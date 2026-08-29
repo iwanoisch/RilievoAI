@@ -1,0 +1,16 @@
+# Permetti accesso ai bot social (bypass WAF Aruba)
+<IfModule mod_setenvif.c>
+  SetEnvIfNoCase User-Agent "facebookexternalhit" SOCIAL_BOT
+  SetEnvIfNoCase User-Agent "LinkedInBot" SOCIAL_BOT
+  SetEnvIfNoCase User-Agent "Twitterbot" SOCIAL_BOT
+  SetEnvIfNoCase User-Agent "Googlebot" SOCIAL_BOT
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>

@@ -1,0 +1,29 @@
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /js/
+Allow: /assets/
+Allow: /images/
+Allow: /favicon/
+Disallow: /dashboard
+Disallow: /activities
+Disallow: /calendar
+Disallow: /projects
+Disallow: /userprofile
+Disallow: /usersettings
+Disallow: /myCompany
+Disallow: /workspaces
+Disallow: /workspace/
+Disallow: /companies
+
+# Bot social (accesso esplicito per anteprime link)
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+Sitemap: https://app.cantieri.ai/sitemap.xml

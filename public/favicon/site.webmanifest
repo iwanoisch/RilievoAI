@@ -1,0 +1,24 @@
+{
+  "name": "Cantieri - Gestione Cantieri e Progetti Edili",
+  "short_name": "Cantieri",
+  "description": "Piattaforma per la gestione dei cantieri edili con pianificazione avanzata, tracciamento materiali e reportistica in tempo reale.",
+  "icons": [
+    {
+      "src": "/favicon/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#F28F16",
+  "background_color": "#f8fafc",
+  "orientation": "any"
+}

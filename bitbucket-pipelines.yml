@@ -1,0 +1,43 @@
+image: node:20
+
+pipelines:
+  # default: Pipeline automatica (parte con i commit)
+  custom:  # 👈 Pipeline manuale (non parte con i commit)
+    deploy-full:  # Nome della tua pipeline manuale
+    - step:
+        name: 'Build project'
+       
+        artifacts:
+          - dist/**   # Conserva la cartella dist per il deploy
+        script:
+          - rm -rf node_modules package-lock.json      
+          - npm install --include=optional --force         
+          - npm run build
+          - ls -la dist/  # Verifica build
+          - cp static/.htaccess dist/
+
+          # DEBUG: Verifica struttura cartelle dopo il build
+          - pwd
+          - find . -name dist
+          - tree -L 3 || echo "Tree non installato"  # Fallback se tree non è disponibile
+
+    - step:
+        name: 'Deploy to Production'
+        deployment: production
+        #trigger: 'manual'
+        script:
+          - apt-get update && apt-get install -y lftp tree  # Installa tree per debug
+
+          # DEBUG: Verifica struttura cartelle prima del deploy
+          - pwd
+          - find . -name dist
+          - tree -L 3
+          - ls -la dist/
+
+          # Comando FTP definitivo
+          - lftp -u $FTP_USERNAME,$FTP_PASSWORD -e "set ftp:ssl-allow no; set xfer:use-temp-file yes; mirror -R -v ./dist/ /; quit" $FTP_HOST
+          - echo "Deploy completato con successo"
+
+definitions:
+  caches:
+    node: node_modules

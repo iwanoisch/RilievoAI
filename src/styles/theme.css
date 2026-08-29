@@ -1,0 +1,1410 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+@import "tailwindcss";
+
+/* Escludi la cartella .claude/ dalla scansione di Tailwind
+   (contiene file .md con testo tipo "file:linea" che viene interpretato come classe CSS) */
+@source not "../../.claude";
+
+/* ================================================================
+   DARK MODE - Configurazione variante dark
+   ================================================================
+   Attiva le classi dark:* quando data-theme è "dark" o "midnight"
+   ================================================================ */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, [data-theme=midnight], [data-theme=midnight] *));
+
+/* ================================================================
+   SISTEMA DI TEMI - Gestione Cantieri
+   ================================================================
+
+   Per cambiare il tema dell'intera app, modifica SOLO i valori
+   in questa sezione @theme. I colori sono organizzati in:
+
+   1. PRIMARY   - Colore brand (bottoni, link, accenti)
+   2. SURFACE   - Sfondi e superfici
+   3. TEXT      - Colori testo
+   4. BORDER    - Bordi e divisori
+   5. STATUS    - Semantici (success, error, warning, info)
+
+   Tutti i colori rispettano WCAG 2.1 per accessibilità.
+   ================================================================ */
+
+@theme {
+    /* ============================================================
+       PRIMARY - Colore Brand (Arancione Professionale)
+       ============================================================
+       Palette morbida, non aggressiva, adatta al lavoro quotidiano.
+       Contrasto WCAG AA su sfondo bianco: ✓
+    */
+    --color-primary-50:  #fff7ed;    /* Sfondo hover molto leggero */
+    --color-primary-75:  #fff2e1;    /* Sfondo hover leggero */
+    --color-primary-100: #ffedd5;    /* Sfondo badge, chip */
+    --color-primary-200: #fed7aa;    /* Bordi leggeri */
+    --color-primary-300: #fdba74;    /* Elementi decorativi */
+    --color-primary-400: #fb923c;    /* NON usare per bottoni (troppo chiaro) */
+    --color-primary-500: #f97316;    /* Bottoni principali */
+    --color-primary-600: #ea580c;    /* Hover bottoni, testo su bianco */
+    --color-primary-700: #c2410c;    /* Testo primario, link */
+    --color-primary-800: #9a3412;    /* Testo su sfondo chiaro */
+    --color-primary-900: #7c2d12;    /* Testo massimo contrasto */
+
+    /* ============================================================
+       SURFACE - Sfondi e Superfici
+       ============================================================ */
+    --color-surface-page: #f8fafc;       /* Sfondo pagina (slate-50) */
+    --color-surface-card: #ffffff;       /* Sfondo card */
+    --color-surface-hover: #f1f5f9;      /* Hover su card (slate-100) */
+    --color-surface-muted: #e2e8f0;      /* Sfondo disabilitato (slate-200) */
+
+    /* ============================================================
+       TEXT - Colori Testo
+       ============================================================ */
+    --color-text-primary: #0f172a;       /* Testo principale (slate-900) */
+    --color-text-secondary: #334155;     /* Testo secondario (slate-700) */
+    --color-text-muted: #64748b;         /* Testo descrittivo (slate-500) */
+    --color-text-disabled: #94a3b8;      /* Testo disabilitato (slate-400) */
+    --color-text-inverse: #ffffff;       /* Testo su sfondo scuro */
+
+    /* ============================================================
+       BORDER - Bordi e Divisori
+       ============================================================ */
+    --color-border-light: #f1f5f9;       /* Bordi leggeri (slate-100) */
+    --color-border-default: #e2e8f0;     /* Bordi normali (slate-200) */
+    --color-border-strong: #cbd5e1;      /* Bordi evidenti (slate-300) */
+
+    /* ============================================================
+       STATUS - Colori Semantici (non cambiano con il tema)
+       ============================================================ */
+    /* Success */
+    --color-success-light: #dcfce7;      /* green-100 */
+    --color-success: #22c55e;            /* green-500 */
+    --color-success-dark: #15803d;       /* green-700 */
+
+    /* Error */
+    --color-error-light: #fee2e2;        /* red-100 */
+    --color-error: #ef4444;              /* red-500 */
+    --color-error-dark: #b91c1c;         /* red-700 */
+
+    /* Warning */
+    --color-warning-light: #fef3c7;      /* amber-100 */
+    --color-warning: #f59e0b;            /* amber-500 */
+    --color-warning-dark: #b45309;       /* amber-700 */
+
+    /* Info */
+    --color-info-light: #dbeafe;         /* blue-100 */
+    --color-info: #3b82f6;               /* blue-500 */
+    --color-info-dark: #1d4ed8;          /* blue-700 */
+
+    /* ============================================================
+       OMBRE
+       ============================================================ */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    /* ============================================================
+       ANIMAZIONI
+       ============================================================ */
+    --animation-float: float 3s ease-in-out infinite;
+}
+
+/* ================================================================
+   STILI BASE
+   ================================================================ */
+@layer base {
+    html {
+        @apply scroll-smooth;
+    }
+
+    body {
+        background-color: var(--color-surface-page);
+        color: var(--color-text-primary);
+        @apply antialiased;
+        font-family: theme(fontFamily.sans);
+    }
+
+    /* Cursor pointer per elementi interattivi */
+    button,
+    [role="button"],
+    [type="button"],
+    [type="submit"],
+    [type="reset"] {
+        @apply cursor-pointer;
+    }
+
+    /* Tipografia */
+    h1 {
+        @apply text-3xl font-bold sm:text-4xl md:text-5xl;
+    }
+
+    h2 {
+        @apply text-2xl font-bold sm:text-3xl;
+    }
+
+    /* Tooltip */
+    .tooltip {
+        @apply invisible absolute;
+    }
+
+    .has-tooltip:hover .tooltip {
+        @apply visible z-50;
+    }
+}
+
+/* ================================================================
+   COMPONENTI RIUTILIZZABILI
+   ================================================================ */
+@layer components {
+    /* Card */
+    .card {
+        background-color: var(--color-surface-card);
+        box-shadow: var(--shadow-card);
+        @apply rounded-xl p-6 transition-all;
+    }
+
+    .card:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Bottone Base */
+    .btn {
+        @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5;
+        @apply text-sm font-semibold transition-all;
+        @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+        @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    }
+
+    /* Bottone Primario */
+    .btn-primary {
+        background-color: var(--color-primary-500);
+        color: var(--color-text-inverse);
+        @apply shadow-sm;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background-color: var(--color-primary-600);
+    }
+
+    .btn-primary:focus {
+        --tw-ring-color: var(--color-primary-200);
+    }
+
+    /* Bottone Outline */
+    .btn-outline {
+        border: 1px solid var(--color-border-default);
+        color: var(--color-text-secondary);
+        background-color: transparent;
+    }
+
+    .btn-outline:hover:not(:disabled) {
+        background-color: var(--color-surface-hover);
+    }
+
+    /* Bottone Ghost */
+    .btn-ghost {
+        background-color: transparent;
+        color: var(--color-primary-600);
+    }
+
+    .btn-ghost:hover:not(:disabled) {
+        background-color: var(--color-primary-50);
+    }
+
+    /* Input Base */
+    .input {
+        @apply block w-full rounded-lg px-3 py-2 text-sm;
+        background-color: var(--color-surface-card);
+        border: 1px solid var(--color-border-default);
+        color: var(--color-text-primary);
+        @apply transition-colors;
+    }
+
+    .input::placeholder {
+        color: var(--color-text-disabled);
+    }
+
+    .input:focus {
+        outline: none;
+        border-color: var(--color-primary-500);
+        box-shadow: 0 0 0 3px var(--color-primary-100);
+    }
+
+    /* Badge */
+    .badge {
+        @apply inline-flex items-center px-2.5 py-0.5 rounded-full;
+        @apply text-xs font-medium;
+    }
+
+    .badge-primary {
+        background-color: var(--color-primary-100);
+        color: var(--color-primary-700);
+    }
+
+    .badge-success {
+        background-color: var(--color-success-light);
+        color: var(--color-success-dark);
+    }
+
+    .badge-error {
+        background-color: var(--color-error-light);
+        color: var(--color-error-dark);
+    }
+
+    .badge-warning {
+        background-color: var(--color-warning-light);
+        color: var(--color-warning-dark);
+    }
+
+    .badge-info {
+        background-color: var(--color-info-light);
+        color: var(--color-info-dark);
+    }
+}
+
+/* ================================================================
+   ANIMAZIONI
+   ================================================================ */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* ================================================================
+   VARIANTI DI TEMA
+   ================================================================
+   I temi vengono attivati tramite l'attributo data-theme su <html>
+   Esempio: <html data-theme="green">
+   ================================================================ */
+
+/* Tema Verde - Natura & Sostenibilità */
+[data-theme="green"] {
+    --color-primary-50:  #f0fdf4;
+    --color-primary-75:  #e6fded;
+    --color-primary-100: #dcfce7;
+    --color-primary-200: #bbf7d0;
+    --color-primary-300: #86efac;
+    --color-primary-400: #4ade80;
+    --color-primary-500: #22c55e;
+    --color-primary-600: #16a34a;
+    --color-primary-700: #15803d;
+    --color-primary-800: #166534;
+    --color-primary-900: #14532d;
+}
+
+/* Tema Blu - Professionale & Corporate */
+[data-theme="blue"] {
+    --color-primary-50:  #eff6ff;
+    --color-primary-75:  #e5f0fe;
+    --color-primary-100: #dbeafe;
+    --color-primary-200: #bfdbfe;
+    --color-primary-300: #93c5fd;
+    --color-primary-400: #60a5fa;
+    --color-primary-500: #3b82f6;
+    --color-primary-600: #2563eb;
+    --color-primary-700: #1d4ed8;
+    --color-primary-800: #1e40af;
+    --color-primary-900: #1e3a8a;
+}
+
+/* Tema Indaco - Elegante & Moderno */
+[data-theme="indigo"] {
+    --color-primary-50:  #eef2ff;
+    --color-primary-75:  #e7ecff;
+    --color-primary-100: #e0e7ff;
+    --color-primary-200: #c7d2fe;
+    --color-primary-300: #a5b4fc;
+    --color-primary-400: #818cf8;
+    --color-primary-500: #6366f1;
+    --color-primary-600: #4f46e5;
+    --color-primary-700: #4338ca;
+    --color-primary-800: #3730a3;
+    --color-primary-900: #312e81;
+}
+
+/* Tema Slate - Minimalista & Scuro */
+[data-theme="slate"] {
+    --color-primary-50:  #f8fafc;
+    --color-primary-75:  #f4f7fa;
+    --color-primary-100: #f1f5f9;
+    --color-primary-200: #e2e8f0;
+    --color-primary-300: #cbd5e1;
+    --color-primary-400: #94a3b8;
+    --color-primary-500: #64748b;
+    --color-primary-600: #475569;
+    --color-primary-700: #334155;
+    --color-primary-800: #1e293b;
+    --color-primary-900: #0f172a;
+}
+
+/* Tema Rose - Caldo & Accogliente */
+[data-theme="rose"] {
+    --color-primary-50:  #fff1f2;
+    --color-primary-75:  #ffeaec;
+    --color-primary-100: #ffe4e6;
+    --color-primary-200: #fecdd3;
+    --color-primary-300: #fda4af;
+    --color-primary-400: #fb7185;
+    --color-primary-500: #f43f5e;
+    --color-primary-600: #e11d48;
+    --color-primary-700: #be123c;
+    --color-primary-800: #9f1239;
+    --color-primary-900: #881337;
+}
+
+/* Tema Teal - Fresco & Tecnologico */
+[data-theme="teal"] {
+    --color-primary-50:  #f0fdfa;
+    --color-primary-75:  #defcf6;
+    --color-primary-100: #ccfbf1;
+    --color-primary-200: #99f6e4;
+    --color-primary-300: #5eead4;
+    --color-primary-400: #2dd4bf;
+    --color-primary-500: #14b8a6;
+    --color-primary-600: #0d9488;
+    --color-primary-700: #0f766e;
+    --color-primary-800: #115e59;
+    --color-primary-900: #134e4a;
+}
+
+/* ================================================================
+   TEMI SCURI - Per riposare gli occhi
+   ================================================================
+   Tutti i colori rispettano WCAG 2.1 AA per contrasto.
+   Contrasto minimo testo normale: 4.5:1
+   Contrasto minimo testo grande: 3:1
+   ================================================================ */
+
+/* Tema Dark - Classico scuro con accento cyan */
+[data-theme="dark"] {
+    /* Primary - Cyan/Teal per buon contrasto su scuro */
+    --color-primary-50:  #0f172a;
+    --color-primary-75:  #162032;
+    --color-primary-100: #1e293b;
+    --color-primary-200: #334155;
+    --color-primary-300: #475569;
+    --color-primary-400: #22d3ee;
+    --color-primary-500: #06b6d4;
+    --color-primary-600: #0891b2;
+    --color-primary-700: #0e7490;
+    --color-primary-800: #155e75;
+    --color-primary-900: #164e63;
+
+    /* Surface - Sfondi scuri */
+    --color-surface-page: #0f172a;
+    --color-surface-card: #1e293b;
+    --color-surface-hover: #334155;
+    --color-surface-muted: #475569;
+
+    /* Text - Colori chiari per leggibilità */
+    --color-text-primary: #f1f5f9;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+    --color-text-disabled: #64748b;
+    --color-text-inverse: #0f172a;
+
+    /* Border - Bordi visibili su scuro */
+    --color-border-light: #1e293b;
+    --color-border-default: #334155;
+    --color-border-strong: #475569;
+}
+
+/* Tema Midnight - Blu notte elegante */
+[data-theme="midnight"] {
+    /* Primary - Blu elettrico per contrasto */
+    --color-primary-50:  #0c1222;
+    --color-primary-75:  #131c33;
+    --color-primary-100: #1a2744;
+    --color-primary-200: #243b67;
+    --color-primary-300: #3b5998;
+    --color-primary-400: #60a5fa;
+    --color-primary-500: #3b82f6;
+    --color-primary-600: #2563eb;
+    --color-primary-700: #1d4ed8;
+    --color-primary-800: #1e40af;
+    --color-primary-900: #1e3a8a;
+
+    /* Surface - Sfondi blu scuro */
+    --color-surface-page: #0c1222;
+    --color-surface-card: #1a2744;
+    --color-surface-hover: #243b67;
+    --color-surface-muted: #3b5998;
+
+    /* Text - Colori chiari per leggibilità */
+    --color-text-primary: #f0f9ff;
+    --color-text-secondary: #bae6fd;
+    --color-text-muted: #7dd3fc;
+    --color-text-disabled: #38bdf8;
+    --color-text-inverse: #0c1222;
+
+    /* Border - Bordi visibili su blu scuro */
+    --color-border-light: #1a2744;
+    --color-border-default: #243b67;
+    --color-border-strong: #3b5998;
+}
+
+/* ================================================================
+   OVERRIDE AUTOMATICI PER DARK MODE
+   ================================================================
+   Queste regole invertono automaticamente i colori comuni
+   quando è attivo un tema scuro (dark o midnight)
+   ================================================================ */
+
+/* Override sfondi - bg-white diventa scuro */
+[data-theme="dark"] .bg-white,
+[data-theme="midnight"] .bg-white {
+    background-color: var(--color-surface-card) !important;
+}
+
+[data-theme="dark"] .bg-slate-50,
+[data-theme="midnight"] .bg-slate-50 {
+    background-color: var(--color-surface-page) !important;
+}
+
+[data-theme="dark"] .bg-slate-100,
+[data-theme="midnight"] .bg-slate-100 {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per bg-white/90 e simili - usando attribute selector con contains */
+[data-theme="dark"] [class*="bg-white/"],
+[data-theme="midnight"] [class*="bg-white/"] {
+    background-color: var(--color-surface-card) !important;
+}
+
+/* Override testi - testi scuri diventano chiari */
+[data-theme="dark"] .text-slate-900,
+[data-theme="dark"] .text-slate-800,
+[data-theme="midnight"] .text-slate-900,
+[data-theme="midnight"] .text-slate-800 {
+    color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .text-slate-700,
+[data-theme="dark"] .text-slate-600,
+[data-theme="midnight"] .text-slate-700,
+[data-theme="midnight"] .text-slate-600 {
+    color: var(--color-text-secondary) !important;
+}
+
+[data-theme="dark"] .text-slate-500,
+[data-theme="dark"] .text-slate-400,
+[data-theme="midnight"] .text-slate-500,
+[data-theme="midnight"] .text-slate-400 {
+    color: var(--color-text-muted) !important;
+}
+
+/* Override bordi */
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-slate-100,
+[data-theme="midnight"] .border-slate-200,
+[data-theme="midnight"] .border-slate-100 {
+    border-color: var(--color-border-default) !important;
+}
+
+[data-theme="dark"] .border-slate-300,
+[data-theme="midnight"] .border-slate-300 {
+    border-color: var(--color-border-strong) !important;
+}
+
+/* Override ring */
+[data-theme="dark"] .ring-slate-900\/5,
+[data-theme="midnight"] .ring-slate-900\/5 {
+    --tw-ring-color: rgb(255 255 255 / 0.1) !important;
+}
+
+/* Override divide */
+[data-theme="dark"] .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+[data-theme="midnight"] .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--color-border-default) !important;
+}
+
+/* Override hover states */
+[data-theme="dark"] .hover\:bg-slate-50:hover,
+[data-theme="midnight"] .hover\:bg-slate-50:hover {
+    background-color: var(--color-surface-hover) !important;
+}
+
+[data-theme="dark"] .hover\:bg-white:hover,
+[data-theme="midnight"] .hover\:bg-white:hover {
+    background-color: var(--color-surface-card) !important;
+}
+
+/* Override shadows per dark mode */
+[data-theme="dark"] .shadow-sm,
+[data-theme="dark"] .shadow-md,
+[data-theme="dark"] .shadow-lg,
+[data-theme="dark"] .shadow-xl,
+[data-theme="midnight"] .shadow-sm,
+[data-theme="midnight"] .shadow-md,
+[data-theme="midnight"] .shadow-lg,
+[data-theme="midnight"] .shadow-xl {
+    --tw-shadow-color: rgb(0 0 0 / 0.5) !important;
+}
+
+/* Override input e select */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea,
+[data-theme="midnight"] input,
+[data-theme="midnight"] select,
+[data-theme="midnight"] textarea {
+    background-color: var(--color-surface-card) !important;
+    color: var(--color-text-primary) !important;
+    border-color: var(--color-border-default) !important;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder,
+[data-theme="midnight"] input::placeholder,
+[data-theme="midnight"] textarea::placeholder {
+    color: var(--color-text-disabled) !important;
+}
+
+/* Override modal e dialog */
+[data-theme="dark"] [role="dialog"],
+[data-theme="midnight"] [role="dialog"] {
+    background-color: var(--color-surface-card) !important;
+}
+
+/* Override per gradienti di sfondo pagina */
+[data-theme="dark"] .from-primary-50\/50,
+[data-theme="midnight"] .from-primary-50\/50 {
+    --tw-gradient-from: var(--color-surface-page) !important;
+}
+
+[data-theme="dark"] .via-primary-100\/30,
+[data-theme="midnight"] .via-primary-100\/30 {
+    --tw-gradient-via: var(--color-surface-hover) !important;
+}
+
+[data-theme="dark"] .to-slate-50,
+[data-theme="midnight"] .to-slate-50 {
+    --tw-gradient-to: var(--color-surface-page) !important;
+}
+
+/* ================================================================
+   OVERRIDE AGGIUNTIVI PER DARK MODE - WCAG Compliant
+   ================================================================ */
+
+/* Override per HeadlessUI data-[active] states */
+[data-theme="dark"] [data-active],
+[data-theme="dark"] [data-headlessui-state~="active"],
+[data-theme="dark"] [class*="data-[active]:bg-slate-100"][data-active],
+[data-theme="midnight"] [data-active],
+[data-theme="midnight"] [data-headlessui-state~="active"],
+[data-theme="midnight"] [class*="data-[active]:bg-slate-100"][data-active] {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per bg-slate-200, bg-slate-300 */
+[data-theme="dark"] .bg-slate-200,
+[data-theme="midnight"] .bg-slate-200 {
+    background-color: var(--color-surface-muted) !important;
+}
+
+[data-theme="dark"] .bg-slate-300,
+[data-theme="midnight"] .bg-slate-300 {
+    background-color: var(--color-border-strong) !important;
+}
+
+/* Override per text-slate-300, text-slate-200, text-slate-100 (già chiari, renderli più visibili su dark) */
+[data-theme="dark"] .text-slate-300,
+[data-theme="dark"] .text-slate-200,
+[data-theme="dark"] .text-slate-100,
+[data-theme="midnight"] .text-slate-300,
+[data-theme="midnight"] .text-slate-200,
+[data-theme="midnight"] .text-slate-100 {
+    color: var(--color-text-secondary) !important;
+}
+
+/* Override per text-gray-* (usati spesso in alternativa a slate) */
+[data-theme="dark"] .text-gray-900,
+[data-theme="dark"] .text-gray-800,
+[data-theme="midnight"] .text-gray-900,
+[data-theme="midnight"] .text-gray-800 {
+    color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .text-gray-700,
+[data-theme="dark"] .text-gray-600,
+[data-theme="midnight"] .text-gray-700,
+[data-theme="midnight"] .text-gray-600 {
+    color: var(--color-text-secondary) !important;
+}
+
+[data-theme="dark"] .text-gray-500,
+[data-theme="dark"] .text-gray-400,
+[data-theme="midnight"] .text-gray-500,
+[data-theme="midnight"] .text-gray-400 {
+    color: var(--color-text-muted) !important;
+}
+
+/* Override per bg-gray-* */
+[data-theme="dark"] .bg-gray-50,
+[data-theme="midnight"] .bg-gray-50 {
+    background-color: var(--color-surface-page) !important;
+}
+
+[data-theme="dark"] .bg-gray-100,
+[data-theme="midnight"] .bg-gray-100 {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per elementi con ring-black/5 */
+[data-theme="dark"] .ring-black\/5,
+[data-theme="midnight"] .ring-black\/5 {
+    --tw-ring-color: rgb(255 255 255 / 0.1) !important;
+}
+
+/* Override per DialogBackdrop e overlay - MANTENERE SEMI-TRASPARENZA */
+/* bg-slate-500/75 usato nei modal dialog */
+[data-theme="dark"] .bg-slate-500\/75,
+[data-theme="midnight"] .bg-slate-500\/75 {
+    background-color: rgba(15, 23, 42, 0.75) !important; /* slate-900 con 75% opacity */
+}
+
+/* bg-slate-900/80 usato in alcuni overlay */
+[data-theme="dark"] .bg-slate-900\/80,
+[data-theme="midnight"] .bg-slate-900\/80 {
+    background-color: rgba(0, 0, 0, 0.80) !important;
+}
+
+/* bg-slate-900/40 usato in altri backdrop */
+[data-theme="dark"] .bg-slate-900\/40,
+[data-theme="midnight"] .bg-slate-900\/40 {
+    background-color: rgba(0, 0, 0, 0.50) !important; /* leggermente più scuro per contrasto */
+}
+
+/* bg-black/50, bg-black/75 - overlay generici */
+[data-theme="dark"] [class*="bg-black\/"],
+[data-theme="midnight"] [class*="bg-black\/"] {
+    /* Mantiene la trasparenza originale */
+}
+
+/* Override per hover:bg-slate-100 */
+[data-theme="dark"] .hover\:bg-slate-100:hover,
+[data-theme="midnight"] .hover\:bg-slate-100:hover {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per hover:text-slate-* */
+[data-theme="dark"] .hover\:text-slate-700:hover,
+[data-theme="dark"] .hover\:text-slate-800:hover,
+[data-theme="midnight"] .hover\:text-slate-700:hover,
+[data-theme="midnight"] .hover\:text-slate-800:hover {
+    color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .hover\:text-slate-600:hover,
+[data-theme="midnight"] .hover\:text-slate-600:hover {
+    color: var(--color-text-secondary) !important;
+}
+
+/* Override per group-hover:text-slate-600 */
+[data-theme="dark"] .group:hover .group-hover\:text-slate-600,
+[data-theme="midnight"] .group:hover .group-hover\:text-slate-600 {
+    color: var(--color-text-secondary) !important;
+}
+
+/* Override per hover:border-slate-300 */
+[data-theme="dark"] .hover\:border-slate-300:hover,
+[data-theme="midnight"] .hover\:border-slate-300:hover {
+    border-color: var(--color-border-strong) !important;
+}
+
+/* Override per focus:ring-* colors */
+[data-theme="dark"] .focus\:ring-slate-200:focus,
+[data-theme="midnight"] .focus\:ring-slate-200:focus {
+    --tw-ring-color: var(--color-border-default) !important;
+}
+
+/* Override per divide-slate-200 */
+[data-theme="dark"] .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+[data-theme="midnight"] .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--color-border-default) !important;
+}
+
+/* Override per border-t, border-b con slate colors */
+[data-theme="dark"] .border-t-slate-200,
+[data-theme="dark"] .border-b-slate-200,
+[data-theme="midnight"] .border-t-slate-200,
+[data-theme="midnight"] .border-b-slate-200 {
+    border-color: var(--color-border-default) !important;
+}
+
+/* Override per label e testi nei form */
+[data-theme="dark"] label,
+[data-theme="midnight"] label {
+    color: var(--color-text-secondary) !important;
+}
+
+/* Override per option negli select */
+[data-theme="dark"] option,
+[data-theme="midnight"] option {
+    background-color: var(--color-surface-card) !important;
+    color: var(--color-text-primary) !important;
+}
+
+/* NOTE: Override per SimpleCalendar/react-big-calendar disabilitati - verranno sistemati dopo */
+
+/* Override per tables */
+[data-theme="dark"] table,
+[data-theme="dark"] th,
+[data-theme="dark"] td,
+[data-theme="midnight"] table,
+[data-theme="midnight"] th,
+[data-theme="midnight"] td {
+    border-color: var(--color-border-default) !important;
+}
+
+[data-theme="dark"] th,
+[data-theme="midnight"] th {
+    background-color: var(--color-surface-hover) !important;
+    color: var(--color-text-secondary) !important;
+}
+
+[data-theme="dark"] td,
+[data-theme="midnight"] td {
+    color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] tr:hover td,
+[data-theme="midnight"] tr:hover td {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per Breadcrumbs */
+[data-theme="dark"] nav[aria-label="Breadcrumb"] a,
+[data-theme="dark"] nav[aria-label="Breadcrumb"] span,
+[data-theme="midnight"] nav[aria-label="Breadcrumb"] a,
+[data-theme="midnight"] nav[aria-label="Breadcrumb"] span {
+    color: var(--color-text-muted) !important;
+}
+
+[data-theme="dark"] nav[aria-label="Breadcrumb"] a:hover,
+[data-theme="midnight"] nav[aria-label="Breadcrumb"] a:hover {
+    color: var(--color-text-secondary) !important;
+}
+
+/* Override per cards con bordo leggero */
+[data-theme="dark"] .border-slate-100,
+[data-theme="midnight"] .border-slate-100 {
+    border-color: var(--color-border-default) !important;
+}
+
+/* Override specifico per critical activities e card colorate */
+/* Manteniamo i colori di stato ma con sfondo più scuro */
+[data-theme="dark"] .bg-red-50,
+[data-theme="midnight"] .bg-red-50 {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+[data-theme="dark"] .bg-amber-50,
+[data-theme="dark"] .bg-yellow-50,
+[data-theme="midnight"] .bg-amber-50,
+[data-theme="midnight"] .bg-yellow-50 {
+    background-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+[data-theme="dark"] .bg-emerald-50,
+[data-theme="dark"] .bg-green-50,
+[data-theme="midnight"] .bg-emerald-50,
+[data-theme="midnight"] .bg-green-50 {
+    background-color: rgba(34, 197, 94, 0.15) !important;
+}
+
+[data-theme="dark"] .bg-emerald-100,
+[data-theme="dark"] .bg-green-100,
+[data-theme="midnight"] .bg-emerald-100,
+[data-theme="midnight"] .bg-green-100 {
+    background-color: rgba(34, 197, 94, 0.25) !important;
+}
+
+/* Override per gradient stops green/emerald (usati nei badge) */
+[data-theme="dark"] .from-green-50,
+[data-theme="midnight"] .from-green-50 {
+    --tw-gradient-from: rgba(34, 197, 94, 0.15) !important;
+}
+
+[data-theme="dark"] .to-emerald-100,
+[data-theme="dark"] .to-green-100,
+[data-theme="midnight"] .to-emerald-100,
+[data-theme="midnight"] .to-green-100 {
+    --tw-gradient-to: rgba(34, 197, 94, 0.25) !important;
+}
+
+[data-theme="dark"] .from-emerald-50,
+[data-theme="midnight"] .from-emerald-50 {
+    --tw-gradient-from: rgba(34, 197, 94, 0.15) !important;
+}
+
+[data-theme="dark"] .bg-blue-50,
+[data-theme="midnight"] .bg-blue-50 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Testi dei colori di stato - manteniamo visibili */
+[data-theme="dark"] .text-red-600,
+[data-theme="dark"] .text-red-700,
+[data-theme="midnight"] .text-red-600,
+[data-theme="midnight"] .text-red-700 {
+    color: #f87171 !important; /* red-400 più visibile su scuro */
+}
+
+[data-theme="dark"] .text-amber-600,
+[data-theme="dark"] .text-amber-700,
+[data-theme="dark"] .text-yellow-600,
+[data-theme="dark"] .text-yellow-700,
+[data-theme="midnight"] .text-amber-600,
+[data-theme="midnight"] .text-amber-700,
+[data-theme="midnight"] .text-yellow-600,
+[data-theme="midnight"] .text-yellow-700 {
+    color: #fbbf24 !important; /* amber-400 */
+}
+
+[data-theme="dark"] .text-emerald-600,
+[data-theme="dark"] .text-green-600,
+[data-theme="dark"] .text-emerald-700,
+[data-theme="dark"] .text-green-700,
+[data-theme="midnight"] .text-emerald-600,
+[data-theme="midnight"] .text-green-600,
+[data-theme="midnight"] .text-emerald-700,
+[data-theme="midnight"] .text-green-700 {
+    color: #4ade80 !important; /* green-400 */
+}
+
+/* Override per bordi colorati status */
+[data-theme="dark"] .border-red-200,
+[data-theme="midnight"] .border-red-200 {
+    border-color: rgba(248, 113, 113, 0.5) !important;
+}
+
+[data-theme="dark"] .border-amber-200,
+[data-theme="dark"] .border-yellow-200,
+[data-theme="midnight"] .border-amber-200,
+[data-theme="midnight"] .border-yellow-200 {
+    border-color: rgba(251, 191, 36, 0.5) !important;
+}
+
+[data-theme="dark"] .border-emerald-200,
+[data-theme="dark"] .border-green-200,
+[data-theme="midnight"] .border-emerald-200,
+[data-theme="midnight"] .border-green-200 {
+    border-color: rgba(74, 222, 128, 0.5) !important;
+}
+
+[data-theme="dark"] .border-emerald-100,
+[data-theme="dark"] .border-green-100,
+[data-theme="midnight"] .border-emerald-100,
+[data-theme="midnight"] .border-green-100 {
+    border-color: rgba(74, 222, 128, 0.3) !important;
+}
+
+/* Override per text-green-800 e text-emerald-800 (usati nei badge) */
+[data-theme="dark"] .text-green-800,
+[data-theme="dark"] .text-emerald-800,
+[data-theme="midnight"] .text-green-800,
+[data-theme="midnight"] .text-emerald-800 {
+    color: #86efac !important; /* green-300 per leggibilità su scuro */
+}
+
+/* Override per icone slate */
+[data-theme="dark"] .text-slate-400 svg,
+[data-theme="dark"] svg.text-slate-400,
+[data-theme="midnight"] .text-slate-400 svg,
+[data-theme="midnight"] svg.text-slate-400 {
+    color: var(--color-text-muted) !important;
+}
+
+/* Override per Dialog panel backgrounds - MANTENERE TRASPARENZA */
+/* Non sovrascrivere lo sfondo del dialog container per non coprire il backdrop */
+
+/* Override per mobile sidebar panel */
+[data-theme="dark"] [role="dialog"] > div > div,
+[data-theme="midnight"] [role="dialog"] > div > div {
+    background-color: var(--color-surface-card) !important;
+}
+
+/* Override per MenuItems dropdown */
+[data-theme="dark"] [role="menu"],
+[data-theme="midnight"] [role="menu"] {
+    background-color: var(--color-surface-card) !important;
+    border-color: var(--color-border-default) !important;
+}
+
+[data-theme="dark"] [role="menuitem"],
+[data-theme="midnight"] [role="menuitem"] {
+    color: var(--color-text-secondary) !important;
+}
+
+[data-theme="dark"] [role="menuitem"]:hover,
+[data-theme="dark"] [role="menuitem"][data-active],
+[data-theme="midnight"] [role="menuitem"]:hover,
+[data-theme="midnight"] [role="menuitem"][data-active] {
+    background-color: var(--color-surface-hover) !important;
+    color: var(--color-text-primary) !important;
+}
+
+/* Override per il pulsante chiudi mobile */
+[data-theme="dark"] button .text-slate-500,
+[data-theme="dark"] button.text-slate-500,
+[data-theme="midnight"] button .text-slate-500,
+[data-theme="midnight"] button.text-slate-500 {
+    color: var(--color-text-muted) !important;
+}
+
+/* Override per stat cards */
+[data-theme="dark"] .bg-primary-50,
+[data-theme="midnight"] .bg-primary-50 {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per PageTitle e heading generici */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="midnight"] h1,
+[data-theme="midnight"] h2,
+[data-theme="midnight"] h3,
+[data-theme="midnight"] h4 {
+    color: var(--color-text-primary);
+}
+
+/* Override per paragrafi con classe slate */
+[data-theme="dark"] p.text-slate-600,
+[data-theme="dark"] p.text-slate-500,
+[data-theme="midnight"] p.text-slate-600,
+[data-theme="midnight"] p.text-slate-500 {
+    color: var(--color-text-muted) !important;
+}
+
+/* Override per avatar background */
+[data-theme="dark"] .bg-slate-200,
+[data-theme="midnight"] .bg-slate-200 {
+    background-color: var(--color-surface-muted) !important;
+}
+
+/* Override per badge/chip con bg-primary-100 */
+[data-theme="dark"] .bg-primary-100,
+[data-theme="midnight"] .bg-primary-100 {
+    background-color: rgba(var(--color-primary-500), 0.2) !important;
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Fix per input focus state */
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="midnight"] input:focus,
+[data-theme="midnight"] select:focus,
+[data-theme="midnight"] textarea:focus {
+    border-color: var(--color-primary-500) !important;
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-500), 0.2) !important;
+    box-shadow: 0 0 0 3px var(--color-primary-200) !important;
+}
+
+/* Override per sfondi gradient con opacity */
+[data-theme="dark"] .bg-gradient-to-br,
+[data-theme="midnight"] .bg-gradient-to-br {
+    background: var(--color-surface-page) !important;
+}
+
+/* Override per bg-slate-50/80 e simili (usati nei form read-only) */
+[data-theme="dark"] [class*="bg-slate-50"],
+[data-theme="midnight"] [class*="bg-slate-50"] {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per bg-white/90 nei container backdrop-blur */
+[data-theme="dark"] [class*="bg-white/"],
+[data-theme="midnight"] [class*="bg-white/"] {
+    background-color: var(--color-surface-card) !important;
+}
+
+/* Override specifico per tooltip */
+[data-theme="dark"] .tooltip,
+[data-theme="midnight"] .tooltip {
+    background-color: var(--color-surface-card) !important;
+    color: var(--color-text-primary) !important;
+    border-color: var(--color-border-default) !important;
+}
+
+/* Override per tooltip scuri (bg-slate-800) - manteniamo scuri ma con contrasto */
+[data-theme="dark"] .bg-slate-800,
+[data-theme="midnight"] .bg-slate-800 {
+    background-color: var(--color-surface-page) !important;
+}
+
+/* Override per text-white su sfondo scuro tooltip */
+[data-theme="dark"] .bg-slate-800 .text-white,
+[data-theme="midnight"] .bg-slate-800 .text-white {
+    color: var(--color-text-primary) !important;
+}
+
+/* Override per bg-red-100 badge */
+[data-theme="dark"] .bg-red-100,
+[data-theme="midnight"] .bg-red-100 {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Override per text su sfondo colorato - manteniamo leggibilità */
+[data-theme="dark"] .bg-red-100 .text-red-800,
+[data-theme="midnight"] .bg-red-100 .text-red-800 {
+    color: #fca5a5 !important; /* red-300 */
+}
+
+/* Override per form fields con sfondo slate */
+[data-theme="dark"] .bg-slate-50\/80,
+[data-theme="midnight"] .bg-slate-50\/80 {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per text-slate-900 dentro contenitori read-only */
+[data-theme="dark"] [class*="bg-slate-50"] .text-slate-900,
+[data-theme="midnight"] [class*="bg-slate-50"] .text-slate-900 {
+    color: var(--color-text-primary) !important;
+}
+
+/* Override per navbar items nel mobile sidebar */
+[data-theme="dark"] .border-l-4,
+[data-theme="midnight"] .border-l-4 {
+    border-left-color: inherit;
+}
+
+[data-theme="dark"] .border-transparent,
+[data-theme="midnight"] .border-transparent {
+    border-color: transparent !important;
+}
+
+/* Override per link attivi nella sidebar */
+[data-theme="dark"] .border-primary-600,
+[data-theme="midnight"] .border-primary-600 {
+    border-color: var(--color-primary-500) !important;
+}
+
+/* Override per hover:bg-slate-50 nella mobile nav */
+[data-theme="dark"] .hover\:bg-slate-50:hover,
+[data-theme="midnight"] .hover\:bg-slate-50:hover {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per hover:border-slate-300 */
+[data-theme="dark"] .hover\:border-slate-300:hover,
+[data-theme="midnight"] .hover\:border-slate-300:hover {
+    border-color: var(--color-border-strong) !important;
+}
+
+/* Override per text-slate-600 nell'hover */
+[data-theme="dark"] .hover\:text-slate-800:hover,
+[data-theme="midnight"] .hover\:text-slate-800:hover {
+    color: var(--color-text-primary) !important;
+}
+
+/* Override per placeholders in select/datepicker */
+[data-theme="dark"] select option:disabled,
+[data-theme="midnight"] select option:disabled {
+    color: var(--color-text-disabled) !important;
+}
+
+/* Override per react-datepicker (se usato) */
+[data-theme="dark"] .react-datepicker,
+[data-theme="midnight"] .react-datepicker {
+    background-color: var(--color-surface-card) !important;
+    border-color: var(--color-border-default) !important;
+}
+
+[data-theme="dark"] .react-datepicker__header,
+[data-theme="midnight"] .react-datepicker__header {
+    background-color: var(--color-surface-hover) !important;
+    border-color: var(--color-border-default) !important;
+}
+
+[data-theme="dark"] .react-datepicker__current-month,
+[data-theme="dark"] .react-datepicker__day-name,
+[data-theme="dark"] .react-datepicker__day,
+[data-theme="midnight"] .react-datepicker__current-month,
+[data-theme="midnight"] .react-datepicker__day-name,
+[data-theme="midnight"] .react-datepicker__day {
+    color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .react-datepicker__day:hover,
+[data-theme="midnight"] .react-datepicker__day:hover {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per empty state messages */
+[data-theme="dark"] .text-slate-400,
+[data-theme="midnight"] .text-slate-400 {
+    color: var(--color-text-muted) !important;
+}
+
+/* Fix per icone con size-* class */
+[data-theme="dark"] [class*="size-"] svg,
+[data-theme="midnight"] [class*="size-"] svg {
+    color: inherit;
+}
+
+/* Fix per componenti con ring-1 */
+[data-theme="dark"] .ring-1,
+[data-theme="midnight"] .ring-1 {
+    --tw-ring-color: var(--color-border-default) !important;
+}
+
+/* Override per loading skeletons */
+[data-theme="dark"] .animate-pulse,
+[data-theme="midnight"] .animate-pulse {
+    background-color: var(--color-surface-hover) !important;
+}
+
+/* Override per stat cards gradient */
+[data-theme="dark"] .from-primary-500,
+[data-theme="dark"] .to-primary-700,
+[data-theme="midnight"] .from-primary-500,
+[data-theme="midnight"] .to-primary-700 {
+    /* Manteniamo i colori primari per i gradient accent */
+}
+
+/* Override per badge info-like (bg-blue-100) */
+[data-theme="dark"] .bg-blue-100,
+[data-theme="midnight"] .bg-blue-100 {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+[data-theme="dark"] .text-blue-700,
+[data-theme="dark"] .text-blue-800,
+[data-theme="midnight"] .text-blue-700,
+[data-theme="midnight"] .text-blue-800 {
+    color: #93c5fd !important; /* blue-300 */
+}
+
+/* Override per colori Rose (usati da status "overdue") */
+[data-theme="dark"] .bg-rose-50,
+[data-theme="midnight"] .bg-rose-50 {
+    background-color: rgba(244, 63, 94, 0.15) !important;
+}
+
+[data-theme="dark"] .text-rose-600,
+[data-theme="dark"] .text-rose-700,
+[data-theme="midnight"] .text-rose-600,
+[data-theme="midnight"] .text-rose-700 {
+    color: #fb7185 !important; /* rose-400 */
+}
+
+[data-theme="dark"] .border-rose-200,
+[data-theme="midnight"] .border-rose-200 {
+    border-color: rgba(251, 113, 133, 0.5) !important;
+}
+
+/* Override per colori Orange (usati in alcune varianti) */
+[data-theme="dark"] .bg-orange-50,
+[data-theme="midnight"] .bg-orange-50 {
+    background-color: rgba(249, 115, 22, 0.15) !important;
+}
+
+[data-theme="dark"] .text-orange-600,
+[data-theme="dark"] .text-orange-700,
+[data-theme="midnight"] .text-orange-600,
+[data-theme="midnight"] .text-orange-700 {
+    color: #fb923c !important; /* orange-400 */
+}
+
+[data-theme="dark"] .border-orange-200,
+[data-theme="midnight"] .border-orange-200 {
+    border-color: rgba(251, 146, 60, 0.5) !important;
+}
+
+/* Override per colori Sky (usati da status "default") */
+[data-theme="dark"] .bg-sky-50,
+[data-theme="midnight"] .bg-sky-50 {
+    background-color: rgba(14, 165, 233, 0.15) !important;
+}
+
+[data-theme="dark"] .text-sky-600,
+[data-theme="dark"] .text-sky-700,
+[data-theme="midnight"] .text-sky-600,
+[data-theme="midnight"] .text-sky-700 {
+    color: #38bdf8 !important; /* sky-400 */
+}
+
+[data-theme="dark"] .border-sky-200,
+[data-theme="midnight"] .border-sky-200 {
+    border-color: rgba(56, 189, 248, 0.5) !important;
+}
+
+/* Override per colori Blue più completi (usati da status "in_progress") */
+[data-theme="dark"] .text-blue-600,
+[data-theme="midnight"] .text-blue-600 {
+    color: #60a5fa !important; /* blue-400 */
+}
+
+[data-theme="dark"] .border-blue-200,
+[data-theme="midnight"] .border-blue-200 {
+    border-color: rgba(96, 165, 250, 0.5) !important;
+}
+
+/* Override per colori Primary border (usati da status "upcoming") */
+[data-theme="dark"] .border-primary-200,
+[data-theme="midnight"] .border-primary-200 {
+    border-color: var(--color-border-strong) !important;
+}
+
+/* Override per colori Primary text nei badge - WCAG 4.5:1 */
+[data-theme="dark"] .text-primary-600,
+[data-theme="dark"] .text-primary-700,
+[data-theme="dark"] .text-primary-800,
+[data-theme="midnight"] .text-primary-600,
+[data-theme="midnight"] .text-primary-700,
+[data-theme="midnight"] .text-primary-800 {
+    color: var(--color-primary-400) !important;
+}
+
+/* Override per bg-primary-100 - sfondo badge con colore primario trasparente */
+[data-theme="dark"] .bg-primary-100 {
+    background-color: rgba(6, 182, 212, 0.2) !important;
+}
+
+[data-theme="midnight"] .bg-primary-100 {
+    background-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Override per bg-primary-50 - sfondo più leggero */
+[data-theme="dark"] .bg-primary-50 {
+    background-color: rgba(6, 182, 212, 0.1) !important;
+}
+
+[data-theme="midnight"] .bg-primary-50 {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Override per border-primary-100 */
+[data-theme="dark"] .border-primary-100 {
+    border-color: rgba(6, 182, 212, 0.3) !important;
+}
+
+[data-theme="midnight"] .border-primary-100 {
+    border-color: rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Override per colori Yellow (usati per note, video, ecc.) */
+[data-theme="dark"] .bg-yellow-50,
+[data-theme="dark"] [class*="bg-yellow-50"],
+[data-theme="midnight"] .bg-yellow-50,
+[data-theme="midnight"] [class*="bg-yellow-50"] {
+    background-color: rgba(234, 179, 8, 0.15) !important;
+}
+
+[data-theme="dark"] .bg-yellow-100,
+[data-theme="midnight"] .bg-yellow-100 {
+    background-color: rgba(234, 179, 8, 0.25) !important;
+}
+
+[data-theme="dark"] .bg-yellow-400,
+[data-theme="midnight"] .bg-yellow-400 {
+    background-color: #facc15 !important;
+}
+
+[data-theme="dark"] .text-yellow-600,
+[data-theme="dark"] .text-yellow-700,
+[data-theme="midnight"] .text-yellow-600,
+[data-theme="midnight"] .text-yellow-700 {
+    color: #fde047 !important; /* yellow-300 */
+}
+
+[data-theme="dark"] .border-yellow-100,
+[data-theme="dark"] [class*="border-yellow-100"],
+[data-theme="midnight"] .border-yellow-100,
+[data-theme="midnight"] [class*="border-yellow-100"] {
+    border-color: rgba(253, 224, 71, 0.3) !important;
+}
+
+[data-theme="dark"] .border-yellow-200,
+[data-theme="midnight"] .border-yellow-200 {
+    border-color: rgba(253, 224, 71, 0.5) !important;
+}
+
+/* Override per text-black (usato in alcuni componenti) */
+[data-theme="dark"] .text-black,
+[data-theme="midnight"] .text-black {
+    color: var(--color-text-primary) !important;
+}
+
+/* Override per bg-amber-100 (usato in file uploader) */
+[data-theme="dark"] .bg-amber-100,
+[data-theme="midnight"] .bg-amber-100 {
+    background-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+/* Override per hover su colori primari */
+[data-theme="dark"] .hover\:bg-primary-100:hover,
+[data-theme="midnight"] .hover\:bg-primary-100:hover {
+    background-color: rgba(6, 182, 212, 0.25) !important;
+}
+
+[data-theme="dark"] .hover\:bg-primary-50:hover,
+[data-theme="midnight"] .hover\:bg-primary-50:hover {
+    background-color: rgba(6, 182, 212, 0.15) !important;
+}
+
+/* Override per hover:text-primary-* */
+[data-theme="dark"] .hover\:text-primary-600:hover,
+[data-theme="dark"] .hover\:text-primary-700:hover,
+[data-theme="midnight"] .hover\:text-primary-600:hover,
+[data-theme="midnight"] .hover\:text-primary-700:hover {
+    color: var(--color-primary-400) !important;
+}
+
+/* Override per text-amber-800, text-red-800 */
+[data-theme="dark"] .text-amber-800,
+[data-theme="midnight"] .text-amber-800 {
+    color: #fcd34d !important; /* amber-300 */
+}
+
+[data-theme="dark"] .text-red-800,
+[data-theme="midnight"] .text-red-800 {
+    color: #fca5a5 !important; /* red-300 */
+}
+
+/* Override per gradient from-primary-50 to-primary-100 (usato nei badge) */
+[data-theme="dark"] .from-primary-50,
+[data-theme="midnight"] .from-primary-50 {
+    --tw-gradient-from: rgba(6, 182, 212, 0.1) !important;
+}
+
+[data-theme="dark"] .to-primary-100,
+[data-theme="midnight"] .to-primary-100 {
+    --tw-gradient-to: rgba(6, 182, 212, 0.2) !important;
+}
+
+/* Override per gradient from-blue-50 to-blue-100 (usato in DocEmpty) */
+[data-theme="dark"] .from-blue-50,
+[data-theme="midnight"] .from-blue-50 {
+    --tw-gradient-from: rgba(59, 130, 246, 0.15) !important;
+}
+
+[data-theme="dark"] .to-blue-100,
+[data-theme="midnight"] .to-blue-100 {
+    --tw-gradient-to: rgba(59, 130, 246, 0.25) !important;
+}
+
+/* ================================================================
+   SFONDO NEUTRO - Per temi chiari
+   ================================================================
+   Quando data-bg="neutral" è attivo, lo sfondo delle pagine
+   diventa grigio slate invece che colorato con il tema.
+   Questo permette di avere un aspetto più sobrio mantenendo
+   i colori del tema per bottoni, link e accenti.
+   ================================================================ */
+
+/* Override per gradient di sfondo pagina con sfondo neutro */
+/* NOTA: Tocca SOLO i gradienti della pagina, NON i bg-primary-* degli elementi UI */
+/* Gli elementi come bottoni, icone, card devono mantenere i colori primari */
+[data-bg="neutral"] .from-primary-50\/50 {
+    --tw-gradient-from: rgba(248, 250, 252, 0.5) !important; /* slate-50/50 */
+}
+
+[data-bg="neutral"] .via-primary-100\/30 {
+    --tw-gradient-via: rgba(241, 245, 249, 0.3) !important; /* slate-100/30 */
+}

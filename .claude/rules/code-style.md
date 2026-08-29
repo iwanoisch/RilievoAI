@@ -1,4 +1,4 @@
-# Convenzioni di Codice - Cantieri Client
+# Convenzioni di Codice - RilievoAI
 
 ## TypeScript
 

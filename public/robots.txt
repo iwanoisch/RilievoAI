@@ -26,4 +26,4 @@ Allow: /
 User-agent: Twitterbot
 Allow: /
 
-Sitemap: https://app.cantieri.ai/sitemap.xml
+Sitemap: https://app.rilievoai.it/sitemap.xml

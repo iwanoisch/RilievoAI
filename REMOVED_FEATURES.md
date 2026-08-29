@@ -1,6 +1,6 @@
 # Feature Rimosse dal Boilerplate
 
-Questo documento contiene il riferimento completo delle feature Redux, API, tipi e interfacce rimossi durante la conversione del progetto Cantieri Client in un boilerplate. Usalo come riferimento per ri-implementare le feature in progetti futuri.
+Questo documento contiene il riferimento completo delle feature Redux, API, tipi e interfacce rimossi durante la conversione del progetto RilievoAI in un boilerplate. Usalo come riferimento per ri-implementare le feature in progetti futuri.
 
 ---
 

@@ -1,4 +1,4 @@
-# SEO/SEM Checklist - Cantieri Client
+# SEO/SEM Checklist - RilievoAI
 
 ## Pagine Pubbliche
 
@@ -19,7 +19,7 @@
 
 - [x] **2. Tag `<title>` generico** _(risolto)_
   - File: `index.html`
-  - Aggiornato a: "Cantieri - Gestione Cantieri e Progetti Edili | Pianificazione e Tracciamento"
+  - Aggiornato a: "RilievoAI - Rilievo Edilizio Assistito da AI"
 
 - [x] **3. Nessuna sitemap.xml** _(risolto)_
   - File: `public/sitemap.xml`
@@ -31,7 +31,7 @@
 
 - [x] **5. Nessun tag canonical** _(risolto)_
   - File: `index.html`
-  - Aggiunto: `<link rel="canonical" href="https://app.cantieri.ai/">`
+  - Aggiunto: `<link rel="canonical" href="https://app.rilievoai.it/">`
 
 ---
 
@@ -112,5 +112,5 @@
 ## Da fare manualmente
 
 - [ ] Creare immagine `public/images/og-image.png` (1200x630px) per anteprime social
-- [x] ~~Verificare/aggiornare URL canonical e OG se il dominio non e `app.cantieri.ai`~~ _(dominio confermato)_
+- [x] ~~Verificare/aggiornare URL canonical e OG se il dominio non e `app.rilievoai.it`~~ _(dominio confermato)_
 - [ ] Aggiornare i dati strutturati JSON-LD (prezzo, categoria) quando disponibili

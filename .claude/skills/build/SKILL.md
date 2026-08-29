@@ -8,7 +8,7 @@ argument-hint: "[--preview]"
 
 # Build Production
 
-Esegui la build di produzione per Cantieri Client.
+Esegui la build di produzione per RilievoAI.
 
 ## Passi
 

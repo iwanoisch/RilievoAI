@@ -4,18 +4,18 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://app.cantieri.ai/</loc>
+    <loc>https://app.rilievoai.it/</loc>
     <lastmod>2026-03-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="it" href="https://app.cantieri.ai/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://app.cantieri.ai/?lang=en"/>
-    <xhtml:link rel="alternate" hreflang="ar" href="https://app.cantieri.ai/?lang=ar"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://app.rilievoai.it/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.rilievoai.it/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://app.rilievoai.it/?lang=ar"/>
   </url>
 
   <!-- Login -->
   <url>
-    <loc>https://app.cantieri.ai/login</loc>
+    <loc>https://app.rilievoai.it/login</loc>
     <lastmod>2026-03-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>

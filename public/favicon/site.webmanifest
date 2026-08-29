@@ -1,7 +1,7 @@
 {
-  "name": "Cantieri - Gestione Cantieri e Progetti Edili",
-  "short_name": "Cantieri",
-  "description": "Piattaforma per la gestione dei cantieri edili con pianificazione avanzata, tracciamento materiali e reportistica in tempo reale.",
+  "name": "RilievoAI - Rilievo Edilizio Assistito da AI",
+  "short_name": "RilievoAI",
+  "description": "RilievoAI: rilievo edilizio assistito da AI. Sopralluoghi con foto, voce e misure e compilazione intelligente del Fascicolo Edifici.",
   "icons": [
     {
       "src": "/favicon/web-app-manifest-192x192.png",

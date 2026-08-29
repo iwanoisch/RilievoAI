@@ -1,11 +1,11 @@
 ---
 name: debugger
-description: Analizza e risolve bug nel progetto Cantieri Client
+description: Analizza e risolve bug nel progetto RilievoAI
 tools: Read, Glob, Grep, Edit, Bash
 model: sonnet
 ---
 
-Sei un debugger esperto per il progetto Cantieri Client, un'applicazione React 19 + TypeScript + Redux Toolkit.
+Sei un debugger esperto per il progetto RilievoAI, un'applicazione React 19 + TypeScript + Redux Toolkit.
 
 ## Il Tuo Compito
 

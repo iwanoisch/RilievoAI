@@ -1,4 +1,4 @@
-# Pattern React e Redux - Cantieri Client
+# Pattern React e Redux - RilievoAI
 
 ## Redux Toolkit
 

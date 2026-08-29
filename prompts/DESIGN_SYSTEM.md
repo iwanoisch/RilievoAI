@@ -1,4 +1,4 @@
-# Design System - Gestione Cantieri
+# Design System - RilievoAI
 
 Documentazione completa del design system utilizzato nell'applicazione.
 
@@ -637,4 +637,4 @@ grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4
 
 ---
 
-*Documento generato per il progetto Gestione Cantieri v2.5.1*
+*Documento generato per il progetto RilievoAI v1.0.0*

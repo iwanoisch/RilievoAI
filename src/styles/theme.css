@@ -14,7 +14,7 @@
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, [data-theme=midnight], [data-theme=midnight] *));
 
 /* ================================================================
-   SISTEMA DI TEMI - Gestione Cantieri
+   SISTEMA DI TEMI - RilievoAI
    ================================================================
 
    Per cambiare il tema dell'intera app, modifica SOLO i valori

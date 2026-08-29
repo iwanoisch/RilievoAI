@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Cantieri Client is a construction site management application ("gestione cantieri") built with React 19, TypeScript, and Vite. It provides project/workspace management, activity tracking, calendar views, file management, and multi-company collaboration features.
+RilievoAI is an AI-powered survey and measurement application ("rilievo") built with React 19, TypeScript, and Vite. It provides project/workspace management, activity tracking, calendar views, file management, and multi-company collaboration features.
 
 ## Commands
 

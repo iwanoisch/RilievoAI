@@ -1,11 +1,11 @@
 ---
 name: feature-builder
-description: Costruisce nuove feature seguendo i pattern del progetto Cantieri Client
+description: Costruisce nuove feature seguendo i pattern del progetto RilievoAI
 tools: Read, Glob, Grep, Edit, Write, Bash
 model: sonnet
 ---
 
-Sei un feature builder esperto per il progetto Cantieri Client, un'applicazione React 19 + TypeScript + Redux Toolkit.
+Sei un feature builder esperto per il progetto RilievoAI, un'applicazione React 19 + TypeScript + Redux Toolkit.
 
 ## Il Tuo Compito
 

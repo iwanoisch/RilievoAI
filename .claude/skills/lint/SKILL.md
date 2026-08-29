@@ -8,7 +8,7 @@ argument-hint: "[--fix]"
 
 # Lint Codebase
 
-Esegui ESLint sul progetto Cantieri Client.
+Esegui ESLint sul progetto RilievoAI.
 
 ## Utilizzo
 

@@ -1,4 +1,4 @@
-export type ApiRequestBody = Record<string, unknown> | FormData | null | undefined;
+export type ApiRequestBody = Record<string, any> | FormData | null | undefined;
 
 export type ApiHeaders = {
     'Content-Type'?: string;

@@ -28,7 +28,8 @@ export default tseslint.config(
           {
             argsIgnorePattern: '^_',
             varsIgnorePattern: '^_',
-            destructuredArrayIgnorePattern: '^_'
+            destructuredArrayIgnorePattern: '^_',
+            caughtErrorsIgnorePattern: '^_'
           }
         ]
       },

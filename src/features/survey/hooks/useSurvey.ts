@@ -168,9 +168,9 @@ export const useSurvey = () => {
     };
 
     const getAllObservations = () => {
-        const photos = Object.values(surveyState.photos).map(p => ({...p, observationType: 'photo' as const}));
-        const voices = Object.values(surveyState.voiceObservations).map(v => ({...v, observationType: 'voice' as const}));
-        const measures = Object.values(surveyState.measurements).map(m => ({...m, observationType: 'measurement' as const}));
+        const photos = surveyState.photos.map(p => ({...p, observationType: 'photo' as const}));
+        const voices = surveyState.voiceObservations.map(v => ({...v, observationType: 'voice' as const}));
+        const measures = surveyState.measurements.map(m => ({...m, observationType: 'measurement' as const}));
         return [...photos, ...voices, ...measures].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     };
 

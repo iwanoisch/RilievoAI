@@ -80,8 +80,8 @@ export interface Measurement {
 
 export interface SurveyState {
     currentSession: SurveySession | null;
-    photos: Record<string, SurveyPhoto>;
-    voiceObservations: Record<string, VoiceObservation>;
-    measurements: Record<string, Measurement>;
+    photos: SurveyPhoto[];
+    voiceObservations: VoiceObservation[];
+    measurements: Measurement[];
     error: string | null;
 }

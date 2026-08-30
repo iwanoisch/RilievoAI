@@ -27,9 +27,9 @@ export const Survey: FC = () => {
     const {fetchBuilding} = useBuilding();
     const [modal, setModal] = useState<ModalState>({type: null});
 
-    const photoCount = Object.keys(photos).length;
-    const voiceCount = Object.keys(voiceObservations).length;
-    const measureCount = Object.keys(measurements).length;
+    const photoCount = photos.length;
+    const voiceCount = voiceObservations.length;
+    const measureCount = measurements.length;
 
     const handleStart = async () => {
         await fetchBuilding('building-1');

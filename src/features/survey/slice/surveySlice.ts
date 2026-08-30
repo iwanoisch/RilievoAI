@@ -3,9 +3,9 @@ import type {Measurement, SurveyPhoto, SurveySession, SurveyState, VoiceObservat
 
 const initialState: SurveyState = {
     currentSession: null,
-    photos: {},
-    voiceObservations: {},
-    measurements: {},
+    photos: [],
+    voiceObservations: [],
+    measurements: [],
     error: null,
 };
 
@@ -30,27 +30,42 @@ export const surveySlice = createSlice({
         },
 
         setPhoto: (state, action: PayloadAction<SurveyPhoto>) => {
-            state.photos[action.payload.id] = action.payload;
+            const idx = state.photos.findIndex(p => p.id === action.payload.id);
+            if (idx !== -1) {
+                state.photos[idx] = action.payload;
+            } else {
+                state.photos.push(action.payload);
+            }
         },
 
         removePhoto: (state, action: PayloadAction<string>) => {
-            delete state.photos[action.payload];
+            state.photos = state.photos.filter(p => p.id !== action.payload);
         },
 
         setVoiceObservation: (state, action: PayloadAction<VoiceObservation>) => {
-            state.voiceObservations[action.payload.id] = action.payload;
+            const idx = state.voiceObservations.findIndex(v => v.id === action.payload.id);
+            if (idx !== -1) {
+                state.voiceObservations[idx] = action.payload;
+            } else {
+                state.voiceObservations.push(action.payload);
+            }
         },
 
         removeVoiceObservation: (state, action: PayloadAction<string>) => {
-            delete state.voiceObservations[action.payload];
+            state.voiceObservations = state.voiceObservations.filter(v => v.id !== action.payload);
         },
 
         setMeasurement: (state, action: PayloadAction<Measurement>) => {
-            state.measurements[action.payload.id] = action.payload;
+            const idx = state.measurements.findIndex(m => m.id === action.payload.id);
+            if (idx !== -1) {
+                state.measurements[idx] = action.payload;
+            } else {
+                state.measurements.push(action.payload);
+            }
         },
 
         removeMeasurement: (state, action: PayloadAction<string>) => {
-            delete state.measurements[action.payload];
+            state.measurements = state.measurements.filter(m => m.id !== action.payload);
         },
 
         setSurveyError: (state, action: PayloadAction<string | null>) => {

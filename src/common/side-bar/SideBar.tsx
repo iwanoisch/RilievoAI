@@ -16,7 +16,8 @@ import {
     ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import {NavLink, useNavigate} from 'react-router-dom';
-import {subMenuItems, userMenuItems, UserRole} from '../../utility/menu-items-utils';
+import {SUB_MENU_ITEMS, USER_MENU_ITEMS} from '../../constants/menu-items.constant.ts';
+import type {UserRole} from '../../types/shared.type.ts';
 import {useAuth} from '../../features/auth/hooks/useAuth';
 import LanguageSelector from '../language-selector/LanguageSelector';
 import Avatar from '../avatar/Avatar';
@@ -82,7 +83,7 @@ export const SideBar = ({showFullSidebar = true, isCollapsed, onToggle}: SideBar
                                     <nav className="flex flex-1 flex-col">
                                         {user && (
                                             <div className="mt-2 space-y-1">
-                                                {subMenuItems.map((item) => (
+                                                {SUB_MENU_ITEMS.map((item) => (
                                                     <NavLink
                                                         key={item.id}
                                                         to={item.href}
@@ -160,7 +161,7 @@ export const SideBar = ({showFullSidebar = true, isCollapsed, onToggle}: SideBar
                                     <ul role="list" className="flex flex-1 flex-col gap-y-7">
                                         <li>
                                             <ul role="list" className="space-y-1">
-                                                {subMenuItems.map((item) => (
+                                                {SUB_MENU_ITEMS.map((item) => (
                                                     <li key={item.id}>
                                                         <NavLink
                                                             to={item.href}
@@ -274,7 +275,7 @@ export const SideBar = ({showFullSidebar = true, isCollapsed, onToggle}: SideBar
                                     leaveTo="transform opacity-0 scale-95"
                                 >
                                     <MenuItems className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
-                                        {userMenuItems
+                                        {USER_MENU_ITEMS
                                             .filter(
                                                 (item) =>
                                                     !item.role || (userRole !== undefined && item.role.includes(userRole))

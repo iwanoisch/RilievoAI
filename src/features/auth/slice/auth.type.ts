@@ -1,6 +1,6 @@
 import {Token} from "../api/auth.type.ts";
 import {Company, Address} from "../../../types/shared.type.ts";
-import {UserRole} from "../../../utility/menu-items-utils.ts";
+import type {UserRole} from "../../../types/shared.type.ts";
 
 export interface Operational extends Address  {
     id?: string,

@@ -1,5 +1,4 @@
 import {useAppDispatch, useAppSelector} from "../../../store/store.ts";
-import {useApiClient} from "../../../hooks/useApiClient.ts";
 import {setAnchor, removeAnchor, setLandmark, removeLandmark, setSpatialAnchorError, resetSpatialAnchor} from "../slice/spatialAnchorSlice.ts";
 import type {SpatialAnchor, Landmark} from "../slice/spatialAnchor.type.ts";
 import {MOCK_SPATIAL_ANCHORS, MOCK_LANDMARKS} from "../../../dataMock/MOCK_SPATIAL_ANCHOR.ts";
@@ -7,36 +6,39 @@ import {MOCK_SPATIAL_ANCHORS, MOCK_LANDMARKS} from "../../../dataMock/MOCK_SPATI
 export const useSpatialAnchors = () => {
     const dispatch = useAppDispatch();
     const spatialAnchorState = useAppSelector(state => state.spatialAnchor);
-    const {get, post, del} = useApiClient();
 
-    const fetchAnchors = async (buildingId: string) => {
+    const fetchAnchors = async (_buildingId: string) => {
         try {
-            const response = await get<{anchors: SpatialAnchor[]; landmarks: Landmark[]}>(`/buildings/${buildingId}/spatial`);
-            if (response) {
-                response.anchors.forEach(a => dispatch(setAnchor(a)));
-                response.landmarks.forEach(l => dispatch(setLandmark(l)));
-                return {data: response};
-            }
-            // Fallback mock
+            // TODO real api: const response = await get<{anchors: SpatialAnchor[]; landmarks: Landmark[]}>(`/buildings/${buildingId}/spatial`);
             MOCK_SPATIAL_ANCHORS.forEach(a => dispatch(setAnchor(a)));
             MOCK_LANDMARKS.forEach(l => dispatch(setLandmark(l)));
-            return null;
+            return {data: {anchors: MOCK_SPATIAL_ANCHORS, landmarks: MOCK_LANDMARKS}};
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore caricamento anchor';
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setSpatialAnchorError(message));
-            MOCK_SPATIAL_ANCHORS.forEach(a => dispatch(setAnchor(a)));
-            MOCK_LANDMARKS.forEach(l => dispatch(setLandmark(l)));
             return null;
         }
     };
 
     const addAnchor = async (anchor: SpatialAnchor) => {
         try {
-            const response = await post<SpatialAnchor>('/spatial/anchors', anchor);
-            dispatch(setAnchor(response ?? anchor));
-            return {data: response ?? anchor};
+            // TODO real api: const response = await post<SpatialAnchor>('/spatial/anchors', anchor);
+            dispatch(setAnchor(anchor));
+            return {data: anchor};
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore creazione anchor';
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSpatialAnchorError(message));
+            return null;
+        }
+    };
+
+    const updateAnchor = async (anchor: SpatialAnchor) => {
+        try {
+            // TODO real api: const response = await put<SpatialAnchor>(`/spatial/anchors/${anchor.id}`, anchor);
+            dispatch(setAnchor(anchor));
+            return {data: anchor};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setSpatialAnchorError(message));
             return null;
         }
@@ -44,11 +46,11 @@ export const useSpatialAnchors = () => {
 
     const deleteAnchor = async (anchorId: string) => {
         try {
-            await del(`/spatial/anchors/${anchorId}`);
+            // TODO real api: await del(`/spatial/anchors/${anchorId}`);
             dispatch(removeAnchor(anchorId));
             return {success: true};
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore rimozione anchor';
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setSpatialAnchorError(message));
             return null;
         }
@@ -56,11 +58,23 @@ export const useSpatialAnchors = () => {
 
     const addLandmark = async (landmark: Landmark) => {
         try {
-            const response = await post<Landmark>('/spatial/landmarks', landmark);
-            dispatch(setLandmark(response ?? landmark));
-            return {data: response ?? landmark};
+            // TODO real api: const response = await post<Landmark>('/spatial/landmarks', landmark);
+            dispatch(setLandmark(landmark));
+            return {data: landmark};
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore creazione landmark';
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSpatialAnchorError(message));
+            return null;
+        }
+    };
+
+    const updateLandmark = async (landmark: Landmark) => {
+        try {
+            // TODO real api: const response = await put<Landmark>(`/spatial/landmarks/${landmark.id}`, landmark);
+            dispatch(setLandmark(landmark));
+            return {data: landmark};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setSpatialAnchorError(message));
             return null;
         }
@@ -68,11 +82,11 @@ export const useSpatialAnchors = () => {
 
     const deleteLandmark = async (landmarkId: string) => {
         try {
-            await del(`/spatial/landmarks/${landmarkId}`);
+            // TODO real api: await del(`/spatial/landmarks/${landmarkId}`);
             dispatch(removeLandmark(landmarkId));
             return {success: true};
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore rimozione landmark';
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setSpatialAnchorError(message));
             return null;
         }
@@ -86,8 +100,10 @@ export const useSpatialAnchors = () => {
         ...spatialAnchorState,
         fetchAnchors,
         addAnchor,
+        updateAnchor,
         deleteAnchor,
         addLandmark,
+        updateLandmark,
         deleteLandmark,
         reset,
     };

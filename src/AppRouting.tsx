@@ -15,6 +15,7 @@ const Dashboard = lazy(() => import("./pages/dashboard/Dashboard.tsx").then(m =>
 const UserProfile = lazy(() => import("./pages/user-profile/UserProfile.tsx").then(m => ({default: m.UserProfile})));
 const UserSettings = lazy(() => import("./pages/user-settings/UserSettings.tsx").then(m => ({default: m.UserSettings})));
 const NotFound = lazy(() => import("./pages/not-found/NotFound.tsx").then(m => ({default: m.NotFound})));
+const SurveyPage = lazy(() => import("./pages/survey/Survey.tsx").then(m => ({default: m.Survey})));
 
 // Scroll to top ad ogni cambio route
 const ScrollToTop = () => {
@@ -59,6 +60,7 @@ function AppRouting() {
                         <Route path="/dashboard" element={<Dashboard/>}/>
                         <Route path="/userprofile" element={<UserProfile/>}/>
                         <Route path="/usersettings" element={<UserSettings/>}/>
+                        <Route path="/survey" element={<SurveyPage/>}/>
                         <Route path="*" element={<NotFound/>}/>
                     </Routes>
                 </Suspense>

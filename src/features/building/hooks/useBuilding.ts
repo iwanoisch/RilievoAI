@@ -1,5 +1,4 @@
 import {useAppDispatch, useAppSelector} from "../../../store/store.ts";
-import {useApiClient} from "../../../hooks/useApiClient.ts";
 import {loadElements, setElement, removeElement, setSelectedElementId, setBuildingError, resetBuilding} from "../slice/buildingSlice.ts";
 import type {BuildingElement} from "../slice/building.type.ts";
 import {MOCK_BUILDING_ELEMENTS} from "../../../dataMock/MOCK_BUILDING.ts";
@@ -7,43 +6,33 @@ import {MOCK_BUILDING_ELEMENTS} from "../../../dataMock/MOCK_BUILDING.ts";
 export const useBuilding = () => {
     const dispatch = useAppDispatch();
     const buildingState = useAppSelector(state => state.building);
-    const {get, post, put, del} = useApiClient();
 
-    const fetchBuilding = async (buildingId: string) => {
+    const fetchBuilding = async (_buildingId: string) => {
         try {
-            const response = await get<BuildingElement[]>(`/buildings/${buildingId}/elements`);
-            if (!response) {
-                // Fallback mock
-                _loadFromArray(MOCK_BUILDING_ELEMENTS);
-                return {data: MOCK_BUILDING_ELEMENTS};
+            // TODO real api: const response = await get<BuildingElement[]>(`/buildings/${buildingId}/elements`);
+            const elements = MOCK_BUILDING_ELEMENTS;
+
+            const elementsMap: Record<string, BuildingElement> = {};
+            for (const el of elements) {
+                elementsMap[el.id] = el;
             }
-            _loadFromArray(response);
-            return {data: response};
+            const root = elements.find(el => el.type === 'building');
+            dispatch(loadElements({elements: elementsMap, rootBuildingId: root?.id ?? null}));
+            return {data: elements};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore nel caricamento edificio';
             dispatch(setBuildingError(message));
-            // Fallback mock
-            _loadFromArray(MOCK_BUILDING_ELEMENTS);
             return null;
         }
     };
 
-    const _loadFromArray = (elements: BuildingElement[]) => {
-        const elementsMap: Record<string, BuildingElement> = {};
-        for (const el of elements) {
-            elementsMap[el.id] = el;
-        }
-        const root = elements.find(el => el.type === 'building');
-        dispatch(loadElements({elements: elementsMap, rootBuildingId: root?.id ?? null}));
-    };
-
     const addElement = async (element: BuildingElement) => {
         try {
-            const response = await post<BuildingElement>('/buildings/elements', element);
-            dispatch(setElement(response ?? element));
-            return {data: response ?? element};
+            // TODO real api: const response = await post<BuildingElement>('/buildings/elements', element);
+            dispatch(setElement(element));
+            return {data: element};
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore nella creazione elemento';
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setBuildingError(message));
             return null;
         }
@@ -51,11 +40,11 @@ export const useBuilding = () => {
 
     const updateElement = async (element: BuildingElement) => {
         try {
-            const response = await put<BuildingElement>(`/buildings/elements/${element.id}`, element);
-            dispatch(setElement(response ?? element));
-            return {data: response ?? element};
+            // TODO real api: const response = await put<BuildingElement>(`/buildings/elements/${element.id}`, element);
+            dispatch(setElement(element));
+            return {data: element};
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore nell\'aggiornamento elemento';
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setBuildingError(message));
             return null;
         }
@@ -63,11 +52,11 @@ export const useBuilding = () => {
 
     const deleteElement = async (elementId: string) => {
         try {
-            await del(`/buildings/elements/${elementId}`);
+            // TODO real api: await del(`/buildings/elements/${elementId}`);
             dispatch(removeElement(elementId));
             return {success: true};
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore nella rimozione elemento';
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setBuildingError(message));
             return null;
         }

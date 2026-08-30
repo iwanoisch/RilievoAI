@@ -34,4 +34,10 @@ export default tseslint.config(
         ]
       },
     },
+    {
+      files: ['**/useApiClient.type.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
 )

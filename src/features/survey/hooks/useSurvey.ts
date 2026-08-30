@@ -1,5 +1,4 @@
 import {useAppDispatch, useAppSelector} from "../../../store/store.ts";
-import {useApiClient} from "../../../hooks/useApiClient.ts";
 import {
     setCurrentSession,
     setSessionStatus,
@@ -14,23 +13,21 @@ import {
     resetSurvey,
 } from "../slice/surveySlice.ts";
 import type {SurveySession, SurveyPhoto, VoiceObservation, Measurement} from "../slice/survey.type.ts";
-import {MOCK_SURVEY_SESSION, MOCK_PHOTOS, MOCK_VOICE_OBSERVATIONS, MOCK_MEASUREMENTS} from "../../../dataMock/MOCK_SURVEY.ts";
+import {createMockSession, MOCK_PHOTOS, MOCK_VOICE_OBSERVATIONS, MOCK_MEASUREMENTS} from "../../../dataMock/MOCK_SURVEY.ts";
 
 export const useSurvey = () => {
     const dispatch = useAppDispatch();
     const surveyState = useAppSelector(state => state.survey);
-    const {get, post} = useApiClient();
 
     const startSession = async (buildingId: string) => {
         try {
-            const response = await post<SurveySession>('/survey/sessions', {buildingId});
-            dispatch(setCurrentSession(response ?? {...MOCK_SURVEY_SESSION, buildingId}));
-            return {data: response ?? MOCK_SURVEY_SESSION};
+            // TODO real api: const response = await post<SurveySession>('/survey/sessions', {buildingId});
+            const session: SurveySession = createMockSession(buildingId);
+            dispatch(setCurrentSession(session));
+            return {data: session};
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore avvio sessione';
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setSurveyError(message));
-            // Fallback mock
-            dispatch(setCurrentSession({...MOCK_SURVEY_SESSION, buildingId}));
             return null;
         }
     };
@@ -48,54 +45,126 @@ export const useSurvey = () => {
         dispatch(setSessionEndedAt(new Date().toISOString()));
     };
 
-    const fetchSessionData = async (sessionId: string) => {
+    const fetchSessionData = async (_sessionId: string) => {
         try {
-            const response = await get<{photos: SurveyPhoto[]; voiceObservations: VoiceObservation[]; measurements: Measurement[]}>(`/survey/sessions/${sessionId}/data`);
-            if (response) {
-                response.photos.forEach(p => dispatch(setPhoto(p)));
-                response.voiceObservations.forEach(v => dispatch(setVoiceObservation(v)));
-                response.measurements.forEach(m => dispatch(setMeasurement(m)));
-                return {data: response};
-            }
-            // Fallback mock
-            _loadMockData();
-            return null;
+            // TODO real api: const response = await get<{...}>(`/survey/sessions/${sessionId}/data`);
+            MOCK_PHOTOS.forEach(p => dispatch(setPhoto(p)));
+            MOCK_VOICE_OBSERVATIONS.forEach(v => dispatch(setVoiceObservation(v)));
+            MOCK_MEASUREMENTS.forEach(m => dispatch(setMeasurement(m)));
+            return {data: {photos: MOCK_PHOTOS, voiceObservations: MOCK_VOICE_OBSERVATIONS, measurements: MOCK_MEASUREMENTS}};
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore caricamento dati sessione';
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setSurveyError(message));
-            _loadMockData();
             return null;
         }
     };
 
-    const _loadMockData = () => {
-        MOCK_PHOTOS.forEach(p => dispatch(setPhoto(p)));
-        MOCK_VOICE_OBSERVATIONS.forEach(v => dispatch(setVoiceObservation(v)));
-        MOCK_MEASUREMENTS.forEach(m => dispatch(setMeasurement(m)));
+    const addPhoto = async (photo: SurveyPhoto) => {
+        try {
+            // TODO real api: const response = await post<SurveyPhoto>('/survey/photos', photo);
+            dispatch(setPhoto(photo));
+            return {data: photo};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSurveyError(message));
+            return null;
+        }
     };
 
-    const addPhoto = (photo: SurveyPhoto) => {
-        dispatch(setPhoto(photo));
+    const updatePhoto = async (photo: SurveyPhoto) => {
+        try {
+            // TODO real api: const response = await put<SurveyPhoto>(`/survey/photos/${photo.id}`, photo);
+            dispatch(setPhoto(photo));
+            return {data: photo};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSurveyError(message));
+            return null;
+        }
     };
 
-    const deletePhoto = (photoId: string) => {
-        dispatch(removePhoto(photoId));
+    const deletePhoto = async (photoId: string) => {
+        try {
+            // TODO real api: await del(`/survey/photos/${photoId}`);
+            dispatch(removePhoto(photoId));
+            return {success: true};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSurveyError(message));
+            return null;
+        }
     };
 
-    const addVoiceObservation = (observation: VoiceObservation) => {
-        dispatch(setVoiceObservation(observation));
+    const addVoiceObservation = async (observation: VoiceObservation) => {
+        try {
+            // TODO real api: const response = await post<VoiceObservation>('/survey/voice-observations', observation);
+            dispatch(setVoiceObservation(observation));
+            return {data: observation};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSurveyError(message));
+            return null;
+        }
     };
 
-    const deleteVoiceObservation = (observationId: string) => {
-        dispatch(removeVoiceObservation(observationId));
+    const updateVoiceObservation = async (observation: VoiceObservation) => {
+        try {
+            // TODO real api: const response = await put<VoiceObservation>(`/survey/voice-observations/${observation.id}`, observation);
+            dispatch(setVoiceObservation(observation));
+            return {data: observation};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSurveyError(message));
+            return null;
+        }
     };
 
-    const addMeasurement = (measurement: Measurement) => {
-        dispatch(setMeasurement(measurement));
+    const deleteVoiceObservation = async (observationId: string) => {
+        try {
+            // TODO real api: await del(`/survey/voice-observations/${observationId}`);
+            dispatch(removeVoiceObservation(observationId));
+            return {success: true};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSurveyError(message));
+            return null;
+        }
     };
 
-    const deleteMeasurement = (measurementId: string) => {
-        dispatch(removeMeasurement(measurementId));
+    const addMeasurement = async (measurement: Measurement) => {
+        try {
+            // TODO real api: const response = await post<Measurement>('/survey/measurements', measurement);
+            dispatch(setMeasurement(measurement));
+            return {data: measurement};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSurveyError(message));
+            return null;
+        }
+    };
+
+    const updateMeasurement = async (measurement: Measurement) => {
+        try {
+            // TODO real api: const response = await put<Measurement>(`/survey/measurements/${measurement.id}`, measurement);
+            dispatch(setMeasurement(measurement));
+            return {data: measurement};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSurveyError(message));
+            return null;
+        }
+    };
+
+    const deleteMeasurement = async (measurementId: string) => {
+        try {
+            // TODO real api: await del(`/survey/measurements/${measurementId}`);
+            dispatch(removeMeasurement(measurementId));
+            return {success: true};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSurveyError(message));
+            return null;
+        }
     };
 
     const getAllObservations = () => {
@@ -117,10 +186,13 @@ export const useSurvey = () => {
         completeSession,
         fetchSessionData,
         addPhoto,
+        updatePhoto,
         deletePhoto,
         addVoiceObservation,
+        updateVoiceObservation,
         deleteVoiceObservation,
         addMeasurement,
+        updateMeasurement,
         deleteMeasurement,
         getAllObservations,
         reset,

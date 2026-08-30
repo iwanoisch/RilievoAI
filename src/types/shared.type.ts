@@ -3,6 +3,8 @@
  * Estratti da projects.type.ts durante la conversione a boilerplate.
  */
 
+import {ComponentType, SVGProps} from "react";
+
 export interface Address {
     addr_street: string;
     addr_zip: string;
@@ -72,4 +74,18 @@ interface PaginationLink {
 export interface GenericPagination<T> {
     pagination: IPagination;
     data: T[]
+}
+
+export type MenuIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+export type UserRole = 'owner' | 'superadmin' | 'user';
+
+export interface MenuItem {
+    id: string;
+    name: string;
+    href: string;
+    icon?: MenuIcon;
+    role?: UserRole[] | undefined;
+    current?: boolean;
+    action?: string;
 }

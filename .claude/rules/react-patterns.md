@@ -15,6 +15,52 @@ src/features/nomeFeature/
     └── nomeFeature.api.ts
 ```
 
+### Slice Pattern — NIENTE LOGICA negli slice
+Gli slice devono essere **puri setter**, senza logica (no findIndex, find, filter, if/else, push condizionale).
+Tutta la logica di ricerca, filtraggio e aggiornamento condizionale va negli **hook**.
+
+```typescript
+// ✅ CORRETTO — Slice puro setter
+reducers: {
+    setItems: (state, action: PayloadAction<Item[]>) => {
+        state.items = action.payload;
+    },
+    setSelectedId: (state, action: PayloadAction<string | null>) => {
+        state.selectedId = action.payload;
+    },
+    setError: (state, action: PayloadAction<string | null>) => {
+        state.error = action.payload;
+    },
+}
+
+// ❌ SBAGLIATO — Logica nello slice
+reducers: {
+    addOrUpdateItem: (state, action: PayloadAction<Item>) => {
+        const idx = state.items.findIndex(i => i.id === action.payload.id);
+        if (idx !== -1) {
+            state.items[idx] = action.payload;  // ❌ logica!
+        } else {
+            state.items.push(action.payload);   // ❌ logica!
+        }
+    },
+}
+```
+
+La logica va nell'hook:
+```typescript
+// ✅ CORRETTO — Logica nell'hook
+const addItem = async (item: Item) => {
+    const updated = [...items];
+    const idx = updated.findIndex(i => i.id === item.id);
+    if (idx !== -1) {
+        updated[idx] = item;
+    } else {
+        updated.push(item);
+    }
+    dispatch(setItems(updated));
+};
+```
+
 ### Hooks Pattern
 Gli hook incapsulano dispatch, selector e API. Il loading è gestito tramite useEffect nei componenti, non nello state Redux:
 

@@ -5,6 +5,7 @@ import {
     ArrowLeftStartOnRectangleIcon,
     CameraIcon,
     BuildingOffice2Icon,
+    MapIcon,
 } from "@heroicons/react/24/outline";
 import type {MenuItem} from "../types/shared.type.ts";
 
@@ -12,6 +13,7 @@ export const SUB_MENU_ITEMS: MenuItem[] = [
     {id: "dashboard", name: "Dashboard", href: "/dashboard", icon: Squares2X2Icon, current: true},
     {id: "survey", name: "Rilievo AI", href: "/survey", icon: CameraIcon},
     {id: "building", name: "Edificio", href: "/building", icon: BuildingOffice2Icon},
+    {id: "floorPlan", name: "Planimetria", href: "/floor-plan", icon: MapIcon},
 ];
 
 export const USER_MENU_ITEMS: MenuItem[] = [

@@ -6,10 +6,9 @@ export interface PhotoMarker {
     confidence: number;
 }
 
-export interface FloorPlan {
+export interface FloorPlanPage {
     id: string;
-    buildingId: string;
-    floorId: string;
+    pageNumber: number;
     imagePath: string;
     scale?: number;
     origin?: { x: number; y: number };
@@ -17,8 +16,20 @@ export interface FloorPlan {
     photoMarkers: PhotoMarker[];
 }
 
+export type FloorPlanFileType = 'pdf' | 'png' | 'jpg' | 'jpeg' | 'webp';
+
+export interface FloorPlanDocument {
+    id: string;
+    buildingId: string;
+    name: string;
+    fileType: FloorPlanFileType;
+    createdAt: string;
+    pages: FloorPlanPage[];
+}
+
 export interface FloorPlanState {
-    floorPlans: Record<string, FloorPlan>;
-    selectedFloorPlanId: string | null;
+    documents: FloorPlanDocument[];
+    selectedDocumentId: string | null;
+    selectedPageId: string | null;
     error: string | null;
 }

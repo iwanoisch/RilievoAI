@@ -1,4 +1,4 @@
-import {useAppDispatch, useAppSelector} from "../../../store/store.ts";
+import {useAppDispatch, useAppSelector, store} from "../../../store/store.ts";
 import {
     setCurrentSession,
     setPhotos,
@@ -193,10 +193,12 @@ export const useSurvey = () => {
     };
 
     const getNextObservationId = (): string => {
+        // Legge lo state fresco dal store per evitare stale closure
+        const fresh = store.getState().survey;
         const allIds = [
-            ...surveyState.photos.map(p => Number(p.id) || 0),
-            ...surveyState.voiceObservations.map(v => Number(v.id) || 0),
-            ...surveyState.measurements.map(m => Number(m.id) || 0),
+            ...fresh.photos.map(p => Number(p.id) || 0),
+            ...fresh.voiceObservations.map(v => Number(v.id) || 0),
+            ...fresh.measurements.map(m => Number(m.id) || 0),
         ];
         return String(allIds.length > 0 ? Math.max(...allIds) + 1 : 1);
     };

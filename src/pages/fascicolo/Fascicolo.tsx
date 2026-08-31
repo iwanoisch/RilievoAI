@@ -174,7 +174,7 @@ export const Fascicolo: FC = () => {
                                 <div className="flex flex-col gap-1">
                                     {previewScheda.fields.map(field => (
                                         <div key={field.key} className="flex justify-between text-sm py-1 border-b border-border-light">
-                                            <span className="text-text-muted">{field.key}</span>
+                                            <span className="text-text-muted">{field.label.includes('.') ? t(field.label) : field.label}</span>
                                             <span className="text-text-primary font-medium">{String(field.value)}</span>
                                         </div>
                                     ))}

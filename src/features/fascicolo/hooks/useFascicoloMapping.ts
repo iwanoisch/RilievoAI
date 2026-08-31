@@ -1,16 +1,20 @@
 import {useAppSelector} from "../../../store/store.ts";
 import {FASCICOLO_SKIP_FIELDS} from "../../../constants/fascicolo.constant.ts";
+import {BUILDING_ELEMENT_CONFIG} from "../../../constants/building-element-config.constant.ts";
 import type {BuildingElement} from "../../building/slice/building.type.ts";
 import type {FascicoloScheda, FascicoloObservation, FascicoloField} from "../slice/fascicolo.type.ts";
 
 const extractFields = (element: BuildingElement): FascicoloField[] => {
     const fields: FascicoloField[] = [];
+    const config = BUILDING_ELEMENT_CONFIG[element.type];
+    const configFields = config?.fields ?? [];
 
     for (const [key, value] of Object.entries(element)) {
-        if (FASCICOLO_SKIP_FIELDS.includes(key) || value === undefined || value === null) continue;
+        if (FASCICOLO_SKIP_FIELDS.includes(key) || value === undefined || value === null || value === '') continue;
+        const fieldConfig = configFields.find(f => f.key === key);
         fields.push({
             key,
-            label: key,
+            label: fieldConfig?.labelKey ?? key,
             value: value as string | number,
             source: 'building',
             sourceId: element.id,

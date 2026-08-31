@@ -9,6 +9,11 @@ export const useBuilding = () => {
 
     const fetchBuilding = async (_buildingId: string) => {
         try {
+            // Se ci sono già elementi nello state, non sovrascrivere con i mock
+            if (Object.keys(buildingState.elements).length > 0) {
+                return {data: Object.values(buildingState.elements)};
+            }
+
             // TODO real api: const response = await get<BuildingElement[]>(`/buildings/${buildingId}/elements`);
             const elements = MOCK_BUILDING_ELEMENTS;
 

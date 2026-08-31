@@ -37,7 +37,6 @@ export const ObservationDetail: FC<ObservationDetailProps> = ({onBack}) => {
     const voice = observationType === 'voice' ? observation as VoiceObservation : null;
     const measurement = observationType === 'measurement' ? observation as Measurement : null;
 
-    const isPending = observation.dataStatus === 'PROPOSED' || observation.dataStatus === 'DERIVED';
     const log = getLogForObservation(observation.id);
     const elementList = Object.values(elements);
 
@@ -154,28 +153,36 @@ export const ObservationDetail: FC<ObservationDetailProps> = ({onBack}) => {
                             </div>
                         </div>
 
-                        {/* Validation actions */}
-                        {isPending && (
-                            <div className="card">
-                                <h3 className="text-sm font-semibold text-text-secondary mb-3">{t('observation.validation')}</h3>
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={handleConfirm}
-                                        className="btn btn-primary flex-1 min-h-[44px] flex items-center justify-center gap-2"
-                                    >
-                                        <CheckIcon className="h-5 w-5"/>
-                                        {t('validation.confirm')}
-                                    </button>
-                                    <button
-                                        onClick={handleReject}
-                                        className="btn bg-error text-white hover:bg-red-700 flex-1 min-h-[44px] flex items-center justify-center gap-2"
-                                    >
-                                        <XMarkIcon className="h-5 w-5"/>
-                                        {t('validation.reject')}
-                                    </button>
-                                </div>
+                        {/* Validation actions — sempre visibile */}
+                        <div className="card">
+                            <h3 className="text-sm font-semibold text-text-secondary mb-3">{t('observation.validation')}</h3>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleConfirm}
+                                    disabled={observation.dataStatus === 'VALIDATED'}
+                                    className={`flex-1 min-h-[44px] flex items-center justify-center gap-2 rounded-lg font-medium text-sm transition-colors
+                                        ${observation.dataStatus === 'VALIDATED'
+                                        ? 'bg-success text-white cursor-default'
+                                        : 'btn btn-primary'
+                                    }`}
+                                >
+                                    <CheckIcon className="h-5 w-5"/>
+                                    {t('validation.confirm')}
+                                </button>
+                                <button
+                                    onClick={handleReject}
+                                    disabled={observation.dataStatus === 'REJECTED'}
+                                    className={`flex-1 min-h-[44px] flex items-center justify-center gap-2 rounded-lg font-medium text-sm transition-colors
+                                        ${observation.dataStatus === 'REJECTED'
+                                        ? 'bg-error text-white cursor-default'
+                                        : 'btn bg-error text-white hover:bg-red-700'
+                                    }`}
+                                >
+                                    <XMarkIcon className="h-5 w-5"/>
+                                    {t('validation.reject')}
+                                </button>
                             </div>
-                        )}
+                        </div>
 
                         {/* Validation log */}
                         {log.length > 0 && (

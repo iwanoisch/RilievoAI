@@ -1,11 +1,14 @@
-import {FC, useState} from "react";
+import {FC, useRef, useState} from "react";
 import {PageTitle} from "../../common/page-title/PageTitle.tsx";
+import {store} from "../../store/store.ts";
 import {useSurvey} from "../../features/survey/hooks/useSurvey.ts";
 import {useBuilding} from "../../features/building/hooks/useBuilding.ts";
+import {useAiAnalysis} from "../../features/ai/hooks/useAiAnalysis.ts";
 import {PhotoModal} from "./modals/PhotoModal.tsx";
 import {VoiceModal} from "./modals/VoiceModal.tsx";
 import {MeasurementModal} from "./modals/MeasurementModal.tsx";
 import {SurveyObservationList} from "../../components/survey-observation-list/SurveyObservationList.tsx";
+import {AiSuggestionCard} from "../../common/ai-suggestion-card/AiSuggestionCard.tsx";
 import type {ObservationItem} from "../../components/survey-observation-list/surveyObservationList.type.ts";
 import type {SurveyPhoto, VoiceObservation, Measurement} from "../../features/survey/slice/survey.type.ts";
 import type {ModalState, ModalType} from "./survey.type.ts";
@@ -16,6 +19,7 @@ import {
     MicrophoneIcon,
     PauseIcon,
     PlayIcon,
+    SparklesIcon,
     StopIcon,
 } from "@heroicons/react/24/solid";
 
@@ -25,7 +29,10 @@ export const Survey: FC = () => {
     const survey = useSurvey();
     const {currentSession, photos, voiceObservations, measurements} = survey;
     const {fetchBuilding} = useBuilding();
+    const {isAnalyzing, pendingSuggestions, analyzePhoto, analyzeVoice, acceptSuggestion, rejectSuggestion} = useAiAnalysis();
     const [modal, setModal] = useState<ModalState>({type: null});
+    const photoCountRef = useRef(0);
+    const voiceCountRef = useRef(0);
 
     const photoCount = photos.length;
     const voiceCount = voiceObservations.length;
@@ -51,11 +58,45 @@ export const Survey: FC = () => {
     };
 
     const openModal = (type: ModalType) => {
+        photoCountRef.current = photos.length;
+        voiceCountRef.current = voiceObservations.length;
         setModal({type});
     };
 
     const closeModal = () => {
+        const modalType = modal.type;
         setModal({type: null});
+
+        // AI per nuove voci (foto gestita da onSaved)
+        if (modalType === 'voice') {
+            const freshState = store.getState().survey;
+            const session = freshState.currentSession;
+            if (freshState.voiceObservations.length > voiceCountRef.current) {
+                const newVoice = freshState.voiceObservations[freshState.voiceObservations.length - 1];
+                if (newVoice?.transcription && session) {
+                    analyzeVoice({
+                        observationId: newVoice.id,
+                        transcription: newVoice.transcription,
+                        buildingId: session.buildingId,
+                        currentFloorId: newVoice.floorId,
+                        currentRoomId: newVoice.roomId,
+                    });
+                }
+            }
+        }
+    };
+
+    const handlePhotoSaved = (photo: SurveyPhoto) => {
+        const session = store.getState().survey.currentSession;
+        if (session) {
+            analyzePhoto({
+                photoId: photo.id,
+                mediaPath: photo.mediaPath,
+                buildingId: session.buildingId,
+                currentFloorId: photo.floorId,
+                currentRoomId: photo.roomId,
+            });
+        }
     };
 
     const handleEditObservation = (obs: ObservationItem) => {
@@ -70,6 +111,16 @@ export const Survey: FC = () => {
                 setModal({type: 'measure', editData: obs as Measurement});
                 break;
         }
+    };
+
+    const handleAcceptSuggestion = async (id: string) => {
+        await acceptSuggestion(id);
+        showAlert({title: t('ai.feedback_sent'), type: 'success', message: ''});
+    };
+
+    const handleRejectSuggestion = async (id: string) => {
+        await rejectSuggestion(id);
+        showAlert({title: t('ai.feedback_sent'), type: 'info', message: ''});
     };
 
     const getStatusBadgeClass = (): string => {
@@ -186,6 +237,31 @@ export const Survey: FC = () => {
                     </button>
                 </div>
 
+                {/* AI Suggerimenti */}
+                {(isAnalyzing || pendingSuggestions.length > 0) && (
+                    <div className="mt-4 flex flex-col gap-3">
+                        {isAnalyzing && (
+                            <div className="card flex items-center gap-3 border-l-4 border-l-primary-500">
+                                <div className="relative h-6 w-6 flex-shrink-0">
+                                    <div className="absolute inset-0 rounded-full border-2 border-primary-100"/>
+                                    <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary-500 motion-safe:animate-spin"/>
+                                </div>
+                                <SparklesIcon className="h-5 w-5 text-primary-500 flex-shrink-0"/>
+                                <p className="text-sm text-text-secondary">{t('ai.analyzing')}</p>
+                            </div>
+                        )}
+
+                        {pendingSuggestions.map(suggestion => (
+                            <AiSuggestionCard
+                                key={suggestion.id}
+                                suggestion={suggestion}
+                                onAccept={handleAcceptSuggestion}
+                                onReject={handleRejectSuggestion}
+                            />
+                        ))}
+                    </div>
+                )}
+
                 {/* Observation list */}
                 <div className="mt-6 card">
                     <SurveyObservationList onEdit={handleEditObservation}/>
@@ -194,7 +270,7 @@ export const Survey: FC = () => {
 
             {/* Modali fullscreen */}
             {modal.type === 'photo' && (
-                <PhotoModal editData={modal.editData as SurveyPhoto | undefined} onClose={closeModal}/>
+                <PhotoModal editData={modal.editData as SurveyPhoto | undefined} onClose={closeModal} onSaved={handlePhotoSaved}/>
             )}
             {modal.type === 'voice' && (
                 <VoiceModal editData={modal.editData as VoiceObservation | undefined} onClose={closeModal}/>

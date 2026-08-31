@@ -820,5 +820,25 @@
     "status_error": "Errore",
     "empty": "Nessuna scheda disponibile",
     "empty_desc": "Valida gli elementi dell'edificio dal rilievo per generare le schede del fascicolo."
+  },
+  "ai": {
+    "suggestion": "Suggerimento AI",
+    "accept": "Accetta",
+    "modify": "Modifica",
+    "reject": "Rifiuta",
+    "analyzing": "Analisi in corso...",
+    "analyze_photo": "Analizza foto",
+    "analyze_voice": "Analizza registrazione",
+    "status_pending": "In attesa",
+    "status_accepted": "Accettato",
+    "status_modified": "Modificato",
+    "status_rejected": "Rifiutato",
+    "criticality_none": "Nessuna criticità",
+    "criticality_low": "Criticità bassa",
+    "criticality_medium": "Criticità media",
+    "criticality_high": "Criticità alta",
+    "criticality_critical": "Criticità critica",
+    "no_suggestions": "Nessun suggerimento AI",
+    "feedback_sent": "Feedback inviato"
   }
 }

@@ -807,5 +807,25 @@
     "status_error": "خطأ",
     "empty": "لا توجد أوراق متاحة",
     "empty_desc": "قم باعتماد عناصر المبنى من المسح لإنشاء أوراق الملف."
+  },
+  "ai": {
+    "suggestion": "اقتراح الذكاء الاصطناعي",
+    "accept": "قبول",
+    "modify": "تعديل",
+    "reject": "رفض",
+    "analyzing": "جارٍ التحليل...",
+    "analyze_photo": "تحليل الصورة",
+    "analyze_voice": "تحليل التسجيل",
+    "status_pending": "في الانتظار",
+    "status_accepted": "مقبول",
+    "status_modified": "معدّل",
+    "status_rejected": "مرفوض",
+    "criticality_none": "بدون خطورة",
+    "criticality_low": "خطورة منخفضة",
+    "criticality_medium": "خطورة متوسطة",
+    "criticality_high": "خطورة عالية",
+    "criticality_critical": "حرج",
+    "no_suggestions": "لا توجد اقتراحات AI",
+    "feedback_sent": "تم إرسال الملاحظات"
   }
 }

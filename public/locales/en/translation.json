@@ -817,5 +817,25 @@
     "status_error": "Error",
     "empty": "No sheets available",
     "empty_desc": "Validate building elements from the survey to generate dossier sheets."
+  },
+  "ai": {
+    "suggestion": "AI Suggestion",
+    "accept": "Accept",
+    "modify": "Modify",
+    "reject": "Reject",
+    "analyzing": "Analyzing...",
+    "analyze_photo": "Analyze photo",
+    "analyze_voice": "Analyze recording",
+    "status_pending": "Pending",
+    "status_accepted": "Accepted",
+    "status_modified": "Modified",
+    "status_rejected": "Rejected",
+    "criticality_none": "No criticality",
+    "criticality_low": "Low criticality",
+    "criticality_medium": "Medium criticality",
+    "criticality_high": "High criticality",
+    "criticality_critical": "Critical",
+    "no_suggestions": "No AI suggestions",
+    "feedback_sent": "Feedback sent"
   }
 }

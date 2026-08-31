@@ -11,7 +11,6 @@ import {HomePage} from "./pages/home-page/HomePage.tsx";
 import {Login} from "./pages/login/Login.tsx";
 
 // Lazy loading per tutte le altre pagine
-const Dashboard = lazy(() => import("./pages/dashboard/Dashboard.tsx").then(m => ({default: m.Dashboard})));
 const UserProfile = lazy(() => import("./pages/user-profile/UserProfile.tsx").then(m => ({default: m.UserProfile})));
 const UserSettings = lazy(() => import("./pages/user-settings/UserSettings.tsx").then(m => ({default: m.UserSettings})));
 const NotFound = lazy(() => import("./pages/not-found/NotFound.tsx").then(m => ({default: m.NotFound})));
@@ -63,7 +62,6 @@ function AppRouting() {
                     <Routes>
                         <Route path="/" element={<HomePage/>}/>
                         <Route path="/login" element={<Login/>}/>
-                        <Route path="/dashboard" element={<Dashboard/>}/>
                         <Route path="/userprofile" element={<UserProfile/>}/>
                         <Route path="/usersettings" element={<UserSettings/>}/>
                         <Route path="/survey" element={<SurveyPage/>}/>

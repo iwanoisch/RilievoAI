@@ -7,10 +7,11 @@ import {useTranslation} from "react-i18next";
 import type {PhotoModalProps} from "./photoModal.type.ts";
 import type {SurveyPhoto} from "../../../features/survey/slice/survey.type.ts";
 
-export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose}) => {
+export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose, onSaved}) => {
     const {t} = useTranslation();
     const {isCameraActive, cameraError, startCamera, stopCamera, takePhoto} = useSurveyMedia();
-    const {addPhoto} = useSurvey();
+    const survey = useSurvey();
+    const {addPhoto} = survey;
     const {elements} = useBuilding();
     const videoRef = useRef<HTMLVideoElement>(null);
     const elementList = Object.values(elements);
@@ -18,8 +19,20 @@ export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose}) => {
     const [pendingPhoto, setPendingPhoto] = useState<SurveyPhoto | null>(editData || null);
     const [viewDirection, setViewDirection] = useState(editData?.viewDirection || '');
     const [targetElementId, setTargetElementId] = useState(editData?.targetElementId || '');
+    const [hasChanges, setHasChanges] = useState(false);
+    const [didRetake, setDidRetake] = useState(false);
 
     const isEditMode = !!editData;
+    const originalViewDirection = editData?.viewDirection || '';
+    const originalTargetElementId = editData?.targetElementId || '';
+
+    // Detecte modifiche ai campi
+    useEffect(() => {
+        if (pendingPhoto) {
+            const changed = viewDirection !== originalViewDirection || targetElementId !== originalTargetElementId || didRetake;
+            setHasChanges(changed);
+        }
+    }, [viewDirection, targetElementId, didRetake, originalViewDirection, originalTargetElementId, pendingPhoto]);
 
     useEffect(() => {
         if (!pendingPhoto && videoRef.current) {
@@ -28,11 +41,8 @@ export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose}) => {
         return () => stopCamera();
     }, [pendingPhoto, startCamera, stopCamera]);
 
-    // Cleanup esplicito al unmount
     useEffect(() => {
-        return () => {
-            stopCamera();
-        };
+        return () => stopCamera();
     }, [stopCamera]);
 
     const handleClose = useCallback(() => {
@@ -40,7 +50,6 @@ export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose}) => {
         onClose();
     }, [stopCamera, onClose]);
 
-    // Chiudi con Escape
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape') handleClose();
@@ -54,22 +63,38 @@ export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose}) => {
         if (photo) {
             setPendingPhoto(photo);
             stopCamera();
+            addPhoto(photo);
+            setHasChanges(true);
+            setDidRetake(false);
         }
-    }, [takePhoto, stopCamera]);
+    }, [takePhoto, stopCamera, addPhoto]);
 
     const handleRetake = () => {
+        if (pendingPhoto) {
+            survey.deletePhoto(pendingPhoto.id);
+        }
         setPendingPhoto(null);
         setViewDirection('');
+        setTargetElementId('');
+        setDidRetake(true);
     };
 
     const handleSave = () => {
         if (!pendingPhoto) return;
-        addPhoto({
+        const updatedPhoto: SurveyPhoto = {
             ...pendingPhoto,
             viewDirection: viewDirection || undefined,
             targetElementId: targetElementId || undefined,
-        });
-        handleClose();
+        };
+        survey.updatePhoto(updatedPhoto);
+        stopCamera();
+        onSaved?.(updatedPhoto);
+        onClose();
+    };
+
+    const handleDone = () => {
+        stopCamera();
+        onClose();
     };
 
     return (
@@ -91,7 +116,6 @@ export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose}) => {
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4">
                 <div className="mx-auto w-full max-w-lg flex flex-col gap-4">
-                    {/* Camera o preview foto */}
                     {pendingPhoto ? (
                         <img src={pendingPhoto.mediaPath} alt="" className="w-full rounded-xl"/>
                     ) : (
@@ -125,7 +149,6 @@ export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose}) => {
                         </div>
                     )}
 
-                    {/* Form — visibile sempre quando c'è una foto */}
                     {pendingPhoto && (
                         <>
                             <div>
@@ -157,7 +180,11 @@ export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose}) => {
             {pendingPhoto ? (
                 <div className="px-4 py-3 border-t border-border-default bg-surface-card flex gap-2">
                     <button onClick={handleRetake} className="btn btn-outline flex-1">{t('survey.retake')}</button>
-                    <button onClick={handleSave} className="btn btn-primary flex-1">{t('common.save')}</button>
+                    {hasChanges ? (
+                        <button onClick={handleSave} className="btn btn-primary flex-1">{t('common.save')}</button>
+                    ) : (
+                        <button onClick={handleDone} className="btn btn-primary flex-1">{t('common.close')}</button>
+                    )}
                 </div>
             ) : (
                 <div className="px-4 py-3 border-t border-border-default bg-surface-card flex gap-2">

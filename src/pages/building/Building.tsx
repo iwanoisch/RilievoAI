@@ -6,12 +6,12 @@ import {BuildingElementDetail} from "../../components/building-element-detail/Bu
 import {BuildingElementForm} from "./modals/BuildingElementForm.tsx";
 import {useTranslation} from "react-i18next";
 import {PlusIcon} from "@heroicons/react/24/solid";
-import type {BuildingElement} from "../../features/building/slice/building.type.ts";
+import type {BuildingElement, DataStatus} from "../../features/building/slice/building.type.ts";
 import type {BuildingModalState} from "./building.type.ts";
 
 export const Building: FC = () => {
     const {t} = useTranslation();
-    const {elements, selectedElementId, selectElement, deleteElement} = useBuilding();
+    const {elements, selectedElementId, selectElement, deleteElement, updateElement} = useBuilding();
     const [modal, setModal] = useState<BuildingModalState>({isOpen: false});
 
     const selectedElement = selectedElementId ? elements[selectedElementId] : null;
@@ -31,6 +31,12 @@ export const Building: FC = () => {
     const handleDeleteElement = async (elementId: string) => {
         await deleteElement(elementId);
         selectElement(null);
+    };
+
+    const handleStatusChange = async (elementId: string, status: DataStatus) => {
+        const el = elements[elementId];
+        if (!el) return;
+        await updateElement({...el, dataStatus: status, updatedAt: new Date().toISOString()});
     };
 
     const handleCloseModal = () => {
@@ -71,7 +77,7 @@ export const Building: FC = () => {
                     {/* Dettaglio */}
                     <div className="lg:col-span-2 card">
                         {selectedElement ? (
-                            <BuildingElementDetail element={selectedElement} onEdit={handleEditElement} onDelete={handleDeleteElement}/>
+                            <BuildingElementDetail element={selectedElement} onEdit={handleEditElement} onDelete={handleDeleteElement} onStatusChange={handleStatusChange}/>
                         ) : (
                             <div className="py-12 text-center">
                                 <p className="text-sm text-text-muted">{t('building.select_element')}</p>

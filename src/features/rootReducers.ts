@@ -5,6 +5,7 @@ import {default as surveyReducer} from "./survey/slice/surveySlice.ts";
 import {default as floorPlanReducer} from "./floorPlan/slice/floorPlanSlice.ts";
 import {default as spatialAnchorReducer} from "./spatialAnchor/slice/spatialAnchorSlice.ts";
 import {default as measurementReducer} from "./measurement/slice/measurementSlice.ts";
+import {default as fascicoloReducer} from "./fascicolo/slice/fascicoloSlice.ts";
 
 export const reducers = {
     init: initReducer,
@@ -14,4 +15,5 @@ export const reducers = {
     floorPlan: floorPlanReducer,
     spatialAnchor: spatialAnchorReducer,
     measurement: measurementReducer,
+    fascicolo: fascicoloReducer,
 };

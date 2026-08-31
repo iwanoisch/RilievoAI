@@ -23,3 +23,14 @@ export const DATA_STATUS_LABELS: Record<DataStatus, string> = {
     REJECTED: 'validation.status_rejected',
     SUPERSEDED: 'validation.status_superseded',
 };
+
+export const DATA_STATUS_STYLES: Record<DataStatus, string> = {
+    RAW: 'badge-info',
+    DERIVED: 'badge-info',
+    PROPOSED: 'badge-warning',
+    VALIDATED: 'badge-success',
+    REJECTED: 'badge-error',
+    SUPERSEDED: 'badge-info',
+};
+
+export const DATA_STATUS_OPTIONS: DataStatus[] = ['RAW', 'PROPOSED', 'VALIDATED', 'REJECTED'];

@@ -113,7 +113,8 @@
     "survey" : "Rilievo AI",
     "building" : "Edificio",
     "floorPlan" : "Planimetria",
-    "validation" : "Validazione"
+    "validation" : "Validazione",
+    "fascicolo" : "Fascicolo"
   },
   "dashboard": {
     "company_project": "Nominativo/Progetto",
@@ -800,5 +801,24 @@
     "validation": "Validazione",
     "history": "Storico validazione",
     "transcription": "Trascrizione"
+  },
+  "fascicolo": {
+    "title": "Fascicolo Edifici",
+    "subtitle": "Trasferisci i dati validati nelle schede del fascicolo",
+    "transfer": "Trasferisci",
+    "preview": "Anteprima",
+    "fields": "Campi",
+    "observations": "Osservazioni",
+    "schede": "schede",
+    "total_elements": "Elementi totali",
+    "validated_elements": "Elementi validati",
+    "ready_schede": "Schede pronte",
+    "transfer_history": "Storico trasferimenti",
+    "transfer_success": "Trasferimento completato con successo",
+    "status_pending": "Da trasferire",
+    "status_transferred": "Trasferito",
+    "status_error": "Errore",
+    "empty": "Nessuna scheda disponibile",
+    "empty_desc": "Valida gli elementi dell'edificio dal rilievo per generare le schede del fascicolo."
   }
 }

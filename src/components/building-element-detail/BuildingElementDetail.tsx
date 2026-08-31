@@ -2,10 +2,13 @@ import React, {FC} from "react";
 import {useTranslation} from "react-i18next";
 import {useSurvey} from "../../features/survey/hooks/useSurvey.ts";
 import {PencilIcon, TrashIcon} from "@heroicons/react/24/solid";
+import {ConfidenceBadge} from "../../common/confidence-badge/ConfidenceBadge.tsx";
+import {DATA_STATUS_LABELS, DATA_STATUS_STYLES, DATA_STATUS_OPTIONS} from "../../constants/validation.constant.ts";
+import type {DataStatus} from "../../features/building/slice/building.type.ts";
 import type {BuildingElementDetailProps} from "./buildingElementDetail.type.ts";
 import {BUILDING_ELEMENT_CONFIG} from "../../constants/building-element-config.constant.ts";
 
-export const BuildingElementDetail: FC<BuildingElementDetailProps> = ({element, onEdit, onDelete}) => {
+export const BuildingElementDetail: FC<BuildingElementDetailProps> = ({element, onEdit, onDelete, onStatusChange}) => {
     const {t, i18n} = useTranslation();
     const {photos, voiceObservations, measurements} = useSurvey();
 
@@ -72,6 +75,28 @@ export const BuildingElementDetail: FC<BuildingElementDetailProps> = ({element, 
                         <span className="hidden sm:inline">{t('common.delete')}</span>
                     </button>
                 </div>
+            </div>
+
+            {/* Stato e Confidence */}
+            <div className="card p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-text-muted">{t('observation.status')}:</span>
+                        <select
+                            value={element.dataStatus}
+                            onChange={e => onStatusChange(element.id, e.target.value as DataStatus)}
+                            className="input text-sm py-1 px-2"
+                        >
+                            {DATA_STATUS_OPTIONS.map(status => (
+                                <option key={status} value={status}>{t(DATA_STATUS_LABELS[status])}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <span className={`badge ${DATA_STATUS_STYLES[element.dataStatus]}`}>
+                        {t(DATA_STATUS_LABELS[element.dataStatus])}
+                    </span>
+                </div>
+                <ConfidenceBadge confidence={element.confidence} showLabel/>
             </div>
 
             {/* Info — campi dinamici dal config */}

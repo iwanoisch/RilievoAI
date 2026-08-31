@@ -7,6 +7,7 @@ import {
     BuildingOffice2Icon,
     MapIcon,
     ClipboardDocumentCheckIcon,
+    DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import type {MenuItem} from "../types/shared.type.ts";
 
@@ -16,6 +17,7 @@ export const SUB_MENU_ITEMS: MenuItem[] = [
     {id: "building", name: "Edificio", href: "/building", icon: BuildingOffice2Icon},
     {id: "floorPlan", name: "Planimetria", href: "/floor-plan", icon: MapIcon},
     {id: "validation", name: "Validazione", href: "/validation", icon: ClipboardDocumentCheckIcon},
+    {id: "fascicolo", name: "Fascicolo", href: "/fascicolo", icon: DocumentTextIcon},
 ];
 
 export const USER_MENU_ITEMS: MenuItem[] = [

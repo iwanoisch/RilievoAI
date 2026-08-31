@@ -360,7 +360,8 @@
     "survey": "المسح بالذكاء الاصطناعي",
     "building": "المبنى",
     "floorPlan": "المخطط الطابقي",
-    "validation": "التحقق"
+    "validation": "التحقق",
+    "fascicolo": "الملف"
   },
   "report": {
     "title": "العنوان",
@@ -787,5 +788,24 @@
     "validation": "التحقق",
     "history": "سجل التحقق",
     "transcription": "النسخ"
+  },
+  "fascicolo": {
+    "title": "ملف المبنى",
+    "subtitle": "نقل البيانات المعتمدة إلى أوراق ملف المبنى",
+    "transfer": "نقل",
+    "preview": "معاينة",
+    "fields": "الحقول",
+    "observations": "الملاحظات",
+    "schede": "أوراق",
+    "total_elements": "إجمالي العناصر",
+    "validated_elements": "العناصر المعتمدة",
+    "ready_schede": "أوراق جاهزة",
+    "transfer_history": "سجل النقل",
+    "transfer_success": "تم النقل بنجاح",
+    "status_pending": "في الانتظار",
+    "status_transferred": "تم النقل",
+    "status_error": "خطأ",
+    "empty": "لا توجد أوراق متاحة",
+    "empty_desc": "قم باعتماد عناصر المبنى من المسح لإنشاء أوراق الملف."
   }
 }

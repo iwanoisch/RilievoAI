@@ -29,7 +29,8 @@
     "survey": "AI Survey",
     "building": "Building",
     "floorPlan": "Floor Plan",
-    "validation": "Validation"
+    "validation": "Validation",
+    "fascicolo": "Dossier"
   },
   "user_profile": {
     "title": "Profile",
@@ -797,5 +798,24 @@
     "validation": "Validation",
     "history": "Validation history",
     "transcription": "Transcription"
+  },
+  "fascicolo": {
+    "title": "Building Dossier",
+    "subtitle": "Transfer validated data to building dossier sheets",
+    "transfer": "Transfer",
+    "preview": "Preview",
+    "fields": "Fields",
+    "observations": "Observations",
+    "schede": "sheets",
+    "total_elements": "Total elements",
+    "validated_elements": "Validated elements",
+    "ready_schede": "Sheets ready",
+    "transfer_history": "Transfer history",
+    "transfer_success": "Transfer completed successfully",
+    "status_pending": "Pending",
+    "status_transferred": "Transferred",
+    "status_error": "Error",
+    "empty": "No sheets available",
+    "empty_desc": "Validate building elements from the survey to generate dossier sheets."
   }
 }

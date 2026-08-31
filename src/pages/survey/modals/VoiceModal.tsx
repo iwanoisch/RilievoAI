@@ -9,7 +9,7 @@ import type {VoiceModalProps} from "./voiceModal.type.ts";
 export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
     const {t} = useTranslation();
     const {isRecording, transcription, audioPath, voiceError, startRecording, stopRecording} = useSurveyVoice();
-    const {currentSession, addVoiceObservation} = useSurvey();
+    const {currentSession, addVoiceObservation, getNextObservationId} = useSurvey();
     const {elements} = useBuilding();
     const elementList = Object.values(elements);
 
@@ -64,7 +64,7 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
             });
         } else if (hasRecorded && audioPath && currentSession) {
             addVoiceObservation({
-                id: crypto.randomUUID(),
+                id: getNextObservationId(),
                 sessionId: currentSession.id,
                 timestamp: new Date().toISOString(),
                 audioPath,

@@ -8,7 +8,7 @@ import type {Measurement} from "../../../features/survey/slice/survey.type.ts";
 
 export const MeasurementModal: FC<MeasurementModalProps> = ({editData, onClose}) => {
     const {t} = useTranslation();
-    const {currentSession, addMeasurement} = useSurvey();
+    const {currentSession, addMeasurement, getNextObservationId} = useSurvey();
     const {elements} = useBuilding();
     const elementList = Object.values(elements);
 
@@ -43,7 +43,7 @@ export const MeasurementModal: FC<MeasurementModalProps> = ({editData, onClose})
             });
         } else if (currentSession) {
             const measurement: Measurement = {
-                id: crypto.randomUUID(),
+                id: getNextObservationId(),
                 sessionId: currentSession.id,
                 type,
                 value: Number(value),

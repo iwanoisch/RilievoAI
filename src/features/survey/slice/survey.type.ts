@@ -78,10 +78,26 @@ export interface Measurement {
     dataStatus: DataStatus;
 }
 
+export type ObservationType = 'photo' | 'voice' | 'measurement';
+
+export interface ValidationLogEntry {
+    id: string;
+    observationId: string;
+    observationType: ObservationType;
+    previousStatus: DataStatus;
+    newStatus: DataStatus;
+    previousConfidence: number;
+    newConfidence: number;
+    timestamp: string;
+    technicianId: string;
+    note?: string;
+}
+
 export interface SurveyState {
     currentSession: SurveySession | null;
     photos: SurveyPhoto[];
     voiceObservations: VoiceObservation[];
     measurements: Measurement[];
+    validationLog: ValidationLogEntry[];
     error: string | null;
 }

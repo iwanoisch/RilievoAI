@@ -1,14 +1,9 @@
 import {useAppDispatch, useAppSelector} from "../../../store/store.ts";
 import {
     setCurrentSession,
-    setSessionStatus,
-    setSessionEndedAt,
-    setPhoto,
-    removePhoto,
-    setVoiceObservation,
-    removeVoiceObservation,
-    setMeasurement,
-    removeMeasurement,
+    setPhotos,
+    setVoiceObservations,
+    setMeasurements,
     setSurveyError,
     resetSurvey,
 } from "../slice/surveySlice.ts";
@@ -33,24 +28,30 @@ export const useSurvey = () => {
     };
 
     const pauseSession = () => {
-        dispatch(setSessionStatus('paused'));
+        if (!surveyState.currentSession) return;
+        dispatch(setCurrentSession({...surveyState.currentSession, status: 'paused'}));
     };
 
     const resumeSession = () => {
-        dispatch(setSessionStatus('active'));
+        if (!surveyState.currentSession) return;
+        dispatch(setCurrentSession({...surveyState.currentSession, status: 'active'}));
     };
 
     const completeSession = () => {
-        dispatch(setSessionStatus('completed'));
-        dispatch(setSessionEndedAt(new Date().toISOString()));
+        if (!surveyState.currentSession) return;
+        dispatch(setCurrentSession({
+            ...surveyState.currentSession,
+            status: 'completed',
+            endedAt: new Date().toISOString(),
+        }));
     };
 
     const fetchSessionData = async (_sessionId: string) => {
         try {
             // TODO real api: const response = await get<{...}>(`/survey/sessions/${sessionId}/data`);
-            MOCK_PHOTOS.forEach(p => dispatch(setPhoto(p)));
-            MOCK_VOICE_OBSERVATIONS.forEach(v => dispatch(setVoiceObservation(v)));
-            MOCK_MEASUREMENTS.forEach(m => dispatch(setMeasurement(m)));
+            dispatch(setPhotos(MOCK_PHOTOS));
+            dispatch(setVoiceObservations(MOCK_VOICE_OBSERVATIONS));
+            dispatch(setMeasurements(MOCK_MEASUREMENTS));
             return {data: {photos: MOCK_PHOTOS, voiceObservations: MOCK_VOICE_OBSERVATIONS, measurements: MOCK_MEASUREMENTS}};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -59,10 +60,11 @@ export const useSurvey = () => {
         }
     };
 
+    // --- Photo CRUD ---
     const addPhoto = async (photo: SurveyPhoto) => {
         try {
             // TODO real api: const response = await post<SurveyPhoto>('/survey/photos', photo);
-            dispatch(setPhoto(photo));
+            dispatch(setPhotos([...surveyState.photos, photo]));
             return {data: photo};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -74,7 +76,7 @@ export const useSurvey = () => {
     const updatePhoto = async (photo: SurveyPhoto) => {
         try {
             // TODO real api: const response = await put<SurveyPhoto>(`/survey/photos/${photo.id}`, photo);
-            dispatch(setPhoto(photo));
+            dispatch(setPhotos(surveyState.photos.map(p => p.id === photo.id ? photo : p)));
             return {data: photo};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -86,7 +88,7 @@ export const useSurvey = () => {
     const deletePhoto = async (photoId: string) => {
         try {
             // TODO real api: await del(`/survey/photos/${photoId}`);
-            dispatch(removePhoto(photoId));
+            dispatch(setPhotos(surveyState.photos.filter(p => p.id !== photoId)));
             return {success: true};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -95,10 +97,11 @@ export const useSurvey = () => {
         }
     };
 
+    // --- Voice CRUD ---
     const addVoiceObservation = async (observation: VoiceObservation) => {
         try {
             // TODO real api: const response = await post<VoiceObservation>('/survey/voice-observations', observation);
-            dispatch(setVoiceObservation(observation));
+            dispatch(setVoiceObservations([...surveyState.voiceObservations, observation]));
             return {data: observation};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -110,7 +113,7 @@ export const useSurvey = () => {
     const updateVoiceObservation = async (observation: VoiceObservation) => {
         try {
             // TODO real api: const response = await put<VoiceObservation>(`/survey/voice-observations/${observation.id}`, observation);
-            dispatch(setVoiceObservation(observation));
+            dispatch(setVoiceObservations(surveyState.voiceObservations.map(v => v.id === observation.id ? observation : v)));
             return {data: observation};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -122,7 +125,7 @@ export const useSurvey = () => {
     const deleteVoiceObservation = async (observationId: string) => {
         try {
             // TODO real api: await del(`/survey/voice-observations/${observationId}`);
-            dispatch(removeVoiceObservation(observationId));
+            dispatch(setVoiceObservations(surveyState.voiceObservations.filter(v => v.id !== observationId)));
             return {success: true};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -131,10 +134,11 @@ export const useSurvey = () => {
         }
     };
 
+    // --- Measurement CRUD ---
     const addMeasurement = async (measurement: Measurement) => {
         try {
             // TODO real api: const response = await post<Measurement>('/survey/measurements', measurement);
-            dispatch(setMeasurement(measurement));
+            dispatch(setMeasurements([...surveyState.measurements, measurement]));
             return {data: measurement};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -146,7 +150,7 @@ export const useSurvey = () => {
     const updateMeasurement = async (measurement: Measurement) => {
         try {
             // TODO real api: const response = await put<Measurement>(`/survey/measurements/${measurement.id}`, measurement);
-            dispatch(setMeasurement(measurement));
+            dispatch(setMeasurements(surveyState.measurements.map(m => m.id === measurement.id ? measurement : m)));
             return {data: measurement};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -158,7 +162,7 @@ export const useSurvey = () => {
     const deleteMeasurement = async (measurementId: string) => {
         try {
             // TODO real api: await del(`/survey/measurements/${measurementId}`);
-            dispatch(removeMeasurement(measurementId));
+            dispatch(setMeasurements(surveyState.measurements.filter(m => m.id !== measurementId)));
             return {success: true};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -167,11 +171,34 @@ export const useSurvey = () => {
         }
     };
 
+    // --- Derived ---
     const getAllObservations = () => {
         const photos = surveyState.photos.map(p => ({...p, observationType: 'photo' as const}));
         const voices = surveyState.voiceObservations.map(v => ({...v, observationType: 'voice' as const}));
         const measures = surveyState.measurements.map(m => ({...m, observationType: 'measurement' as const}));
         return [...photos, ...voices, ...measures].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    };
+
+    const getObservationById = (id: string) => {
+        const photo = surveyState.photos.find(p => p.id === id);
+        if (photo) return {data: photo, type: 'photo' as const};
+
+        const voice = surveyState.voiceObservations.find(v => v.id === id);
+        if (voice) return {data: voice, type: 'voice' as const};
+
+        const measurement = surveyState.measurements.find(m => m.id === id);
+        if (measurement) return {data: measurement, type: 'measurement' as const};
+
+        return null;
+    };
+
+    const getNextObservationId = (): string => {
+        const allIds = [
+            ...surveyState.photos.map(p => Number(p.id) || 0),
+            ...surveyState.voiceObservations.map(v => Number(v.id) || 0),
+            ...surveyState.measurements.map(m => Number(m.id) || 0),
+        ];
+        return String(allIds.length > 0 ? Math.max(...allIds) + 1 : 1);
     };
 
     const reset = () => {
@@ -195,6 +222,8 @@ export const useSurvey = () => {
         updateMeasurement,
         deleteMeasurement,
         getAllObservations,
+        getObservationById,
+        getNextObservationId,
         reset,
     };
 };

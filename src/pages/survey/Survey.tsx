@@ -98,7 +98,7 @@ export const Survey: FC = () => {
     if (!currentSession || currentSession.status === 'completed') {
         return (
             <div className="w-full px-4 sm:px-6 lg:px-8 py-6 bg-gradient-to-br from-primary-50/50 via-primary-100/30 to-slate-50 min-h-screen">
-                <div className="mx-auto w-full max-w-3xl">
+                <div className="mx-auto w-full max-w-5xl">
                     <PageTitle title={t('survey.title')} subtitle={t('survey.subtitle')}/>
                     <div className="mt-10 flex flex-col items-center gap-6">
                         <div className="card text-center w-full">
@@ -119,7 +119,7 @@ export const Survey: FC = () => {
     // Sessione attiva
     return (
         <div className="w-full px-4 sm:px-6 lg:px-8 py-6 bg-gradient-to-br from-primary-50/50 via-primary-100/30 to-slate-50 min-h-screen">
-            <div className="mx-auto w-full max-w-3xl">
+            <div className="mx-auto w-full max-w-5xl">
                 <PageTitle
                     title={t('survey.title')}
                     subtitle={t('survey.subtitle')}

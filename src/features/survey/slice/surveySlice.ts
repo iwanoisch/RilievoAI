@@ -1,11 +1,15 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import type {Measurement, SurveyPhoto, SurveySession, SurveyState, VoiceObservation} from "./survey.type.ts";
+import type {
+    Measurement, SurveyPhoto, SurveySession, SurveyState,
+    VoiceObservation, ValidationLogEntry
+} from "./survey.type.ts";
 
 const initialState: SurveyState = {
     currentSession: null,
     photos: [],
     voiceObservations: [],
     measurements: [],
+    validationLog: [],
     error: null,
 };
 
@@ -17,55 +21,20 @@ export const surveySlice = createSlice({
             state.currentSession = action.payload;
         },
 
-        setSessionStatus: (state, action: PayloadAction<SurveySession['status']>) => {
-            if (state.currentSession) {
-                state.currentSession.status = action.payload;
-            }
+        setPhotos: (state, action: PayloadAction<SurveyPhoto[]>) => {
+            state.photos = action.payload;
         },
 
-        setSessionEndedAt: (state, action: PayloadAction<string>) => {
-            if (state.currentSession) {
-                state.currentSession.endedAt = action.payload;
-            }
+        setVoiceObservations: (state, action: PayloadAction<VoiceObservation[]>) => {
+            state.voiceObservations = action.payload;
         },
 
-        setPhoto: (state, action: PayloadAction<SurveyPhoto>) => {
-            const idx = state.photos.findIndex(p => p.id === action.payload.id);
-            if (idx !== -1) {
-                state.photos[idx] = action.payload;
-            } else {
-                state.photos.push(action.payload);
-            }
+        setMeasurements: (state, action: PayloadAction<Measurement[]>) => {
+            state.measurements = action.payload;
         },
 
-        removePhoto: (state, action: PayloadAction<string>) => {
-            state.photos = state.photos.filter(p => p.id !== action.payload);
-        },
-
-        setVoiceObservation: (state, action: PayloadAction<VoiceObservation>) => {
-            const idx = state.voiceObservations.findIndex(v => v.id === action.payload.id);
-            if (idx !== -1) {
-                state.voiceObservations[idx] = action.payload;
-            } else {
-                state.voiceObservations.push(action.payload);
-            }
-        },
-
-        removeVoiceObservation: (state, action: PayloadAction<string>) => {
-            state.voiceObservations = state.voiceObservations.filter(v => v.id !== action.payload);
-        },
-
-        setMeasurement: (state, action: PayloadAction<Measurement>) => {
-            const idx = state.measurements.findIndex(m => m.id === action.payload.id);
-            if (idx !== -1) {
-                state.measurements[idx] = action.payload;
-            } else {
-                state.measurements.push(action.payload);
-            }
-        },
-
-        removeMeasurement: (state, action: PayloadAction<string>) => {
-            state.measurements = state.measurements.filter(m => m.id !== action.payload);
+        setValidationLog: (state, action: PayloadAction<ValidationLogEntry[]>) => {
+            state.validationLog = action.payload;
         },
 
         setSurveyError: (state, action: PayloadAction<string | null>) => {
@@ -78,14 +47,10 @@ export const surveySlice = createSlice({
 
 export const {
     setCurrentSession,
-    setSessionStatus,
-    setSessionEndedAt,
-    setPhoto,
-    removePhoto,
-    setVoiceObservation,
-    removeVoiceObservation,
-    setMeasurement,
-    removeMeasurement,
+    setPhotos,
+    setVoiceObservations,
+    setMeasurements,
+    setValidationLog,
     setSurveyError,
     resetSurvey,
 } = surveySlice.actions;

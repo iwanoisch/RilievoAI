@@ -359,7 +359,8 @@
     "menuManagement": "قائمة الإدارة",
     "survey": "المسح بالذكاء الاصطناعي",
     "building": "المبنى",
-    "floorPlan": "المخطط الطابقي"
+    "floorPlan": "المخطط الطابقي",
+    "validation": "التحقق"
   },
   "report": {
     "title": "العنوان",
@@ -743,5 +744,48 @@
     "neutral_background_desc": "استخدم خلفية رمادية هادئة بدلاً من لون السمة",
     "language_section": "اللغة",
     "language_description": "اختر لغة التطبيق"
+  },
+  "confidence": {
+    "label": "الموثوقية",
+    "high": "عالية",
+    "medium": "متوسطة",
+    "low": "منخفضة"
+  },
+  "validation": {
+    "title": "التحقق من البيانات",
+    "subtitle": "مراجعة وتأكيد بيانات المسح",
+    "total": "الإجمالي",
+    "pending": "في الانتظار",
+    "validated": "تم التحقق",
+    "rejected": "مرفوض",
+    "progress": "تقدم التحقق",
+    "confirm": "تأكيد",
+    "reject": "رفض",
+    "correct": "تصحيح",
+    "filters": "مرشحات",
+    "filter_all_types": "جميع الأنواع",
+    "filter_all_confidence": "جميع مستويات الموثوقية",
+    "type_photo": "صورة",
+    "type_voice": "تسجيل صوتي",
+    "type_measurement": "قياس",
+    "status_raw": "خام",
+    "status_derived": "مشتق",
+    "status_proposed": "مقترح",
+    "status_validated": "تم التحقق",
+    "status_rejected": "مرفوض",
+    "status_superseded": "ملغى",
+    "empty": "لا توجد عناصر لعرضها",
+    "processed": "تمت معالجتها"
+  },
+  "observation": {
+    "detail_subtitle": "تفاصيل الملاحظة",
+    "info": "المعلومات",
+    "type": "النوع",
+    "date": "التاريخ",
+    "status": "الحالة",
+    "association": "ربط العنصر",
+    "validation": "التحقق",
+    "history": "سجل التحقق",
+    "transcription": "النسخ"
   }
 }

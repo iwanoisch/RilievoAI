@@ -19,6 +19,8 @@ const SurveyPage = lazy(() => import("./pages/survey/Survey.tsx").then(m => ({de
 const BuildingPage = lazy(() => import("./pages/building/Building.tsx").then(m => ({default: m.Building})));
 const FloorPlan = lazy(() => import("./pages/floor-plan/FloorPlan.tsx").then(m => ({default: m.FloorPlan})));
 const FloorPlanDetail = lazy(() => import("./components/floor-plan-detail/FloorPlanDetail.tsx").then(m => ({default: m.FloorPlanDetail})));
+const SurveyValidation = lazy(() => import("./pages/survey-validation/SurveyValidation.tsx").then(m => ({default: m.SurveyValidation})));
+const ObservationDetail = lazy(() => import("./components/observation-detail/ObservationDetail.tsx").then(m => ({default: m.ObservationDetail})));
 
 // Scroll to top ad ogni cambio route
 const ScrollToTop = () => {
@@ -64,6 +66,8 @@ function AppRouting() {
                         <Route path="/userprofile" element={<UserProfile/>}/>
                         <Route path="/usersettings" element={<UserSettings/>}/>
                         <Route path="/survey" element={<SurveyPage/>}/>
+                        <Route path="/validation/:observationId" element={<ObservationDetail/>}/>
+                        <Route path="/validation" element={<SurveyValidation/>}/>
                         <Route path="/building" element={<BuildingPage/>}/>
                         <Route path="/floor-plan" element={<FloorPlan/>}/>
                         <Route path="/floor-plan/:documentId" element={<FloorPlanDetail/>}/>

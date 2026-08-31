@@ -112,7 +112,8 @@
     "menuManagement" : "Menu Gestione",
     "survey" : "Rilievo AI",
     "building" : "Edificio",
-    "floorPlan" : "Planimetria"
+    "floorPlan" : "Planimetria",
+    "validation" : "Validazione"
   },
   "dashboard": {
     "company_project": "Nominativo/Progetto",
@@ -756,5 +757,48 @@
     "neutral_background_desc": "Usa uno sfondo grigio sobrio invece del colore del tema",
     "language_section": "Lingua",
     "language_description": "Seleziona la lingua dell'applicazione"
+  },
+  "confidence": {
+    "label": "Affidabilità",
+    "high": "Alta",
+    "medium": "Media",
+    "low": "Bassa"
+  },
+  "validation": {
+    "title": "Validazione Dati",
+    "subtitle": "Verifica e conferma i dati del rilievo",
+    "total": "Totale",
+    "pending": "Da validare",
+    "validated": "Validati",
+    "rejected": "Rifiutati",
+    "progress": "Progresso validazione",
+    "confirm": "Conferma",
+    "reject": "Rifiuta",
+    "correct": "Correggi",
+    "filters": "Filtri",
+    "filter_all_types": "Tutti i tipi",
+    "filter_all_confidence": "Tutte le affidabilità",
+    "type_photo": "Foto",
+    "type_voice": "Registrazione vocale",
+    "type_measurement": "Misura",
+    "status_raw": "Grezzo",
+    "status_derived": "Derivato",
+    "status_proposed": "Proposto",
+    "status_validated": "Validato",
+    "status_rejected": "Rifiutato",
+    "status_superseded": "Superato",
+    "empty": "Nessun elemento da mostrare",
+    "processed": "elaborati"
+  },
+  "observation": {
+    "detail_subtitle": "Dettaglio osservazione",
+    "info": "Informazioni",
+    "type": "Tipo",
+    "date": "Data",
+    "status": "Stato",
+    "association": "Associazione elemento",
+    "validation": "Validazione",
+    "history": "Storico validazione",
+    "transcription": "Trascrizione"
   }
 }

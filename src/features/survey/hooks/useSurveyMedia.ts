@@ -1,9 +1,9 @@
 import {useCallback, useRef, useState} from "react";
-import {useSurvey} from "./useSurvey.ts";
+import {useAppSelector, store} from "../../../store/store.ts";
 import type {SurveyPhoto, GeoPosition, DeviceOrient} from "../slice/survey.type.ts";
 
 export const useSurveyMedia = () => {
-    const {currentSession} = useSurvey();
+    const currentSession = useAppSelector(state => state.survey.currentSession);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const [isCameraActive, setIsCameraActive] = useState(false);
@@ -90,7 +90,13 @@ export const useSurveyMedia = () => {
             getDeviceOrientation(),
         ]);
 
-        const photoId = crypto.randomUUID();
+        const surveyState = store.getState().survey;
+        const allIds = [
+            ...surveyState.photos.map(p => Number(p.id) || 0),
+            ...surveyState.voiceObservations.map(v => Number(v.id) || 0),
+            ...surveyState.measurements.map(m => Number(m.id) || 0),
+        ];
+        const photoId = String(allIds.length > 0 ? Math.max(...allIds) + 1 : 1);
         const timestamp = new Date().toISOString();
 
         // Genera thumbnail

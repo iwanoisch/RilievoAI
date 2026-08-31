@@ -28,7 +28,8 @@
     "menuManagement": "Management Menu",
     "survey": "AI Survey",
     "building": "Building",
-    "floorPlan": "Floor Plan"
+    "floorPlan": "Floor Plan",
+    "validation": "Validation"
   },
   "user_profile": {
     "title": "Profile",
@@ -753,5 +754,48 @@
     "neutral_background_desc": "Use a subtle grey background instead of the theme color",
     "language_section": "Language",
     "language_description": "Select the application language"
+  },
+  "confidence": {
+    "label": "Confidence",
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low"
+  },
+  "validation": {
+    "title": "Data Validation",
+    "subtitle": "Review and confirm survey data",
+    "total": "Total",
+    "pending": "Pending",
+    "validated": "Validated",
+    "rejected": "Rejected",
+    "progress": "Validation progress",
+    "confirm": "Confirm",
+    "reject": "Reject",
+    "correct": "Correct",
+    "filters": "Filters",
+    "filter_all_types": "All types",
+    "filter_all_confidence": "All confidence levels",
+    "type_photo": "Photo",
+    "type_voice": "Voice recording",
+    "type_measurement": "Measurement",
+    "status_raw": "Raw",
+    "status_derived": "Derived",
+    "status_proposed": "Proposed",
+    "status_validated": "Validated",
+    "status_rejected": "Rejected",
+    "status_superseded": "Superseded",
+    "empty": "No items to display",
+    "processed": "processed"
+  },
+  "observation": {
+    "detail_subtitle": "Observation detail",
+    "info": "Information",
+    "type": "Type",
+    "date": "Date",
+    "status": "Status",
+    "association": "Element association",
+    "validation": "Validation",
+    "history": "Validation history",
+    "transcription": "Transcription"
   }
 }

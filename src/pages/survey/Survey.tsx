@@ -2,7 +2,7 @@ import {FC, useRef, useState} from "react";
 import {PageTitle} from "../../common/page-title/PageTitle.tsx";
 import {store} from "../../store/store.ts";
 import {useSurvey} from "../../features/survey/hooks/useSurvey.ts";
-import {useBuilding} from "../../features/building/hooks/useBuilding.ts";
+import {useEdificio} from "../../features/edificio/useEdificio.ts";
 import {useAiAnalysis} from "../../features/ai/hooks/useAiAnalysis.ts";
 import {PhotoModal} from "./modals/PhotoModal.tsx";
 import {VoiceModal} from "./modals/VoiceModal.tsx";
@@ -28,7 +28,7 @@ export const Survey: FC = () => {
     const {showAlert} = useAlert();
     const survey = useSurvey();
     const {currentSession, photos, voiceObservations, measurements} = survey;
-    const {fetchBuilding} = useBuilding();
+    const {fetchEdificio} = useEdificio();
     const {isAnalyzing, pendingSuggestions, analyzePhoto, analyzePhotoBatch, analyzeVoice, acceptSuggestion, rejectSuggestion} = useAiAnalysis();
     const [modal, setModal] = useState<ModalState>({type: null});
     const photoCountRef = useRef(0);
@@ -39,7 +39,7 @@ export const Survey: FC = () => {
     const measureCount = measurements.length;
 
     const handleStart = async () => {
-        await fetchBuilding('building-1');
+        await fetchEdificio('building-1');
         await survey.startSession('building-1');
         await survey.fetchSessionData('session-1');
     };

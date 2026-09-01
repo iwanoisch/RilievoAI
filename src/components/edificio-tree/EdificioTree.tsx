@@ -1,20 +1,20 @@
 import {FC, useState, useCallback} from "react";
-import {useBuilding} from "../../features/building/hooks/useBuilding.ts";
+import {useEdificio} from "../../features/edificio/useEdificio.ts";
 import {useTranslation} from "react-i18next";
 import {ChevronRightIcon, CubeIcon, BuildingOffice2Icon} from "@heroicons/react/24/outline";
-import type {BuildingTreeProps, BuildingTreeNodeProps} from "./buildingTree.type.ts";
-import {BUILDING_ELEMENT_ICONS} from "../../constants/building-element-icons.constant.ts";
+import type {EdificioTreeProps, EdificioTreeNodeProps} from "./edificioTree.type.ts";
+import {EDIFICIO_ELEMENT_ICONS} from "../../constants/edificio-element-icons.constant.ts";
 
-const BuildingTreeNode: FC<BuildingTreeNodeProps> = ({elementId, depth, onSelectElement, selectedElementId}) => {
+const EdificioTreeNode: FC<EdificioTreeNodeProps> = ({elementId, depth, onSelectElement, selectedElementId}) => {
     const {t} = useTranslation();
-    const {elements, getChildren} = useBuilding();
+    const {elements, getChildren} = useEdificio();
     const [isExpanded, setIsExpanded] = useState(depth < 2);
 
     const element = elements[elementId];
     const children = element ? getChildren(elementId) : [];
     const hasChildren = children.length > 0;
     const isSelected = selectedElementId === elementId;
-    const Icon = element ? (BUILDING_ELEMENT_ICONS[element.type] || CubeIcon) : CubeIcon;
+    const Icon = element ? (EDIFICIO_ELEMENT_ICONS[element.type] || CubeIcon) : CubeIcon;
 
     const handleToggle = useCallback(() => {
         if (hasChildren) setIsExpanded(prev => !prev);
@@ -89,7 +89,7 @@ const BuildingTreeNode: FC<BuildingTreeNodeProps> = ({elementId, depth, onSelect
             {hasChildren && isExpanded && (
                 <ul role="group" className="list-none">
                     {children.map(child => (
-                        <BuildingTreeNode
+                        <EdificioTreeNode
                             key={child.id}
                             elementId={child.id}
                             depth={depth + 1}
@@ -103,9 +103,9 @@ const BuildingTreeNode: FC<BuildingTreeNodeProps> = ({elementId, depth, onSelect
     );
 };
 
-export const BuildingTree: FC<BuildingTreeProps> = ({onSelectElement, selectedElementId}) => {
+export const EdificioTree: FC<EdificioTreeProps> = ({onSelectElement, selectedElementId}) => {
     const {t} = useTranslation();
-    const {elements, rootBuildingId} = useBuilding();
+    const {elements, rootBuildingId} = useEdificio();
 
     const rootElements = rootBuildingId
         ? [rootBuildingId]
@@ -124,7 +124,7 @@ export const BuildingTree: FC<BuildingTreeProps> = ({onSelectElement, selectedEl
     return (
         <ul role="tree" aria-label={t('building.tree_label')} className="list-none">
             {rootElements.map(id => (
-                <BuildingTreeNode
+                <EdificioTreeNode
                     key={id}
                     elementId={id}
                     depth={0}

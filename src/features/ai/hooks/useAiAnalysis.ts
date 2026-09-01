@@ -1,11 +1,11 @@
 import {useAppDispatch, useAppSelector, store} from "../../../store/store.ts";
 import {setSuggestions, setIsAnalyzing, setAnalyzingSourceId, setAiError, resetAi} from "../slice/aiSlice.ts";
-import {setElement} from "../../building/slice/buildingSlice.ts";
+import {setElement} from "../../edificio/edificioSlice.ts";
 import {setPhotos, setVoiceObservations} from "../../survey/slice/surveySlice.ts";
 import {aiService} from "../services/ai-service.ts";
 import type {AiPhotoAnalysisRequest, AiVoiceAnalysisRequest} from "../services/ai-service.type.ts";
 import type {AiSuggestionWithStatus, SuggestionStatus} from "../slice/ai.type.ts";
-import type {BuildingElement} from "../../building/slice/building.type.ts";
+import type {EdificioElement} from "../../edificio/edificio.type.ts";
 
 export const useAiAnalysis = () => {
     const dispatch = useAppDispatch();
@@ -82,7 +82,7 @@ export const useAiAnalysis = () => {
             if (action === 'accepted' || action === 'modified') {
                 const now = new Date().toISOString();
                 const elementId = String(Date.now());
-                const buildingState = store.getState().building;
+                const buildingState = store.getState().edificio;
 
                 // Trova un parent valido
                 let parentId = suggestion.proposedParentId || null;
@@ -109,14 +109,14 @@ export const useAiAnalysis = () => {
                                 createdAt: now,
                                 updatedAt: now,
                                 floors: [],
-                            } as BuildingElement));
+                            } as EdificioElement));
                         }
                         parentId = rootId;
                     }
                 }
 
                 // Crea elemento nell'albero edificio
-                const newElement: BuildingElement = {
+                const newElement: EdificioElement = {
                     id: elementId,
                     label: correction?.proposedElementLabel || suggestion.proposedElementLabel,
                     parentId,
@@ -126,7 +126,7 @@ export const useAiAnalysis = () => {
                     sessionId: store.getState().survey.currentSession?.id || '',
                     createdAt: now,
                     updatedAt: now,
-                } as BuildingElement;
+                } as EdificioElement;
 
                 dispatch(setElement(newElement));
 

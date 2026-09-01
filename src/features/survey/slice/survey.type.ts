@@ -1,4 +1,4 @@
-import type {DataStatus} from "../../building/slice/building.type.ts";
+import type {DataStatus} from "../../edificio/edificio.type.ts";
 
 export interface DeviceInfo {
     userAgent: string;

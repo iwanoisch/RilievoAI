@@ -33,7 +33,7 @@ export const Layout = ({children}: LayoutPagePros) => {
             // CASO 1: landing "/"
             if (location.pathname === "/") {
                 if (isAuthenticated) {
-                    navigate("/building", {replace: true});
+                    navigate("/buildings", {replace: true});
                 }
                 return;
             }

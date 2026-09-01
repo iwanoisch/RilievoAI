@@ -30,7 +30,9 @@
     "building": "Building",
     "floorPlan": "Floor Plan",
     "validation": "Validation",
-    "fascicolo": "Dossier"
+    "fascicolo": "Dossier",
+    "buildings": "Building Management",
+    "poc": "Poc"
   },
   "user_profile": {
     "title": "Profile",
@@ -847,5 +849,21 @@
     "criticality_critical": "Critical",
     "no_suggestions": "No AI suggestions",
     "feedback_sent": "Feedback sent"
+  },
+  "buildings": {
+    "title": "Building Management",
+    "subtitle": "Building and project management",
+    "new_building": "New building",
+    "no_buildings": "No buildings yet",
+    "no_buildings_desc": "Create your first building to get started",
+    "floors": "Floors",
+    "type": "Type",
+    "created": "Created on",
+    "completion": "Completion",
+    "criticality": "criticalities",
+    "deadline": "Deadline",
+    "status_active": "Active",
+    "status_completed": "Completed",
+    "status_draft": "Draft"
   }
 }

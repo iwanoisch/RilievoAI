@@ -3,16 +3,13 @@
 ## Redux Toolkit
 
 ### Struttura Feature
-Ogni feature segue questa struttura:
+Ogni feature usa una struttura flat (NO sottocartelle):
 ```
 src/features/nomeFeature/
-├── slice/
-│   ├── nomeFeature.type.ts      # Interfacce e tipi
-│   └── nomeFeatureSlice.ts      # Slice Redux
-├── hooks/
-│   └── useNomeFeature.ts        # Hook principale
-└── api/                         # (opzionale)
-    └── nomeFeature.api.ts
+├── nomeFeature.type.ts           # Interfacce e tipi
+├── nomeFeatureSlice.ts           # Slice Redux
+├── useNomeFeature.ts             # Hook principale
+└── nomeFeature.api.ts            # (opzionale)
 ```
 
 ### Slice Pattern — NIENTE LOGICA negli slice

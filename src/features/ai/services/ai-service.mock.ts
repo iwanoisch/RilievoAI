@@ -1,5 +1,5 @@
 import type {AiService, AiPhotoAnalysisRequest, AiVoiceAnalysisRequest, AiSuggestion} from "./ai-service.type.ts";
-import type {ElementType} from "../../building/slice/building.type.ts";
+import type {ElementType} from "../../edificio/edificio.type.ts";
 
 const MOCK_DELAY_MS = 2000;
 

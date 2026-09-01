@@ -14,12 +14,9 @@ import {Login} from "./pages/login/Login.tsx";
 const UserProfile = lazy(() => import("./pages/user-profile/UserProfile.tsx").then(m => ({default: m.UserProfile})));
 const UserSettings = lazy(() => import("./pages/user-settings/UserSettings.tsx").then(m => ({default: m.UserSettings})));
 const NotFound = lazy(() => import("./pages/not-found/NotFound.tsx").then(m => ({default: m.NotFound})));
-const SurveyPage = lazy(() => import("./pages/survey/Survey.tsx").then(m => ({default: m.Survey})));
-const BuildingPage = lazy(() => import("./pages/building/Building.tsx").then(m => ({default: m.Building})));
-const FloorPlan = lazy(() => import("./pages/floor-plan/FloorPlan.tsx").then(m => ({default: m.FloorPlan})));
+const BuildingsPage = lazy(() => import("./pages/buildings/Buildings.tsx").then(m => ({default: m.Buildings})));
+const PocPage = lazy(() => import("./pages/poc/Poc.tsx").then(m => ({default: m.Poc})));
 const FloorPlanDetail = lazy(() => import("./components/floor-plan-detail/FloorPlanDetail.tsx").then(m => ({default: m.FloorPlanDetail})));
-const SurveyValidation = lazy(() => import("./pages/survey-validation/SurveyValidation.tsx").then(m => ({default: m.SurveyValidation})));
-const FascicoloPage = lazy(() => import("./pages/fascicolo/Fascicolo.tsx").then(m => ({default: m.Fascicolo})));
 const ObservationDetail = lazy(() => import("./components/observation-detail/ObservationDetail.tsx").then(m => ({default: m.ObservationDetail})));
 
 // Scroll to top ad ogni cambio route
@@ -64,13 +61,10 @@ function AppRouting() {
                         <Route path="/login" element={<Login/>}/>
                         <Route path="/userprofile" element={<UserProfile/>}/>
                         <Route path="/usersettings" element={<UserSettings/>}/>
-                        <Route path="/survey" element={<SurveyPage/>}/>
-                        <Route path="/validation/:observationId" element={<ObservationDetail/>}/>
-                        <Route path="/validation" element={<SurveyValidation/>}/>
-                        <Route path="/fascicolo" element={<FascicoloPage/>}/>
-                        <Route path="/building" element={<BuildingPage/>}/>
-                        <Route path="/floor-plan" element={<FloorPlan/>}/>
+                        <Route path="/buildings" element={<BuildingsPage/>}/>
+                        <Route path="/poc" element={<PocPage/>}/>
                         <Route path="/floor-plan/:documentId" element={<FloorPlanDetail/>}/>
+                        <Route path="/validation/:observationId" element={<ObservationDetail/>}/>
                         <Route path="*" element={<NotFound/>}/>
                     </Routes>
                 </Suspense>

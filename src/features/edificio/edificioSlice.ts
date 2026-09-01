@@ -1,24 +1,24 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import type {BuildingElement, BuildingState} from "./building.type.ts";
+import type {EdificioElement, EdificioState} from "./edificio.type.ts";
 
-const initialState: BuildingState = {
+const initialState: EdificioState = {
     elements: {},
     selectedElementId: null,
     rootBuildingId: null,
     error: null,
 };
 
-export const buildingSlice = createSlice({
-    name: 'building',
+export const edificioSlice = createSlice({
+    name: 'edificio',
     initialState,
     reducers: {
-        loadElements: (state, action: PayloadAction<{ elements: Record<string, BuildingElement>; rootBuildingId: string | null }>) => {
+        loadElements: (state, action: PayloadAction<{ elements: Record<string, EdificioElement>; rootBuildingId: string | null }>) => {
             state.elements = action.payload.elements;
             state.rootBuildingId = action.payload.rootBuildingId;
             state.error = null;
         },
 
-        setElement: (state, action: PayloadAction<BuildingElement>) => {
+        setElement: (state, action: PayloadAction<EdificioElement>) => {
             state.elements[action.payload.id] = action.payload;
         },
 
@@ -30,11 +30,11 @@ export const buildingSlice = createSlice({
             state.selectedElementId = action.payload;
         },
 
-        setBuildingError: (state, action: PayloadAction<string | null>) => {
+        setEdificioError: (state, action: PayloadAction<string | null>) => {
             state.error = action.payload;
         },
 
-        resetBuilding: () => initialState,
+        resetEdificio: () => initialState,
     },
 });
 
@@ -43,8 +43,8 @@ export const {
     setElement,
     removeElement,
     setSelectedElementId,
-    setBuildingError,
-    resetBuilding,
-} = buildingSlice.actions;
+    setEdificioError,
+    resetEdificio,
+} = edificioSlice.actions;
 
-export default buildingSlice.reducer;
+export default edificioSlice.reducer;

@@ -1,12 +1,12 @@
 import {FC, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {DocumentTextIcon} from "@heroicons/react/24/outline";
-import {useBuilding} from "../../../features/building/hooks/useBuilding.ts";
+import {useEdificio} from "../../../features/edificio/useEdificio.ts";
 import type {NameDocumentModalProps} from "./nameDocumentModal.type.ts";
 
 export const NameDocumentModal: FC<NameDocumentModalProps> = ({defaultName, defaultBuildingId, onConfirm, onClose}) => {
     const {t} = useTranslation();
-    const {elements} = useBuilding();
+    const {elements} = useEdificio();
     const [name, setName] = useState(defaultName);
     const [buildingId, setBuildingId] = useState<string | null>(defaultBuildingId ?? null);
 

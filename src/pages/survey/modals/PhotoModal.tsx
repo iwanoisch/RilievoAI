@@ -1,6 +1,6 @@
 import {FC, useCallback, useEffect, useRef, useState} from "react";
 import {useCamera} from "../../../hooks/useCamera.ts";
-import {useBuilding} from "../../../features/building/hooks/useBuilding.ts";
+import {useEdificio} from "../../../features/edificio/useEdificio.ts";
 import {useSurvey} from "../../../features/survey/hooks/useSurvey.ts";
 import {XMarkIcon, ArrowUpTrayIcon, CameraIcon, ExclamationCircleIcon} from "@heroicons/react/24/solid";
 import {useTranslation} from "react-i18next";
@@ -14,7 +14,7 @@ export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose, onSaved, onB
     const {isCameraActive, cameraError, startCamera, stopCamera, captureFrame} = useCamera();
     const survey = useSurvey();
     const {createPhoto, createPhotosFromFiles, savePhotos} = survey;
-    const {elements} = useBuilding();
+    const {elements} = useEdificio();
     const videoRef = useRef<HTMLVideoElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const elementList = Object.values(elements);

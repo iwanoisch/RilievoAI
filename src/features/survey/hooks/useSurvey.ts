@@ -9,7 +9,7 @@ import {
     resetSurvey,
 } from "../slice/surveySlice.ts";
 import type {SurveySession, SurveyPhoto, VoiceObservation, Measurement, ObservationType, ValidationLogEntry, PhotoUploadJob} from "../slice/survey.type.ts";
-import type {DataStatus} from "../../building/slice/building.type.ts";
+import type {DataStatus} from "../../edificio/edificio.type.ts";
 import {createMockSession, MOCK_PHOTOS, MOCK_VOICE_OBSERVATIONS, MOCK_MEASUREMENTS} from "../../../dataMock/MOCK_SURVEY.ts";
 import {getGeolocation, getDeviceOrientation} from "../../../utility/device-utils.ts";
 import {fileToImageData} from "../../../utility/image-utils.ts";

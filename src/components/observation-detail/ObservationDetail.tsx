@@ -4,7 +4,7 @@ import {useTranslation} from "react-i18next";
 import {PageTitle} from "../../common/page-title/PageTitle.tsx";
 import {ConfidenceBadge} from "../../common/confidence-badge/ConfidenceBadge.tsx";
 import {useSurvey} from "../../features/survey/hooks/useSurvey.ts";
-import {useBuilding} from "../../features/building/hooks/useBuilding.ts";
+import {useEdificio} from "../../features/edificio/useEdificio.ts";
 import {ArrowLeftIcon, CheckIcon, XMarkIcon, MicrophoneIcon, WrenchScrewdriverIcon} from "@heroicons/react/24/solid";
 import {OBSERVATION_TYPE_ICONS, OBSERVATION_TYPE_LABELS, DATA_STATUS_LABELS} from "../../constants/validation.constant.ts";
 import type {ObservationDetailProps} from "./observationDetail.type.ts";
@@ -15,7 +15,7 @@ export const ObservationDetail: FC<ObservationDetailProps> = ({onBack}) => {
     const navigate = useNavigate();
     const {observationId} = useParams<{observationId: string}>();
     const {getObservationById, confirmObservation, rejectObservation, getLogForObservation} = useSurvey();
-    const {elements} = useBuilding();
+    const {elements} = useEdificio();
 
     const result = observationId ? getObservationById(observationId) : null;
 
@@ -24,7 +24,7 @@ export const ObservationDetail: FC<ObservationDetailProps> = ({onBack}) => {
             <div className="w-full px-4 sm:px-6 lg:px-8 py-6 bg-gradient-to-br from-primary-50/50 via-primary-100/30 to-slate-50 min-h-screen">
                 <div className="mx-auto w-full max-w-5xl text-center py-20">
                     <p className="text-sm text-text-muted">{t('validation.empty')}</p>
-                    <button onClick={() => navigate('/validation')} className="btn btn-primary mt-4">{t('general.back')}</button>
+                    <button onClick={() => navigate('/poc')} className="btn btn-primary mt-4">{t('general.back')}</button>
                 </div>
             </div>
         );
@@ -48,7 +48,7 @@ export const ObservationDetail: FC<ObservationDetailProps> = ({onBack}) => {
 
     const handleBack = () => {
         if (onBack) onBack();
-        else navigate('/validation');
+        else navigate('/poc');
     };
 
     const formatDate = (dateStr: string) => {

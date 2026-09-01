@@ -4,11 +4,11 @@ import {useSurvey} from "../../features/survey/hooks/useSurvey.ts";
 import {PencilIcon, TrashIcon} from "@heroicons/react/24/solid";
 import {ConfidenceBadge} from "../../common/confidence-badge/ConfidenceBadge.tsx";
 import {DATA_STATUS_LABELS, DATA_STATUS_STYLES, DATA_STATUS_OPTIONS} from "../../constants/validation.constant.ts";
-import type {DataStatus} from "../../features/building/slice/building.type.ts";
-import type {BuildingElementDetailProps} from "./buildingElementDetail.type.ts";
-import {BUILDING_ELEMENT_CONFIG} from "../../constants/building-element-config.constant.ts";
+import type {DataStatus} from "../../features/edificio/edificio.type.ts";
+import type {EdificioElementDetailProps} from "./edificioElementDetail.type.ts";
+import {EDIFICIO_ELEMENT_CONFIG} from "../../constants/edificio-element-config.constant.ts";
 
-export const BuildingElementDetail: FC<BuildingElementDetailProps> = ({element, onEdit, onDelete, onStatusChange}) => {
+export const EdificioElementDetail: FC<EdificioElementDetailProps> = ({element, onEdit, onDelete, onStatusChange}) => {
     const {t, i18n} = useTranslation();
     const {photos, voiceObservations, measurements} = useSurvey();
 
@@ -16,7 +16,7 @@ export const BuildingElementDetail: FC<BuildingElementDetailProps> = ({element, 
     const associatedVoice = voiceObservations.filter(v => v.targetElementId === element.id);
     const associatedMeasurements = measurements.filter(m => m.elementId === element.id);
 
-    const config = BUILDING_ELEMENT_CONFIG[element.type];
+    const config = EDIFICIO_ELEMENT_CONFIG[element.type];
 
     const formatDate = (dateStr: string): string => {
         return new Date(dateStr).toLocaleDateString(i18n.language, {day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'});

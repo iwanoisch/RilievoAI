@@ -13,7 +13,7 @@ export type ElementType =
     | 'plant'
     | 'defect';
 
-export interface BuildingEntity {
+export interface EdificioEntity {
     id: string;
     label: string;
     parentId: string | null;
@@ -25,20 +25,20 @@ export interface BuildingEntity {
     updatedAt: string;
 }
 
-export interface Building extends BuildingEntity {
+export interface Edificio extends EdificioEntity {
     type: 'building';
     parentId: null;
     address?: string;
     floors: string[];
 }
 
-export interface Floor extends BuildingEntity {
+export interface Floor extends EdificioEntity {
     type: 'floor';
     floorNumber: number;
     rooms: string[];
 }
 
-export interface Room extends BuildingEntity {
+export interface Room extends EdificioEntity {
     type: 'room';
     area?: number;
     perimeter?: number;
@@ -46,7 +46,7 @@ export interface Room extends BuildingEntity {
     elements: string[];
 }
 
-export interface Wall extends BuildingEntity {
+export interface Wall extends EdificioEntity {
     type: 'wall';
     length?: number;
     height?: number;
@@ -54,7 +54,7 @@ export interface Wall extends BuildingEntity {
     material?: string;
 }
 
-export interface Door extends BuildingEntity {
+export interface Door extends EdificioEntity {
     type: 'door';
     width?: number;
     height?: number;
@@ -62,7 +62,7 @@ export interface Door extends BuildingEntity {
     openingDirection?: 'left' | 'right' | 'sliding' | 'other';
 }
 
-export interface Window extends BuildingEntity {
+export interface Window extends EdificioEntity {
     type: 'window';
     width?: number;
     height?: number;
@@ -71,38 +71,38 @@ export interface Window extends BuildingEntity {
     glazingType?: 'single' | 'double' | 'triple';
 }
 
-export interface Ceiling extends BuildingEntity {
+export interface Ceiling extends EdificioEntity {
     type: 'ceiling';
     height?: number;
     material?: string;
 }
 
-export interface FloorSurface extends BuildingEntity {
+export interface FloorSurface extends EdificioEntity {
     type: 'floor_surface';
     material?: string;
     area?: number;
 }
 
-export interface GenericElement extends BuildingEntity {
+export interface GenericElement extends EdificioEntity {
     type: 'element';
     description?: string;
 }
 
-export interface Plant extends BuildingEntity {
+export interface Plant extends EdificioEntity {
     type: 'plant';
     plantType?: 'electrical' | 'plumbing' | 'hvac' | 'gas' | 'fire' | 'other';
     description?: string;
 }
 
-export interface Defect extends BuildingEntity {
+export interface Defect extends EdificioEntity {
     type: 'defect';
     severity?: 'low' | 'medium' | 'high' | 'critical';
     description?: string;
     photoIds?: string[];
 }
 
-export type BuildingElement =
-    | Building
+export type EdificioElement =
+    | Edificio
     | Floor
     | Room
     | Wall
@@ -114,8 +114,8 @@ export type BuildingElement =
     | Plant
     | Defect;
 
-export interface BuildingState {
-    elements: Record<string, BuildingElement>;
+export interface EdificioState {
+    elements: Record<string, EdificioElement>;
     selectedElementId: string | null;
     rootBuildingId: string | null;
     error: string | null;

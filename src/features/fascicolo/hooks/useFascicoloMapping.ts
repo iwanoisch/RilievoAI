@@ -1,12 +1,12 @@
 import {useAppSelector} from "../../../store/store.ts";
 import {FASCICOLO_SKIP_FIELDS} from "../../../constants/fascicolo.constant.ts";
-import {BUILDING_ELEMENT_CONFIG} from "../../../constants/building-element-config.constant.ts";
-import type {BuildingElement} from "../../building/slice/building.type.ts";
+import {EDIFICIO_ELEMENT_CONFIG} from "../../../constants/edificio-element-config.constant.ts";
+import type {EdificioElement} from "../../edificio/edificio.type.ts";
 import type {FascicoloScheda, FascicoloObservation, FascicoloField} from "../slice/fascicolo.type.ts";
 
-const extractFields = (element: BuildingElement): FascicoloField[] => {
+const extractFields = (element: EdificioElement): FascicoloField[] => {
     const fields: FascicoloField[] = [];
-    const config = BUILDING_ELEMENT_CONFIG[element.type];
+    const config = EDIFICIO_ELEMENT_CONFIG[element.type];
     const configFields = config?.fields ?? [];
 
     for (const [key, value] of Object.entries(element)) {
@@ -26,7 +26,7 @@ const extractFields = (element: BuildingElement): FascicoloField[] => {
 };
 
 export const useFascicoloMapping = () => {
-    const {elements} = useAppSelector(state => state.building);
+    const {elements} = useAppSelector(state => state.edificio);
     const {photos, voiceObservations, measurements} = useAppSelector(state => state.survey);
 
     const buildSchede = (): FascicoloScheda[] => {

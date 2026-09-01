@@ -361,7 +361,9 @@
     "building": "المبنى",
     "floorPlan": "المخطط الطابقي",
     "validation": "التحقق",
-    "fascicolo": "الملف"
+    "fascicolo": "الملف",
+    "buildings": "إدارة المباني",
+    "poc": "Poc"
   },
   "report": {
     "title": "العنوان",
@@ -837,5 +839,21 @@
     "criticality_critical": "حرج",
     "no_suggestions": "لا توجد اقتراحات AI",
     "feedback_sent": "تم إرسال الملاحظات"
+  },
+  "buildings": {
+    "title": "إدارة المباني",
+    "subtitle": "إدارة المباني والمشاريع",
+    "new_building": "مبنى جديد",
+    "no_buildings": "لا توجد مبانٍ بعد",
+    "no_buildings_desc": "أنشئ أول مبنى للبدء",
+    "floors": "الطوابق",
+    "type": "النوع",
+    "created": "تم الإنشاء في",
+    "completion": "الإنجاز",
+    "criticality": "حرجة",
+    "deadline": "الموعد النهائي",
+    "status_active": "نشط",
+    "status_completed": "مكتمل",
+    "status_draft": "مسودة"
   }
 }

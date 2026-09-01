@@ -114,7 +114,9 @@
     "building" : "Edificio",
     "floorPlan" : "Planimetria",
     "validation" : "Validazione",
-    "fascicolo" : "Fascicolo"
+    "fascicolo" : "Fascicolo",
+    "buildings" : "Gestione Edifici",
+    "poc" : "Poc"
   },
   "dashboard": {
     "company_project": "Nominativo/Progetto",
@@ -850,5 +852,21 @@
     "criticality_critical": "Criticità critica",
     "no_suggestions": "Nessun suggerimento AI",
     "feedback_sent": "Feedback inviato"
+  },
+  "buildings": {
+    "title": "Gestione Edifici",
+    "subtitle": "Gestione edifici e progetti",
+    "new_building": "Nuovo edificio",
+    "no_buildings": "Nessun edificio ancora",
+    "no_buildings_desc": "Crea il tuo primo edificio per iniziare",
+    "floors": "Piani",
+    "type": "Tipo",
+    "created": "Creato il",
+    "completion": "Completamento",
+    "criticality": "criticità",
+    "deadline": "Scadenza",
+    "status_active": "Attivo",
+    "status_completed": "Completato",
+    "status_draft": "Bozza"
   }
 }

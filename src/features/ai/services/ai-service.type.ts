@@ -1,4 +1,4 @@
-import type {ElementType} from "../../building/slice/building.type.ts";
+import type {ElementType} from "../../edificio/edificio.type.ts";
 
 export interface AiPhotoAnalysisRequest {
     photoId: string;

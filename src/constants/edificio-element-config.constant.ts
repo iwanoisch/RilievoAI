@@ -1,4 +1,4 @@
-import type {ElementType} from "../features/building/slice/building.type.ts";
+import type {ElementType} from "../features/edificio/edificio.type.ts";
 
 export type FieldType = 'text' | 'number' | 'select';
 
@@ -15,7 +15,7 @@ export interface ElementTypeConfig {
     fields: ElementFieldConfig[];
 }
 
-export const BUILDING_ELEMENT_CONFIG: Record<ElementType, ElementTypeConfig> = {
+export const EDIFICIO_ELEMENT_CONFIG: Record<ElementType, ElementTypeConfig> = {
     building: {
         defaultChildren: {floors: []},
         fields: [

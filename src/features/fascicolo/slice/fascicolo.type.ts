@@ -1,4 +1,4 @@
-import type {DataStatus, ElementType} from "../../building/slice/building.type.ts";
+import type {DataStatus, ElementType} from "../../edificio/edificio.type.ts";
 import type {ObservationType} from "../../survey/slice/survey.type.ts";
 
 export type TransferStatus = 'pending' | 'transferred' | 'error';

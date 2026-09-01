@@ -19,7 +19,7 @@ export const Login = () => {
         const {success, error} = await login(email, password)
 
         if (success) {
-            navigate('/building')
+            navigate('/buildings')
         } else {
             setError(error || 'Credenziali non valide')
             showAlert({
@@ -117,7 +117,7 @@ export const Login = () => {
                                     href="#"
                                     onClick={(e) => {
                                         e.preventDefault();
-                                        navigate('/building');
+                                        navigate('/buildings');
                                     }}
                                     className="font-semibold text-primary-600 hover:text-primary-500"
                                 >

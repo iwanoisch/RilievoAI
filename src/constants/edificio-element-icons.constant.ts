@@ -4,10 +4,10 @@ import {
     CubeIcon,
     ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
-import type {ElementType} from "../features/building/slice/building.type.ts";
+import type {ElementType} from "../features/edificio/edificio.type.ts";
 import type {ComponentType, SVGProps} from "react";
 
-export const BUILDING_ELEMENT_ICONS: Record<ElementType, ComponentType<SVGProps<SVGSVGElement>>> = {
+export const EDIFICIO_ELEMENT_ICONS: Record<ElementType, ComponentType<SVGProps<SVGSVGElement>>> = {
     building: BuildingOffice2Icon,
     floor: HomeIcon,
     room: CubeIcon,

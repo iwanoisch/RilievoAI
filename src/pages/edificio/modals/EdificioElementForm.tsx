@@ -1,15 +1,15 @@
 import {FC, useEffect, useState} from "react";
-import {useBuilding} from "../../../features/building/hooks/useBuilding.ts";
+import {useEdificio} from "../../../features/edificio/useEdificio.ts";
 import {XMarkIcon} from "@heroicons/react/24/solid";
 import {useTranslation} from "react-i18next";
-import type {BuildingElementFormProps} from "./buildingElementForm.type.ts";
-import type {BuildingElement, ElementType} from "../../../features/building/slice/building.type.ts";
-import {BUILDING_ELEMENT_TYPES} from "../../../constants/building-element-types.constant.ts";
-import {BUILDING_ELEMENT_CONFIG} from "../../../constants/building-element-config.constant.ts";
+import type {EdificioElementFormProps} from "./edificioElementForm.type.ts";
+import type {EdificioElement, ElementType} from "../../../features/edificio/edificio.type.ts";
+import {EDIFICIO_ELEMENT_TYPES} from "../../../constants/edificio-element-types.constant.ts";
+import {EDIFICIO_ELEMENT_CONFIG} from "../../../constants/edificio-element-config.constant.ts";
 
-export const BuildingElementForm: FC<BuildingElementFormProps> = ({editData, parentId, defaultType, onClose}) => {
+export const EdificioElementForm: FC<EdificioElementFormProps> = ({editData, parentId, defaultType, onClose}) => {
     const {t} = useTranslation();
-    const {elements, addElement, updateElement} = useBuilding();
+    const {elements, addElement, updateElement} = useEdificio();
     const elementList = Object.values(elements);
 
     const isEditMode = !!editData;
@@ -20,7 +20,7 @@ export const BuildingElementForm: FC<BuildingElementFormProps> = ({editData, par
     const [fieldValues, setFieldValues] = useState<Record<string, string>>(() => {
         if (!editData) return {};
         const values: Record<string, string> = {};
-        const config = BUILDING_ELEMENT_CONFIG[editData.type];
+        const config = EDIFICIO_ELEMENT_CONFIG[editData.type];
         for (const field of config.fields) {
             const val = (editData as unknown as Record<string, unknown>)[field.key];
             if (val !== undefined && val !== null) {
@@ -30,7 +30,7 @@ export const BuildingElementForm: FC<BuildingElementFormProps> = ({editData, par
         return values;
     });
 
-    const currentConfig = BUILDING_ELEMENT_CONFIG[type];
+    const currentConfig = EDIFICIO_ELEMENT_CONFIG[type];
 
     // Reset field values quando cambia il tipo
     useEffect(() => {
@@ -76,9 +76,9 @@ export const BuildingElementForm: FC<BuildingElementFormProps> = ({editData, par
         }
 
         if (isEditMode) {
-            await updateElement(element as unknown as BuildingElement);
+            await updateElement(element as unknown as EdificioElement);
         } else {
-            await addElement(element as unknown as BuildingElement);
+            await addElement(element as unknown as EdificioElement);
         }
         onClose();
     };
@@ -122,7 +122,7 @@ export const BuildingElementForm: FC<BuildingElementFormProps> = ({editData, par
                             className="input"
                             disabled={isEditMode}
                         >
-                            {BUILDING_ELEMENT_TYPES.map(elType => (
+                            {EDIFICIO_ELEMENT_TYPES.map(elType => (
                                 <option key={elType} value={elType}>{t('building.' + elType)}</option>
                             ))}
                         </select>

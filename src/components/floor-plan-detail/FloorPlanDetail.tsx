@@ -3,7 +3,7 @@ import {useNavigate, useParams} from "react-router-dom";
 import {PageTitle} from "../../common/page-title/PageTitle.tsx";
 import {useFloorPlan} from "../../features/floorPlan/hooks/useFloorPlan.ts";
 import {useSurvey} from "../../features/survey/hooks/useSurvey.ts";
-import {useBuilding} from "../../features/building/hooks/useBuilding.ts";
+import {useEdificio} from "../../features/edificio/useEdificio.ts";
 import {FloorPlanViewer} from "../floor-plan-viewer/FloorPlanViewer.tsx";
 import {MarkerDetailModal} from "../../pages/floor-plan/modals/MarkerDetailModal.tsx";
 import {useTranslation} from "react-i18next";
@@ -29,7 +29,7 @@ export const FloorPlanDetail: FC<FloorPlanDetailProps> = ({onBack}) => {
             if (doc) {
                 selectDocument(doc.id);
             } else {
-                navigate('/floor-plan', {replace: true});
+                navigate('/poc', {replace: true});
             }
         }
     }, [documentId, selectedDocument, documents, selectDocument, navigate]);
@@ -38,7 +38,7 @@ export const FloorPlanDetail: FC<FloorPlanDetailProps> = ({onBack}) => {
         if (onBack) {
             onBack();
         } else {
-            navigate('/floor-plan');
+            navigate('/poc');
         }
     };
 
@@ -48,7 +48,7 @@ export const FloorPlanDetail: FC<FloorPlanDetailProps> = ({onBack}) => {
         handleBack();
     };
     const {photos} = useSurvey();
-    const {elements} = useBuilding();
+    const {elements} = useEdificio();
 
     const [isPlacingMode, setIsPlacingMode] = useState(false);
     const [placingPhotoId, setPlacingPhotoId] = useState<string | null>(null);

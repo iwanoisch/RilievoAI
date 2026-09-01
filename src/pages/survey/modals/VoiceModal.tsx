@@ -1,6 +1,6 @@
 import {FC, useCallback, useEffect, useState} from "react";
 import {useVoiceRecorder} from "../../../hooks/useVoiceRecorder.ts";
-import {useBuilding} from "../../../features/building/hooks/useBuilding.ts";
+import {useEdificio} from "../../../features/edificio/useEdificio.ts";
 import {useSurvey} from "../../../features/survey/hooks/useSurvey.ts";
 import {MicrophoneIcon, StopIcon, XMarkIcon} from "@heroicons/react/24/solid";
 import {useTranslation} from "react-i18next";
@@ -10,7 +10,7 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
     const {t} = useTranslation();
     const {isRecording, transcription, audioPath, voiceError, startRecording, stopRecording} = useVoiceRecorder();
     const {currentSession, addVoiceObservation, updateVoiceObservation, deleteVoiceObservation, getNextObservationId} = useSurvey();
-    const {elements} = useBuilding();
+    const {elements} = useEdificio();
     const elementList = Object.values(elements);
 
     const [hasRecorded, setHasRecorded] = useState(!!editData);

@@ -1,6 +1,6 @@
 import {FC, useEffect, useState} from "react";
 import {useSurvey} from "../../../features/survey/hooks/useSurvey.ts";
-import {useBuilding} from "../../../features/building/hooks/useBuilding.ts";
+import {useEdificio} from "../../../features/edificio/useEdificio.ts";
 import {XMarkIcon} from "@heroicons/react/24/solid";
 import {useTranslation} from "react-i18next";
 import type {MeasurementModalProps} from "./measurementModal.type.ts";
@@ -9,7 +9,7 @@ import type {Measurement} from "../../../features/survey/slice/survey.type.ts";
 export const MeasurementModal: FC<MeasurementModalProps> = ({editData, onClose}) => {
     const {t} = useTranslation();
     const {currentSession, addMeasurement, getNextObservationId} = useSurvey();
-    const {elements} = useBuilding();
+    const {elements} = useEdificio();
     const elementList = Object.values(elements);
 
     const isEditMode = !!editData;

@@ -1,5 +1,5 @@
 import {CameraIcon, MicrophoneIcon, WrenchScrewdriverIcon} from "@heroicons/react/24/solid";
-import type {DataStatus} from "../features/building/slice/building.type.ts";
+import type {DataStatus} from "../features/edificio/edificio.type.ts";
 import type {ObservationType} from "../features/survey/slice/survey.type.ts";
 import type {FC, SVGProps} from "react";
 

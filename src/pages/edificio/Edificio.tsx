@@ -1,22 +1,22 @@
 import {FC, useState} from "react";
 import {PageTitle} from "../../common/page-title/PageTitle.tsx";
-import {useBuilding} from "../../features/building/hooks/useBuilding.ts";
-import {BuildingTree} from "../../components/building-tree/BuildingTree.tsx";
-import {BuildingElementDetail} from "../../components/building-element-detail/BuildingElementDetail.tsx";
-import {BuildingElementForm} from "./modals/BuildingElementForm.tsx";
+import {useEdificio} from "../../features/edificio/useEdificio.ts";
+import {EdificioTree} from "../../components/edificio-tree/EdificioTree.tsx";
+import {EdificioElementDetail} from "../../components/edificio-element-detail/EdificioElementDetail.tsx";
+import {EdificioElementForm} from "./modals/EdificioElementForm.tsx";
 import {useTranslation} from "react-i18next";
 import {PlusIcon} from "@heroicons/react/24/solid";
-import type {BuildingElement, DataStatus} from "../../features/building/slice/building.type.ts";
-import type {BuildingModalState} from "./building.type.ts";
+import type {EdificioElement, DataStatus} from "../../features/edificio/edificio.type.ts";
+import type {EdificioModalState} from "./edificio.type.ts";
 
-export const Building: FC = () => {
+export const Edificio: FC = () => {
     const {t} = useTranslation();
-    const {elements, selectedElementId, selectElement, deleteElement, updateElement} = useBuilding();
-    const [modal, setModal] = useState<BuildingModalState>({isOpen: false});
+    const {elements, selectedElementId, selectElement, deleteElement, updateElement} = useEdificio();
+    const [modal, setModal] = useState<EdificioModalState>({isOpen: false});
 
     const selectedElement = selectedElementId ? elements[selectedElementId] : null;
 
-    const handleSelectElement = (element: BuildingElement) => {
+    const handleSelectElement = (element: EdificioElement) => {
         selectElement(element.id);
     };
 
@@ -24,7 +24,7 @@ export const Building: FC = () => {
         setModal({isOpen: true, parentId});
     };
 
-    const handleEditElement = (element: BuildingElement) => {
+    const handleEditElement = (element: EdificioElement) => {
         setModal({isOpen: true, editData: element});
     };
 
@@ -62,7 +62,7 @@ export const Building: FC = () => {
                     {/* Albero */}
                     <div className="lg:col-span-1 card">
                         <h3 className="text-sm font-semibold text-text-secondary mb-3">{t('building.structure')}</h3>
-                        <BuildingTree onSelectElement={handleSelectElement} selectedElementId={selectedElementId}/>
+                        <EdificioTree onSelectElement={handleSelectElement} selectedElementId={selectedElementId}/>
                         {selectedElement && (
                             <button
                                 onClick={() => handleAddElement(selectedElement.id)}
@@ -77,7 +77,7 @@ export const Building: FC = () => {
                     {/* Dettaglio */}
                     <div className="lg:col-span-2 card">
                         {selectedElement ? (
-                            <BuildingElementDetail element={selectedElement} onEdit={handleEditElement} onDelete={handleDeleteElement} onStatusChange={handleStatusChange}/>
+                            <EdificioElementDetail element={selectedElement} onEdit={handleEditElement} onDelete={handleDeleteElement} onStatusChange={handleStatusChange}/>
                         ) : (
                             <div className="py-12 text-center">
                                 <p className="text-sm text-text-muted">{t('building.select_element')}</p>
@@ -89,7 +89,7 @@ export const Building: FC = () => {
 
             {/* Modale form */}
             {modal.isOpen && (
-                <BuildingElementForm
+                <EdificioElementForm
                     editData={modal.editData}
                     parentId={modal.parentId}
                     onClose={handleCloseModal}

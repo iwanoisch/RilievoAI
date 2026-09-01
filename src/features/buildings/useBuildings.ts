@@ -9,8 +9,8 @@ export const useBuildings = () => {
     const getBuildings = async () => {
         try {
             // TODO real api: const response = await get<BuildingCardData[]>('/buildings');
-            dispatch(setBuildings([]));
-            return {data: []};
+            // Mock: non sovrascrive i dati esistenti
+            return {data: state.buildings};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
             dispatch(setBuildingsError(message));

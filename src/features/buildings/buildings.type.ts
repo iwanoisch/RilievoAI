@@ -1,11 +1,14 @@
-export type BuildingStatus = 'active' | 'completed' | 'draft';
+export type BuildingStatus = 'active' | 'completed';
 
 export interface BuildingCardData {
     id: string;
+    code: string;
     name: string;
     address: string;
     city: string;
     buildingType: string;
+    description?: string;
+    yearBuilt?: number;
     floorsCount: number;
     completionPercent: number;
     criticalityCount: number;

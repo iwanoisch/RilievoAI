@@ -1,5 +1,26 @@
 # Pattern React e Redux - RilievoAI
 
+## Struttura Pagine
+
+Ogni pagina/componente ha la sua **cartella dedicata**. MAI mettere componenti multipli nella stessa cartella.
+
+```
+src/pages/nome-pagina/
+├── NomePagina.tsx                # Componente principale
+├── nomePagina.type.ts            # Tipi della pagina
+└── modals/                       # Modali (se presenti)
+    ├── NomeModale.tsx
+    └── nomeModale.type.ts
+```
+
+**Regole:**
+- Un componente = una cartella dedicata
+- Tipi sempre in file `.type.ts` separato, MAI inline
+- Le modali vanno nella sottocartella `modals/` della pagina che le usa
+- Se una pagina cresce e ha sotto-viste, ognuna ha la sua cartella sotto `src/pages/`
+- Componenti riutilizzabili in `src/components/nome-componente/` con la stessa struttura
+- Nomi cartelle in kebab-case (es. `building-detail`), componenti in PascalCase
+
 ## Redux Toolkit
 
 ### Struttura Feature

@@ -1,23 +1,25 @@
-import {FC, useEffect} from "react";
+import {FC, useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {PlusIcon, BuildingOffice2Icon, ExclamationTriangleIcon, CalendarDaysIcon} from "@heroicons/react/24/outline";
 import {PageTitle} from "../../common/page-title/PageTitle.tsx";
 import {useBuildings} from "../../features/buildings/useBuildings.ts";
 import {BUILDING_STATUS_BADGE, BUILDING_STATUS_LABEL} from "../../constants/buildings.constant.ts";
+import {CreateBuildingModal} from "./modals/CreateBuildingModal.tsx";
 import type {BuildingCardData} from "../../features/buildings/buildings.type.ts";
 
 export const Buildings: FC = () => {
     const {t, i18n} = useTranslation();
     const navigate = useNavigate();
     const {buildings, getBuildings} = useBuildings();
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
     useEffect(() => {
         getBuildings();
     }, []);
 
-    const handleCardClick = (_building: BuildingCardData) => {
-        navigate('/poc');
+    const handleCardClick = (building: BuildingCardData) => {
+        navigate(`/buildings/${building.id}`);
     };
 
     const getCompletionColor = (percent: number): string => {
@@ -27,8 +29,9 @@ export const Buildings: FC = () => {
     };
 
     return (
+        <>
         <div className="w-full px-4 sm:px-6 lg:px-8 py-6 bg-gradient-to-br from-primary-50/50 via-primary-100/30 to-slate-50 min-h-screen">
-            <div className="mx-auto w-full max-w-5xl">
+            <div className="mx-auto w-full max-w-6xl">
                 <div className="flex items-center justify-between">
                     <PageTitle
                         title={t('buildings.title')}
@@ -37,6 +40,7 @@ export const Buildings: FC = () => {
                     <button
                         className="btn btn-primary flex items-center gap-2 min-h-[44px]"
                         aria-label={t('buildings.new_building')}
+                        onClick={() => setShowCreateModal(true)}
                     >
                         <PlusIcon className="h-5 w-5"/>
                         <span className="hidden sm:inline">{t('buildings.new_building')}</span>
@@ -52,6 +56,7 @@ export const Buildings: FC = () => {
                             <button
                                 className="btn btn-primary flex items-center gap-2 mt-6 min-h-[44px]"
                                 aria-label={t('buildings.new_building')}
+                                onClick={() => setShowCreateModal(true)}
                             >
                                 <PlusIcon className="h-5 w-5"/>
                                 {t('buildings.new_building')}
@@ -66,9 +71,13 @@ export const Buildings: FC = () => {
                                     className="card p-0 overflow-hidden text-left w-full hover:shadow-md transition-shadow focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:outline-none"
                                     aria-label={building.name}
                                 >
-                                    {/* Immagine placeholder con badge completamento */}
+                                    {/* Immagine o placeholder con badge completamento */}
                                     <div className="relative h-36 bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center">
-                                        <BuildingOffice2Icon className="h-16 w-16 text-slate-400"/>
+                                        {building.imageUrl ? (
+                                            <img src={building.imageUrl} alt={building.name} className="w-full h-full object-cover"/>
+                                        ) : (
+                                            <BuildingOffice2Icon className="h-16 w-16 text-slate-400"/>
+                                        )}
                                         <div className={`absolute top-2 right-2 px-2.5 py-1 rounded-full text-xs font-bold ${getCompletionColor(building.completionPercent)}`}>
                                             {building.completionPercent}%
                                         </div>
@@ -126,5 +135,16 @@ export const Buildings: FC = () => {
                 </div>
             </div>
         </div>
+
+        {showCreateModal && (
+            <CreateBuildingModal
+                onClose={() => setShowCreateModal(false)}
+                onCreated={(id) => {
+                    setShowCreateModal(false);
+                    navigate(`/buildings/${id}`);
+                }}
+            />
+        )}
+        </>
     );
 };

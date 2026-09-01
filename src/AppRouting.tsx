@@ -15,6 +15,7 @@ const UserProfile = lazy(() => import("./pages/user-profile/UserProfile.tsx").th
 const UserSettings = lazy(() => import("./pages/user-settings/UserSettings.tsx").then(m => ({default: m.UserSettings})));
 const NotFound = lazy(() => import("./pages/not-found/NotFound.tsx").then(m => ({default: m.NotFound})));
 const BuildingsPage = lazy(() => import("./pages/buildings/Buildings.tsx").then(m => ({default: m.Buildings})));
+const BuildingDetailPage = lazy(() => import("./pages/building-detail/BuildingDetail.tsx").then(m => ({default: m.BuildingDetail})));
 const PocPage = lazy(() => import("./pages/poc/Poc.tsx").then(m => ({default: m.Poc})));
 const FloorPlanDetail = lazy(() => import("./components/floor-plan-detail/FloorPlanDetail.tsx").then(m => ({default: m.FloorPlanDetail})));
 const ObservationDetail = lazy(() => import("./components/observation-detail/ObservationDetail.tsx").then(m => ({default: m.ObservationDetail})));
@@ -61,6 +62,7 @@ function AppRouting() {
                         <Route path="/login" element={<Login/>}/>
                         <Route path="/userprofile" element={<UserProfile/>}/>
                         <Route path="/usersettings" element={<UserSettings/>}/>
+                        <Route path="/buildings/:id" element={<BuildingDetailPage/>}/>
                         <Route path="/buildings" element={<BuildingsPage/>}/>
                         <Route path="/poc" element={<PocPage/>}/>
                         <Route path="/floor-plan/:documentId" element={<FloorPlanDetail/>}/>

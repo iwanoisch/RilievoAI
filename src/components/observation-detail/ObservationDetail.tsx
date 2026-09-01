@@ -4,7 +4,6 @@ import {useTranslation} from "react-i18next";
 import {PageTitle} from "../../common/page-title/PageTitle.tsx";
 import {ConfidenceBadge} from "../../common/confidence-badge/ConfidenceBadge.tsx";
 import {useSurvey} from "../../features/survey/hooks/useSurvey.ts";
-import {useSurveyValidation} from "../../features/survey/hooks/useSurveyValidation.ts";
 import {useBuilding} from "../../features/building/hooks/useBuilding.ts";
 import {ArrowLeftIcon, CheckIcon, XMarkIcon, MicrophoneIcon, WrenchScrewdriverIcon} from "@heroicons/react/24/solid";
 import {OBSERVATION_TYPE_ICONS, OBSERVATION_TYPE_LABELS, DATA_STATUS_LABELS} from "../../constants/validation.constant.ts";
@@ -15,8 +14,7 @@ export const ObservationDetail: FC<ObservationDetailProps> = ({onBack}) => {
     const {t, i18n} = useTranslation();
     const navigate = useNavigate();
     const {observationId} = useParams<{observationId: string}>();
-    const {getObservationById} = useSurvey();
-    const {confirmObservation, rejectObservation, getLogForObservation} = useSurveyValidation();
+    const {getObservationById, confirmObservation, rejectObservation, getLogForObservation} = useSurvey();
     const {elements} = useBuilding();
 
     const result = observationId ? getObservationById(observationId) : null;

@@ -1,21 +1,8 @@
 import {useCallback, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
+import type {SpeechRecognitionInstance, SpeechRecognitionEvent} from "./useVoiceRecorder.type.ts";
 
-interface SpeechRecognitionEvent {
-    results: SpeechRecognitionResultList;
-}
-
-interface SpeechRecognitionInstance {
-    continuous: boolean;
-    interimResults: boolean;
-    lang: string;
-    onresult: ((event: SpeechRecognitionEvent) => void) | null;
-    onerror: (() => void) | null;
-    start: () => void;
-    stop: () => void;
-}
-
-export const useSurveyVoice = () => {
+export const useVoiceRecorder = () => {
     const {i18n} = useTranslation();
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);

@@ -1,5 +1,5 @@
 import {FC, useCallback, useEffect, useState} from "react";
-import {useSurveyVoice} from "../../../features/survey/hooks/useSurveyVoice.ts";
+import {useVoiceRecorder} from "../../../hooks/useVoiceRecorder.ts";
 import {useBuilding} from "../../../features/building/hooks/useBuilding.ts";
 import {useSurvey} from "../../../features/survey/hooks/useSurvey.ts";
 import {MicrophoneIcon, StopIcon, XMarkIcon} from "@heroicons/react/24/solid";
@@ -8,16 +8,21 @@ import type {VoiceModalProps} from "./voiceModal.type.ts";
 
 export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
     const {t} = useTranslation();
-    const {isRecording, transcription, audioPath, voiceError, startRecording, stopRecording} = useSurveyVoice();
-    const {currentSession, addVoiceObservation, getNextObservationId} = useSurvey();
+    const {isRecording, transcription, audioPath, voiceError, startRecording, stopRecording} = useVoiceRecorder();
+    const {currentSession, addVoiceObservation, updateVoiceObservation, deleteVoiceObservation, getNextObservationId} = useSurvey();
     const {elements} = useBuilding();
     const elementList = Object.values(elements);
 
     const [hasRecorded, setHasRecorded] = useState(!!editData);
     const [targetElementId, setTargetElementId] = useState(editData?.targetElementId || '');
     const [localTranscription, setLocalTranscription] = useState(editData?.transcription || '');
+    const [pendingId, setPendingId] = useState<string | null>(editData?.id || null);
 
     const isEditMode = !!editData;
+    const [hasChanges, setHasChanges] = useState(false);
+
+    const originalTranscription = editData?.transcription || '';
+    const originalTargetElementId = editData?.targetElementId || '';
 
     // Sincronizza trascrizione live durante registrazione e dopo stop
     useEffect(() => {
@@ -26,12 +31,31 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
         }
     }, [transcription, isEditMode]);
 
-    // Quando l'audio è pronto, mostra il form di revisione
+    // Quando l'audio è pronto, salva automaticamente e mostra il form di revisione
     useEffect(() => {
-        if (!isEditMode && audioPath) {
+        if (!isEditMode && audioPath && currentSession) {
+            const id = getNextObservationId();
+            addVoiceObservation({
+                id,
+                sessionId: currentSession.id,
+                timestamp: new Date().toISOString(),
+                audioPath,
+                transcription: localTranscription || undefined,
+                confidence: localTranscription ? 70 : 30,
+                dataStatus: 'RAW',
+            });
+            setPendingId(id);
             setHasRecorded(true);
         }
     }, [audioPath, isEditMode]);
+
+    // Detecta modifiche ai campi
+    useEffect(() => {
+        if (hasRecorded) {
+            const changed = localTranscription !== originalTranscription || targetElementId !== originalTargetElementId;
+            setHasChanges(changed);
+        }
+    }, [localTranscription, targetElementId, originalTranscription, originalTargetElementId, hasRecorded]);
 
     // Chiudi con Escape
     useEffect(() => {
@@ -43,9 +67,15 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
     }, [onClose, isRecording]);
 
     const handleStart = useCallback(() => {
+        if (pendingId) {
+            deleteVoiceObservation(pendingId);
+            setPendingId(null);
+        }
         setHasRecorded(false);
         setLocalTranscription('');
-    }, []);
+        setTargetElementId('');
+        setHasChanges(false);
+    }, [pendingId, deleteVoiceObservation]);
 
     const handleRecord = useCallback(() => {
         startRecording();
@@ -57,14 +87,14 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
 
     const handleSave = () => {
         if (isEditMode && editData) {
-            addVoiceObservation({
+            updateVoiceObservation({
                 ...editData,
                 transcription: localTranscription || undefined,
                 targetElementId: targetElementId || undefined,
             });
-        } else if (hasRecorded && audioPath && currentSession) {
-            addVoiceObservation({
-                id: getNextObservationId(),
+        } else if (pendingId && hasRecorded && audioPath && currentSession) {
+            updateVoiceObservation({
+                id: pendingId,
                 sessionId: currentSession.id,
                 timestamp: new Date().toISOString(),
                 audioPath,
@@ -177,7 +207,11 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
             {hasRecorded ? (
                 <div className="px-4 py-3 border-t border-border-default bg-surface-card flex gap-2">
                     <button onClick={handleStart} className="btn btn-outline flex-1">{t('survey.retake')}</button>
-                    <button onClick={handleSave} className="btn btn-primary flex-1">{t('common.save')}</button>
+                    {hasChanges ? (
+                        <button onClick={handleSave} className="btn btn-primary flex-1">{t('common.save')}</button>
+                    ) : (
+                        <button onClick={onClose} className="btn btn-primary flex-1">{t('common.close')}</button>
+                    )}
                 </div>
             ) : !isRecording && (
                 <div className="px-4 py-3 border-t border-border-default bg-surface-card flex gap-2">

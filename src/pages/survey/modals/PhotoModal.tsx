@@ -1,5 +1,5 @@
 import {FC, useCallback, useEffect, useRef, useState} from "react";
-import {useSurveyMedia} from "../../../features/survey/hooks/useSurveyMedia.ts";
+import {useCamera} from "../../../hooks/useCamera.ts";
 import {useBuilding} from "../../../features/building/hooks/useBuilding.ts";
 import {useSurvey} from "../../../features/survey/hooks/useSurvey.ts";
 import {XMarkIcon} from "@heroicons/react/24/solid";
@@ -9,9 +9,9 @@ import type {SurveyPhoto} from "../../../features/survey/slice/survey.type.ts";
 
 export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose, onSaved}) => {
     const {t} = useTranslation();
-    const {isCameraActive, cameraError, startCamera, stopCamera, takePhoto} = useSurveyMedia();
+    const {isCameraActive, cameraError, startCamera, stopCamera, captureFrame} = useCamera();
     const survey = useSurvey();
-    const {addPhoto} = survey;
+    const {createPhoto} = survey;
     const {elements} = useBuilding();
     const videoRef = useRef<HTMLVideoElement>(null);
     const elementList = Object.values(elements);
@@ -59,15 +59,16 @@ export const PhotoModal: FC<PhotoModalProps> = ({editData, onClose, onSaved}) =>
     }, [handleClose]);
 
     const handleTakePhoto = useCallback(async () => {
-        const photo = await takePhoto();
+        const frame = captureFrame();
+        if (!frame) return;
+        const photo = await createPhoto(frame.mediaPath, frame.thumbnailPath);
         if (photo) {
             setPendingPhoto(photo);
             stopCamera();
-            addPhoto(photo);
             setHasChanges(true);
             setDidRetake(false);
         }
-    }, [takePhoto, stopCamera, addPhoto]);
+    }, [captureFrame, createPhoto, stopCamera]);
 
     const handleRetake = () => {
         if (pendingPhoto) {

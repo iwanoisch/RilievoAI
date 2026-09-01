@@ -4,15 +4,24 @@ import {
     setPhotos,
     setVoiceObservations,
     setMeasurements,
+    setValidationLog,
     setSurveyError,
     resetSurvey,
 } from "../slice/surveySlice.ts";
-import type {SurveySession, SurveyPhoto, VoiceObservation, Measurement} from "../slice/survey.type.ts";
+import type {SurveySession, SurveyPhoto, VoiceObservation, Measurement, ObservationType, ValidationLogEntry} from "../slice/survey.type.ts";
+import type {DataStatus} from "../../building/slice/building.type.ts";
 import {createMockSession, MOCK_PHOTOS, MOCK_VOICE_OBSERVATIONS, MOCK_MEASUREMENTS} from "../../../dataMock/MOCK_SURVEY.ts";
+import {getGeolocation, getDeviceOrientation} from "../../../utility/device-utils.ts";
 
 export const useSurvey = () => {
     const dispatch = useAppDispatch();
     const surveyState = useAppSelector(state => state.survey);
+    const {photos, voiceObservations, measurements, currentSession} = surveyState;
+    const validationLog = surveyState.validationLog ?? [];
+
+    // =====================
+    // Session management
+    // =====================
 
     const startSession = async (buildingId: string) => {
         try {
@@ -28,19 +37,19 @@ export const useSurvey = () => {
     };
 
     const pauseSession = () => {
-        if (!surveyState.currentSession) return;
-        dispatch(setCurrentSession({...surveyState.currentSession, status: 'paused'}));
+        if (!currentSession) return;
+        dispatch(setCurrentSession({...currentSession, status: 'paused'}));
     };
 
     const resumeSession = () => {
-        if (!surveyState.currentSession) return;
-        dispatch(setCurrentSession({...surveyState.currentSession, status: 'active'}));
+        if (!currentSession) return;
+        dispatch(setCurrentSession({...currentSession, status: 'active'}));
     };
 
     const completeSession = () => {
-        if (!surveyState.currentSession) return;
+        if (!currentSession) return;
         dispatch(setCurrentSession({
-            ...surveyState.currentSession,
+            ...currentSession,
             status: 'completed',
             endedAt: new Date().toISOString(),
         }));
@@ -60,11 +69,57 @@ export const useSurvey = () => {
         }
     };
 
-    // --- Photo CRUD ---
+    // =====================
+    // ID generation
+    // =====================
+
+    const getNextObservationId = (): string => {
+        const fresh = store.getState().survey;
+        const allIds = [
+            ...fresh.photos.map(p => Number(p.id) || 0),
+            ...fresh.voiceObservations.map(v => Number(v.id) || 0),
+            ...fresh.measurements.map(m => Number(m.id) || 0),
+        ];
+        return String(allIds.length > 0 ? Math.max(...allIds) + 1 : 1);
+    };
+
+    // =====================
+    // Photo CRUD + creation
+    // =====================
+
+    const createPhoto = async (mediaPath: string, thumbnailPath: string): Promise<SurveyPhoto | null> => {
+        if (!currentSession) return null;
+
+        const [geolocation, deviceOrientation] = await Promise.all([
+            getGeolocation(),
+            getDeviceOrientation(),
+        ]);
+
+        const photo: SurveyPhoto = {
+            id: getNextObservationId(),
+            sessionId: currentSession.id,
+            timestamp: new Date().toISOString(),
+            geolocation,
+            deviceOrientation,
+            confidence: 50,
+            dataStatus: 'RAW',
+            mediaPath,
+            thumbnailPath,
+        };
+
+        // Vibrazione feedback
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+
+        dispatch(setPhotos([...photos, photo]));
+        return photo;
+    };
+
     const addPhoto = async (photo: SurveyPhoto) => {
         try {
             // TODO real api: const response = await post<SurveyPhoto>('/survey/photos', photo);
-            dispatch(setPhotos([...surveyState.photos, photo]));
+            dispatch(setPhotos([...photos, photo]));
             return {data: photo};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -76,7 +131,7 @@ export const useSurvey = () => {
     const updatePhoto = async (photo: SurveyPhoto) => {
         try {
             // TODO real api: const response = await put<SurveyPhoto>(`/survey/photos/${photo.id}`, photo);
-            dispatch(setPhotos(surveyState.photos.map(p => p.id === photo.id ? photo : p)));
+            dispatch(setPhotos(photos.map(p => p.id === photo.id ? photo : p)));
             return {data: photo};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -88,7 +143,7 @@ export const useSurvey = () => {
     const deletePhoto = async (photoId: string) => {
         try {
             // TODO real api: await del(`/survey/photos/${photoId}`);
-            dispatch(setPhotos(surveyState.photos.filter(p => p.id !== photoId)));
+            dispatch(setPhotos(photos.filter(p => p.id !== photoId)));
             return {success: true};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -97,11 +152,14 @@ export const useSurvey = () => {
         }
     };
 
-    // --- Voice CRUD ---
+    // =====================
+    // Voice CRUD
+    // =====================
+
     const addVoiceObservation = async (observation: VoiceObservation) => {
         try {
             // TODO real api: const response = await post<VoiceObservation>('/survey/voice-observations', observation);
-            dispatch(setVoiceObservations([...surveyState.voiceObservations, observation]));
+            dispatch(setVoiceObservations([...voiceObservations, observation]));
             return {data: observation};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -113,7 +171,7 @@ export const useSurvey = () => {
     const updateVoiceObservation = async (observation: VoiceObservation) => {
         try {
             // TODO real api: const response = await put<VoiceObservation>(`/survey/voice-observations/${observation.id}`, observation);
-            dispatch(setVoiceObservations(surveyState.voiceObservations.map(v => v.id === observation.id ? observation : v)));
+            dispatch(setVoiceObservations(voiceObservations.map(v => v.id === observation.id ? observation : v)));
             return {data: observation};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -125,7 +183,7 @@ export const useSurvey = () => {
     const deleteVoiceObservation = async (observationId: string) => {
         try {
             // TODO real api: await del(`/survey/voice-observations/${observationId}`);
-            dispatch(setVoiceObservations(surveyState.voiceObservations.filter(v => v.id !== observationId)));
+            dispatch(setVoiceObservations(voiceObservations.filter(v => v.id !== observationId)));
             return {success: true};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -134,11 +192,14 @@ export const useSurvey = () => {
         }
     };
 
-    // --- Measurement CRUD ---
+    // =====================
+    // Measurement CRUD
+    // =====================
+
     const addMeasurement = async (measurement: Measurement) => {
         try {
             // TODO real api: const response = await post<Measurement>('/survey/measurements', measurement);
-            dispatch(setMeasurements([...surveyState.measurements, measurement]));
+            dispatch(setMeasurements([...measurements, measurement]));
             return {data: measurement};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -150,7 +211,7 @@ export const useSurvey = () => {
     const updateMeasurement = async (measurement: Measurement) => {
         try {
             // TODO real api: const response = await put<Measurement>(`/survey/measurements/${measurement.id}`, measurement);
-            dispatch(setMeasurements(surveyState.measurements.map(m => m.id === measurement.id ? measurement : m)));
+            dispatch(setMeasurements(measurements.map(m => m.id === measurement.id ? measurement : m)));
             return {data: measurement};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -162,7 +223,7 @@ export const useSurvey = () => {
     const deleteMeasurement = async (measurementId: string) => {
         try {
             // TODO real api: await del(`/survey/measurements/${measurementId}`);
-            dispatch(setMeasurements(surveyState.measurements.filter(m => m.id !== measurementId)));
+            dispatch(setMeasurements(measurements.filter(m => m.id !== measurementId)));
             return {success: true};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
@@ -171,37 +232,135 @@ export const useSurvey = () => {
         }
     };
 
-    // --- Derived ---
+    // =====================
+    // Derived
+    // =====================
+
     const getAllObservations = () => {
-        const photos = surveyState.photos.map(p => ({...p, observationType: 'photo' as const}));
-        const voices = surveyState.voiceObservations.map(v => ({...v, observationType: 'voice' as const}));
-        const measures = surveyState.measurements.map(m => ({...m, observationType: 'measurement' as const}));
-        return [...photos, ...voices, ...measures].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+        const p = photos.map(p => ({...p, observationType: 'photo' as const}));
+        const v = voiceObservations.map(v => ({...v, observationType: 'voice' as const}));
+        const m = measurements.map(m => ({...m, observationType: 'measurement' as const}));
+        return [...p, ...v, ...m].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
     };
 
     const getObservationById = (id: string) => {
-        const photo = surveyState.photos.find(p => p.id === id);
+        const photo = photos.find(p => p.id === id);
         if (photo) return {data: photo, type: 'photo' as const};
 
-        const voice = surveyState.voiceObservations.find(v => v.id === id);
+        const voice = voiceObservations.find(v => v.id === id);
         if (voice) return {data: voice, type: 'voice' as const};
 
-        const measurement = surveyState.measurements.find(m => m.id === id);
+        const measurement = measurements.find(m => m.id === id);
         if (measurement) return {data: measurement, type: 'measurement' as const};
 
         return null;
     };
 
-    const getNextObservationId = (): string => {
-        // Legge lo state fresco dal store per evitare stale closure
-        const fresh = store.getState().survey;
-        const allIds = [
-            ...fresh.photos.map(p => Number(p.id) || 0),
-            ...fresh.voiceObservations.map(v => Number(v.id) || 0),
-            ...fresh.measurements.map(m => Number(m.id) || 0),
-        ];
-        return String(allIds.length > 0 ? Math.max(...allIds) + 1 : 1);
+    // =====================
+    // Validation
+    // =====================
+
+    const validateObservation = async (
+        observationId: string,
+        observationType: ObservationType,
+        newStatus: DataStatus,
+        newConfidence?: number,
+        note?: string,
+    ) => {
+        try {
+            // TODO real api: await put(`/survey/observations/${observationId}/validate`, {newStatus, newConfidence});
+            const createLogEntry = (previousStatus: DataStatus, previousConfidence: number, finalConfidence: number): ValidationLogEntry => ({
+                id: String(Date.now()),
+                observationId,
+                observationType,
+                previousStatus,
+                newStatus,
+                previousConfidence,
+                newConfidence: finalConfidence,
+                timestamp: new Date().toISOString(),
+                technicianId: currentSession?.technicianId ?? '',
+                note,
+            });
+
+            if (observationType === 'photo') {
+                const photo = photos.find(p => p.id === observationId);
+                if (!photo) return null;
+                const logEntry = createLogEntry(photo.dataStatus, photo.confidence, newConfidence ?? photo.confidence);
+                dispatch(setPhotos(photos.map(p =>
+                    p.id === observationId
+                        ? {...p, dataStatus: newStatus, confidence: newConfidence ?? p.confidence}
+                        : p
+                )));
+                dispatch(setValidationLog([...validationLog, logEntry]));
+            }
+
+            if (observationType === 'voice') {
+                const voice = voiceObservations.find(v => v.id === observationId);
+                if (!voice) return null;
+                const logEntry = createLogEntry(voice.dataStatus, voice.confidence, newConfidence ?? voice.confidence);
+                dispatch(setVoiceObservations(voiceObservations.map(v =>
+                    v.id === observationId
+                        ? {...v, dataStatus: newStatus, confidence: newConfidence ?? v.confidence}
+                        : v
+                )));
+                dispatch(setValidationLog([...validationLog, logEntry]));
+            }
+
+            if (observationType === 'measurement') {
+                const measurement = measurements.find(m => m.id === observationId);
+                if (!measurement) return null;
+                const logEntry = createLogEntry(measurement.dataStatus, measurement.confidence, newConfidence ?? measurement.confidence);
+                dispatch(setMeasurements(measurements.map(m =>
+                    m.id === observationId
+                        ? {...m, dataStatus: newStatus, confidence: newConfidence ?? m.confidence}
+                        : m
+                )));
+                dispatch(setValidationLog([...validationLog, logEntry]));
+            }
+
+            return {success: true};
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
+            dispatch(setSurveyError(message));
+            return null;
+        }
     };
+
+    const confirmObservation = (observationId: string, observationType: ObservationType) => {
+        return validateObservation(observationId, observationType, 'VALIDATED', 100);
+    };
+
+    const rejectObservation = (observationId: string, observationType: ObservationType, note?: string) => {
+        return validateObservation(observationId, observationType, 'REJECTED', undefined, note);
+    };
+
+    const correctObservation = (observationId: string, observationType: ObservationType, newConfidence: number, note?: string) => {
+        return validateObservation(observationId, observationType, 'VALIDATED', newConfidence, note);
+    };
+
+    const getLogForObservation = (observationId: string): ValidationLogEntry[] => {
+        return validationLog.filter(l => l.observationId === observationId);
+    };
+
+    // Validation derived
+    const allValidationItems = [
+        ...photos.map(p => ({id: p.id, type: 'photo' as const, confidence: p.confidence, dataStatus: p.dataStatus, timestamp: p.timestamp})),
+        ...voiceObservations.map(v => ({id: v.id, type: 'voice' as const, confidence: v.confidence, dataStatus: v.dataStatus, timestamp: v.timestamp})),
+        ...measurements.map(m => ({id: m.id, type: 'measurement' as const, confidence: m.confidence, dataStatus: m.dataStatus, timestamp: m.timestamp})),
+    ];
+
+    const pendingValidation = allValidationItems
+        .filter(o => o.dataStatus === 'PROPOSED' || o.dataStatus === 'DERIVED')
+        .sort((a, b) => a.confidence - b.confidence);
+
+    const validatedCount = allValidationItems.filter(o => o.dataStatus === 'VALIDATED').length;
+    const rejectedCount = allValidationItems.filter(o => o.dataStatus === 'REJECTED').length;
+    const totalCount = allValidationItems.length;
+    const pendingCount = pendingValidation.length;
+
+    // =====================
+    // Reset
+    // =====================
 
     const reset = () => {
         dispatch(resetSurvey());
@@ -209,23 +368,42 @@ export const useSurvey = () => {
 
     return {
         ...surveyState,
+        // Session
         startSession,
         pauseSession,
         resumeSession,
         completeSession,
         fetchSessionData,
+        // Photo
+        createPhoto,
         addPhoto,
         updatePhoto,
         deletePhoto,
+        // Voice
         addVoiceObservation,
         updateVoiceObservation,
         deleteVoiceObservation,
+        // Measurement
         addMeasurement,
         updateMeasurement,
         deleteMeasurement,
+        // Derived
         getAllObservations,
         getObservationById,
         getNextObservationId,
+        // Validation
+        validationLog,
+        pendingValidation,
+        validatedCount,
+        rejectedCount,
+        totalCount,
+        pendingCount,
+        validateObservation,
+        confirmObservation,
+        rejectObservation,
+        correctObservation,
+        getLogForObservation,
+        // Reset
         reset,
     };
 };

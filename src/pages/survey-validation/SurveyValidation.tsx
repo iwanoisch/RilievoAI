@@ -4,7 +4,6 @@ import {useTranslation} from "react-i18next";
 import {PageTitle} from "../../common/page-title/PageTitle.tsx";
 import {ConfidenceBadge} from "../../common/confidence-badge/ConfidenceBadge.tsx";
 import {useSurvey} from "../../features/survey/hooks/useSurvey.ts";
-import {useSurveyValidation} from "../../features/survey/hooks/useSurveyValidation.ts";
 import {getConfidenceLevel} from "../../utility/confidence-utils.ts";
 import {CheckIcon, XMarkIcon} from "@heroicons/react/24/solid";
 import {OBSERVATION_TYPE_ICONS, OBSERVATION_TYPE_LABELS, DATA_STATUS_LABELS} from "../../constants/validation.constant.ts";
@@ -14,11 +13,11 @@ import type {ValidationFilter, ConfidenceFilter, StatusFilter} from "./surveyVal
 export const SurveyValidation: FC = () => {
     const {t} = useTranslation();
     const navigate = useNavigate();
-    const {photos, voiceObservations, measurements} = useSurvey();
     const {
+        photos, voiceObservations, measurements,
         pendingCount, validatedCount, rejectedCount, totalCount,
         confirmObservation, rejectObservation,
-    } = useSurveyValidation();
+    } = useSurvey();
 
     const [typeFilter, setTypeFilter] = useState<ValidationFilter>('all');
     const [confidenceFilter, setConfidenceFilter] = useState<ConfidenceFilter>('all');

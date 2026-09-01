@@ -93,6 +93,18 @@ export interface ValidationLogEntry {
     note?: string;
 }
 
+export type PhotoUploadStatus = 'pending' | 'processing' | 'completed' | 'error';
+
+export interface PhotoUploadJob {
+    tempId: string;
+    fileName: string;
+    preview: string;
+    status: PhotoUploadStatus;
+    photo: SurveyPhoto | null;
+    error: string | null;
+    progress: number;
+}
+
 export interface SurveyState {
     currentSession: SurveySession | null;
     photos: SurveyPhoto[];

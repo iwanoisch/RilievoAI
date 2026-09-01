@@ -29,7 +29,7 @@ export const Survey: FC = () => {
     const survey = useSurvey();
     const {currentSession, photos, voiceObservations, measurements} = survey;
     const {fetchBuilding} = useBuilding();
-    const {isAnalyzing, pendingSuggestions, analyzePhoto, analyzeVoice, acceptSuggestion, rejectSuggestion} = useAiAnalysis();
+    const {isAnalyzing, pendingSuggestions, analyzePhoto, analyzePhotoBatch, analyzeVoice, acceptSuggestion, rejectSuggestion} = useAiAnalysis();
     const [modal, setModal] = useState<ModalState>({type: null});
     const photoCountRef = useRef(0);
     const voiceCountRef = useRef(0);
@@ -97,6 +97,19 @@ export const Survey: FC = () => {
                 currentRoomId: photo.roomId,
             });
         }
+    };
+
+    const handleBatchSaved = (batchPhotos: SurveyPhoto[]) => {
+        const session = store.getState().survey.currentSession;
+        if (!session) return;
+        const requests = batchPhotos.map(photo => ({
+            photoId: photo.id,
+            mediaPath: photo.mediaPath,
+            buildingId: session.buildingId,
+            currentFloorId: photo.floorId,
+            currentRoomId: photo.roomId,
+        }));
+        analyzePhotoBatch(requests);
     };
 
     const handleEditObservation = (obs: ObservationItem) => {
@@ -270,7 +283,7 @@ export const Survey: FC = () => {
 
             {/* Modali fullscreen */}
             {modal.type === 'photo' && (
-                <PhotoModal editData={modal.editData as SurveyPhoto | undefined} onClose={closeModal} onSaved={handlePhotoSaved}/>
+                <PhotoModal editData={modal.editData as SurveyPhoto | undefined} onClose={closeModal} onSaved={handlePhotoSaved} onBatchSaved={handleBatchSaved}/>
             )}
             {modal.type === 'voice' && (
                 <VoiceModal editData={modal.editData as VoiceObservation | undefined} onClose={closeModal}/>

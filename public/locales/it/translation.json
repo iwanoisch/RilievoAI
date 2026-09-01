@@ -629,7 +629,17 @@
     "confirm_transcription": "Conferma trascrizione",
     "view_direction": "Direzione di presa",
     "view_direction_placeholder": "es. Nord, Sud, verso finestra...",
-    "retake": "Rifai"
+    "retake": "Rifai",
+    "start_camera": "Avvia camera",
+    "tab_capture": "Scatta",
+    "tab_upload": "Carica",
+    "upload_drag_drop": "Trascina le foto qui o clicca per selezionarle",
+    "upload_formats": "Formati: JPG, PNG, WebP, HEIC (max 20MB per file)",
+    "upload_processing": "Elaborazione in corso...",
+    "upload_completed": "Completato",
+    "upload_error": "Errore",
+    "upload_count": "{{count}} foto caricate",
+    "upload_batch_limit": "Massimo {{max}} foto per volta"
   },
   "floorPlan": {
     "title": "Planimetria",

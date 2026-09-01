@@ -55,6 +55,21 @@ export const useAiAnalysis = () => {
         }
     };
 
+    const analyzePhotoBatch = async (
+        requests: AiPhotoAnalysisRequest[],
+        onProgress?: (completed: number, total: number) => void,
+    ) => {
+        const results: AiSuggestionWithStatus[] = [];
+        for (let i = 0; i < requests.length; i++) {
+            const result = await analyzePhoto(requests[i]);
+            if (result?.data) {
+                results.push(result.data);
+            }
+            onProgress?.(i + 1, requests.length);
+        }
+        return results;
+    };
+
     const respondToSuggestion = async (suggestionId: string, action: SuggestionStatus, correction?: Partial<AiSuggestionWithStatus>) => {
         try {
             const freshSuggestions = store.getState().ai.suggestions;
@@ -165,6 +180,7 @@ export const useAiAnalysis = () => {
         ...state,
         pendingSuggestions,
         analyzePhoto,
+        analyzePhotoBatch,
         analyzeVoice,
         acceptSuggestion,
         rejectSuggestion,

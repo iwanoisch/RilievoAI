@@ -626,7 +626,17 @@
     "confirm_transcription": "Confirm transcription",
     "view_direction": "View direction",
     "view_direction_placeholder": "e.g. North, South, towards window...",
-    "retake": "Retake"
+    "retake": "Retake",
+    "start_camera": "Start camera",
+    "tab_capture": "Capture",
+    "tab_upload": "Upload",
+    "upload_drag_drop": "Drag photos here or click to select",
+    "upload_formats": "Formats: JPG, PNG, WebP, HEIC (max 20MB per file)",
+    "upload_processing": "Processing...",
+    "upload_completed": "Completed",
+    "upload_error": "Error",
+    "upload_count": "{{count}} photos uploaded",
+    "upload_batch_limit": "Maximum {{max}} photos at once"
   },
   "floorPlan": {
     "title": "Floor Plan",

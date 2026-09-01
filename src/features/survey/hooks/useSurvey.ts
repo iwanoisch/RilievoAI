@@ -8,10 +8,12 @@ import {
     setSurveyError,
     resetSurvey,
 } from "../slice/surveySlice.ts";
-import type {SurveySession, SurveyPhoto, VoiceObservation, Measurement, ObservationType, ValidationLogEntry} from "../slice/survey.type.ts";
+import type {SurveySession, SurveyPhoto, VoiceObservation, Measurement, ObservationType, ValidationLogEntry, PhotoUploadJob} from "../slice/survey.type.ts";
 import type {DataStatus} from "../../building/slice/building.type.ts";
 import {createMockSession, MOCK_PHOTOS, MOCK_VOICE_OBSERVATIONS, MOCK_MEASUREMENTS} from "../../../dataMock/MOCK_SURVEY.ts";
 import {getGeolocation, getDeviceOrientation} from "../../../utility/device-utils.ts";
+import {fileToImageData} from "../../../utility/image-utils.ts";
+import {ACCEPTED_PHOTO_MIME_TYPES, MAX_PHOTO_FILE_SIZE_MB} from "../../../constants/file-formats.constant.ts";
 
 export const useSurvey = () => {
     const dispatch = useAppDispatch();
@@ -114,6 +116,94 @@ export const useSurvey = () => {
 
         dispatch(setPhotos([...photos, photo]));
         return photo;
+    };
+
+    const createPhotosFromFiles = async (
+        files: File[],
+        onProgress?: (jobs: PhotoUploadJob[]) => void,
+    ): Promise<SurveyPhoto[]> => {
+        if (!currentSession) return [];
+
+        const maxBytes = MAX_PHOTO_FILE_SIZE_MB * 1024 * 1024;
+
+        // Inizializza jobs
+        const jobs: PhotoUploadJob[] = files.map((file, i) => ({
+            tempId: `upload-${Date.now()}-${i}`,
+            fileName: file.name,
+            preview: '',
+            status: 'pending',
+            photo: null,
+            error: null,
+            progress: 0,
+        }));
+
+        onProgress?.(jobs);
+
+        // Geo/orientation una sola volta per il batch
+        const [geolocation, deviceOrientation] = await Promise.all([
+            getGeolocation(),
+            getDeviceOrientation(),
+        ]);
+
+        const createdPhotos: SurveyPhoto[] = [];
+        let nextId = Number(getNextObservationId());
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            jobs[i] = {...jobs[i], status: 'processing', progress: 10};
+            onProgress?.([...jobs]);
+
+            // Validazione
+            if (!ACCEPTED_PHOTO_MIME_TYPES[file.type]) {
+                jobs[i] = {...jobs[i], status: 'error', error: `Formato non supportato: ${file.type}`, progress: 100};
+                onProgress?.([...jobs]);
+                continue;
+            }
+
+            if (file.size > maxBytes) {
+                jobs[i] = {...jobs[i], status: 'error', error: `File troppo grande (max ${MAX_PHOTO_FILE_SIZE_MB}MB)`, progress: 100};
+                onProgress?.([...jobs]);
+                continue;
+            }
+
+            try {
+                jobs[i] = {...jobs[i], progress: 30};
+                onProgress?.([...jobs]);
+
+                const {mediaPath, thumbnailPath} = await fileToImageData(file);
+
+                jobs[i] = {...jobs[i], preview: thumbnailPath, progress: 70};
+                onProgress?.([...jobs]);
+
+                const photo: SurveyPhoto = {
+                    id: String(nextId++),
+                    sessionId: currentSession.id,
+                    timestamp: new Date().toISOString(),
+                    geolocation,
+                    deviceOrientation,
+                    confidence: 50,
+                    dataStatus: 'RAW',
+                    mediaPath,
+                    thumbnailPath,
+                };
+
+                createdPhotos.push(photo);
+
+                jobs[i] = {...jobs[i], status: 'completed', photo, progress: 100};
+                onProgress?.([...jobs]);
+            } catch (error) {
+                const message = error instanceof Error ? error.message : 'Errore elaborazione';
+                jobs[i] = {...jobs[i], status: 'error', error: message, progress: 100};
+                onProgress?.([...jobs]);
+            }
+        }
+
+        return createdPhotos;
+    };
+
+    const savePhotos = (newPhotos: SurveyPhoto[]) => {
+        const freshPhotos = store.getState().survey.photos;
+        dispatch(setPhotos([...freshPhotos, ...newPhotos]));
     };
 
     const addPhoto = async (photo: SurveyPhoto) => {
@@ -376,6 +466,8 @@ export const useSurvey = () => {
         fetchSessionData,
         // Photo
         createPhoto,
+        createPhotosFromFiles,
+        savePhotos,
         addPhoto,
         updatePhoto,
         deletePhoto,

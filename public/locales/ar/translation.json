@@ -616,7 +616,17 @@
     "confirm_transcription": "تأكيد النسخ",
     "view_direction": "اتجاه التصوير",
     "view_direction_placeholder": "مثال: شمال، جنوب، نحو النافذة...",
-    "retake": "إعادة"
+    "retake": "إعادة",
+    "start_camera": "تشغيل الكاميرا",
+    "tab_capture": "التقاط",
+    "tab_upload": "تحميل",
+    "upload_drag_drop": "اسحب الصور هنا أو انقر للتحديد",
+    "upload_formats": "الصيغ: JPG، PNG، WebP، HEIC (حد أقصى 20 ميجابايت لكل ملف)",
+    "upload_processing": "جاري المعالجة...",
+    "upload_completed": "مكتمل",
+    "upload_error": "خطأ",
+    "upload_count": "تم تحميل {{count}} صورة",
+    "upload_batch_limit": "حد أقصى {{max}} صورة في المرة الواحدة"
   },
   "floorPlan": {
     "title": "المخطط الطابقي",

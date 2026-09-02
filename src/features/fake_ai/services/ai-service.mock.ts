@@ -68,6 +68,6 @@ export const mockAiService: AiService = {
 
     sendFeedback: async (_suggestionId: string, _action: string, _correction?: Partial<AiSuggestion>): Promise<void> => {
         await delay(500);
-        // TODO real api: POST /ai/feedback { suggestionId, action, correction }
+        // TODO real api: POST /fake_ai/feedback { suggestionId, action, correction }
     },
 };

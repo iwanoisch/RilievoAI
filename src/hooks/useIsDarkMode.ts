@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 /**
  * Hook leggero per rilevare se il tema corrente è scuro.
  *
- * Utilizza MutationObserver per reagire ai cambiamenti del tema in tempo reale.
+ * Utilizza MutationObserver per reagire fake_ai cambiamenti del tema in tempo reale.
  * Non dipende da useAuth o altri context, quindi può essere usato ovunque.
  *
  * @returns boolean - true se il tema è 'dark' o 'midnight', false altrimenti

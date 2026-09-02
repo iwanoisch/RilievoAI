@@ -1,4 +1,4 @@
-import {FC, useState} from "react";
+import {FC, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {
     DocumentTextIcon,
@@ -6,22 +6,28 @@ import {
     TrashIcon,
     ChevronRightIcon,
     PlusIcon,
+    SparklesIcon,
 } from "@heroicons/react/24/outline";
 import {PaperClipIcon} from "@heroicons/react/24/solid";
 import {RadioGroup, Radio, Field, Label} from "@headlessui/react";
-import {ARAZIO_SECTIONS, EMPTY_VALUTAZIONE} from "../../constants/arazio-sections.constant.ts";
-import {useArazio} from "../../features/arazio/useArazio.ts";
-import {useAlert} from "../../common/alert/useAlert.ts";
-import {formatFileSize} from "../../utility/arazio-utils.ts";
-import type {ArazioFieldConfig, ArazioGroupConfig, ArazioRepeatableInstance, ArazioValutazione} from "../../features/arazio/arazio.type.ts";
-import type {ArazioSectionFormProps} from "./arazioTab.type.ts";
+import {ARAZIO_SECTIONS, EMPTY_VALUTAZIONE} from "../../../constants/arazio-sections.constant.ts";
+import {useArazio} from "../../../features/arazio/useArazio.ts";
+import {useAlert} from "../../../common/alert/useAlert.ts";
+import {formatFileSize} from "../../../utility/arazio-utils.ts";
+import {extractFilesFromList} from "../../../utility/file-extract-utils.ts";
+import {buildFieldSchema} from "../../../utility/ai-schema-utils.ts";
+import {callClaudeForArazio} from "../../../features/ai/ai-arazio-service.ts";
+import type {ArazioFieldConfig, ArazioGroupConfig, ArazioRepeatableInstance, ArazioValutazione} from "../../../features/arazio/arazio.type.ts";
+import type {ArazioSectionFormProps} from "./arazioSectionForm.type.ts";
 
 export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, sectionId}) => {
     const {t} = useTranslation();
     const arazio = useArazio();
     const {showAlert} = useAlert();
     const [saving, setSaving] = useState(false);
+    const [aiLoading, setAiLoading] = useState(false);
     const [expandedInstances, setExpandedInstances] = useState<Record<string, boolean>>({});
+    const aiFileInputRef = useRef<HTMLInputElement>(null);
 
     const config = ARAZIO_SECTIONS.find(s => s.id === sectionId);
     const sectionData = arazio.getSectionData(buildingId, sectionId);
@@ -53,12 +59,38 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
         // TODO: reload from server
     };
 
+    const handleAiPrefill = async (files: FileList) => {
+        if (!config || files.length === 0) return;
+        setAiLoading(true);
+        try {
+            const extracted = await extractFilesFromList(Array.from(files));
+            if (extracted.length === 0) {
+                showAlert({title: t('arazio.ai_no_files'), type: 'warning', message: ''});
+                setAiLoading(false);
+                return;
+            }
+            const schema = buildFieldSchema(config);
+            const response = await callClaudeForArazio({
+                sectionId: config.id,
+                sectionLabel: config.label,
+                fieldSchema: schema,
+                files: extracted,
+            });
+            arazio.applyAiResponse(buildingId, sectionId, response);
+            showAlert({title: t('arazio.ai_success'), type: 'success', message: ''});
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Errore AI';
+            showAlert({title: t('arazio.ai_error'), type: 'error', message});
+        }
+        setAiLoading(false);
+    };
+
     // ── Render field ──
     const renderField = (
         field: ArazioFieldConfig,
         getValue: () => string,
         onChange: (val: string) => void,
-        idPrefix: string,
+        _idPrefix: string,
         instanceId?: string,
     ) => {
         const fieldValue = getValue();
@@ -517,13 +549,35 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                         {config.number}. {config.label}
                     </h3>
                 </div>
-                <span className={`badge self-start ${
-                    sectionData.status === 'completed' ? 'badge-success'
-                        : sectionData.status === 'draft' ? 'badge-warning'
-                            : 'badge-info'
-                }`}>
-                    {t(`arazio.status_${sectionData.status}`)}
-                </span>
+                <div className="flex items-center gap-2 self-start">
+                    <span className={`badge ${
+                        sectionData.status === 'completed' ? 'badge-success'
+                            : sectionData.status === 'draft' ? 'badge-warning'
+                                : 'badge-info'
+                    }`}>
+                        {t(`arazio.status_${sectionData.status}`)}
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => aiFileInputRef.current?.click()}
+                        disabled={aiLoading}
+                        className="btn btn-primary flex items-center gap-2 min-h-[44px] text-sm"
+                    >
+                        <SparklesIcon className={`h-4 w-4 ${aiLoading ? 'animate-spin' : ''}`}/>
+                        {aiLoading ? t('arazio.ai_loading') : t('arazio.ai_prefill')}
+                    </button>
+                    <input
+                        ref={aiFileInputRef}
+                        type="file"
+                        multiple
+                        accept=".zip,.pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                        className="hidden"
+                        onChange={(e) => {
+                            if (e.target.files) handleAiPrefill(e.target.files);
+                            e.target.value = '';
+                        }}
+                    />
+                </div>
             </div>
 
             {/* Gruppi */}

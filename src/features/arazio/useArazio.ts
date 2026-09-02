@@ -1,6 +1,7 @@
 import {useAppDispatch, useAppSelector} from "../../store/store.ts";
 import {setSections, setArazioError} from "./arazioSlice.ts";
-import type {ArazioAttachment, ArazioSectionData, ArazioValutazione} from "./arazio.type.ts";
+import type {ArazioAttachment, ArazioRepeatableInstance, ArazioSectionData, ArazioValutazione} from "./arazio.type.ts";
+import type {AiArazioResponse} from "../ai/ai.type.ts";
 import {ARAZIO_SECTIONS, EMPTY_VALUTAZIONE} from "../../constants/arazio-sections.constant.ts";
 import {mapInstance, createEmptyInstance, createEmptySection} from "../../utility/arazio-utils.ts";
 
@@ -13,7 +14,8 @@ export const useArazio = () => {
             const existing = state.sections.find(
                 s => s.sectionId === config.id && s.buildingId === buildingId
             );
-            return existing ?? createEmptySection(config.id, buildingId);
+            if (!existing) return createEmptySection(config.id, buildingId);
+            return {...createEmptySection(config.id, buildingId), ...existing};
         });
     };
 
@@ -21,7 +23,11 @@ export const useArazio = () => {
         const existing = state.sections.find(
             s => s.sectionId === sectionId && s.buildingId === buildingId
         );
-        return existing ?? createEmptySection(sectionId, buildingId);
+        if (!existing) return createEmptySection(sectionId, buildingId);
+        return {
+            ...createEmptySection(sectionId, buildingId),
+            ...existing,
+        };
     };
 
     const updateSection = (buildingId: string, sectionId: string, patch: Partial<ArazioSectionData>) => {
@@ -261,6 +267,31 @@ export const useArazio = () => {
         });
     };
 
+    // ── Applicazione risposta AI ──
+
+    const applyAiResponse = (buildingId: string, sectionId: string, aiResponse: AiArazioResponse) => {
+        const current = getSectionData(buildingId, sectionId);
+
+        const mergedValues = {...current.values, ...aiResponse.values};
+        const mergedGroupValutazioni = {...current.groupValutazioni, ...aiResponse.groupValutazioni};
+
+        const mergedRepeatables: Record<string, ArazioRepeatableInstance[]> = {...current.repeatables};
+        for (const [groupKey, aiInstances] of Object.entries(aiResponse.repeatables)) {
+            const newInstances: ArazioRepeatableInstance[] = aiInstances.map(ai => ({
+                ...createEmptyInstance(),
+                values: ai.values,
+                valutazione: ai.valutazione,
+            }));
+            mergedRepeatables[groupKey] = [...(mergedRepeatables[groupKey] ?? []), ...newInstances];
+        }
+
+        updateSection(buildingId, sectionId, {
+            values: mergedValues,
+            groupValutazioni: mergedGroupValutazioni,
+            repeatables: mergedRepeatables,
+        });
+    };
+
     // ── Salvataggio ──
 
     const saveDraft = async (buildingId: string, sectionId: string) => {
@@ -304,6 +335,7 @@ export const useArazio = () => {
         updateSubRepeatableValutazione,
         updateSubGroupValutazione,
         updateGroupValutazione,
+        applyAiResponse,
         saveDraft,
         saveAndComplete,
     };

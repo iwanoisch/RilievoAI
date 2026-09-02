@@ -725,7 +725,12 @@
     "add": "Add",
     "no_instances": "No items added. Click \"Add\" to start.",
     "add_section": "Add section\u2026",
-    "remove_section": "Remove"
+    "remove_section": "Remove",
+    "ai_prefill": "Prefill with AI",
+    "ai_loading": "Analyzing\u2026",
+    "ai_success": "Form prefilled successfully by AI",
+    "ai_error": "Error during AI analysis",
+    "ai_no_files": "No supported files found"
   },
   "building": {
     "title": "Building Model",

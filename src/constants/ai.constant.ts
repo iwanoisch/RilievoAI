@@ -1,10 +1,10 @@
-import type {SuggestionStatus} from "../features/ai/slice/ai.type.ts";
+import type {SuggestionStatus} from "../features/fake_ai/slice/ai.type.ts";
 
 export const SUGGESTION_STATUS_LABELS: Record<SuggestionStatus, string> = {
-    pending: 'ai.status_pending',
-    accepted: 'ai.status_accepted',
-    modified: 'ai.status_modified',
-    rejected: 'ai.status_rejected',
+    pending: 'fake_ai.status_pending',
+    accepted: 'fake_ai.status_accepted',
+    modified: 'fake_ai.status_modified',
+    rejected: 'fake_ai.status_rejected',
 };
 
 export const SUGGESTION_STATUS_STYLES: Record<SuggestionStatus, string> = {
@@ -15,11 +15,11 @@ export const SUGGESTION_STATUS_STYLES: Record<SuggestionStatus, string> = {
 };
 
 export const CRITICALITY_LABELS: Record<string, string> = {
-    none: 'ai.criticality_none',
-    low: 'ai.criticality_low',
-    medium: 'ai.criticality_medium',
-    high: 'ai.criticality_high',
-    critical: 'ai.criticality_critical',
+    none: 'fake_ai.criticality_none',
+    low: 'fake_ai.criticality_low',
+    medium: 'fake_ai.criticality_medium',
+    high: 'fake_ai.criticality_high',
+    critical: 'fake_ai.criticality_critical',
 };
 
 export const CRITICALITY_STYLES: Record<string, string> = {

@@ -14,7 +14,7 @@ export const AiSuggestionCard: FC<AiSuggestionCardProps> = ({suggestion, onAccep
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
                 <SparklesIcon className="h-5 w-5 text-primary-500 flex-shrink-0"/>
-                <h4 className="text-sm font-semibold text-text-primary flex-1">{t('ai.suggestion')}</h4>
+                <h4 className="text-sm font-semibold text-text-primary flex-1">{t('fake_ai.suggestion')}</h4>
                 <span className={`badge ${SUGGESTION_STATUS_STYLES[suggestion.status]}`}>
                     {t(SUGGESTION_STATUS_LABELS[suggestion.status])}
                 </span>
@@ -53,7 +53,7 @@ export const AiSuggestionCard: FC<AiSuggestionCardProps> = ({suggestion, onAccep
                         className="btn btn-primary flex-1 min-h-[44px] flex items-center justify-center gap-1.5 text-sm"
                     >
                         <CheckIcon className="h-4 w-4"/>
-                        {t('ai.accept')}
+                        {t('fake_ai.accept')}
                     </button>
                     {onModify && (
                         <button
@@ -61,7 +61,7 @@ export const AiSuggestionCard: FC<AiSuggestionCardProps> = ({suggestion, onAccep
                             className="btn btn-outline flex-1 min-h-[44px] flex items-center justify-center gap-1.5 text-sm"
                         >
                             <PencilIcon className="h-4 w-4"/>
-                            {t('ai.modify')}
+                            {t('fake_ai.modify')}
                         </button>
                     )}
                     <button
@@ -69,7 +69,7 @@ export const AiSuggestionCard: FC<AiSuggestionCardProps> = ({suggestion, onAccep
                         className="btn bg-error text-white hover:bg-red-700 flex-1 min-h-[44px] flex items-center justify-center gap-1.5 text-sm"
                     >
                         <XMarkIcon className="h-4 w-4"/>
-                        {t('ai.reject')}
+                        {t('fake_ai.reject')}
                     </button>
                 </div>
             )}

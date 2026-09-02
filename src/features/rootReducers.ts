@@ -6,7 +6,7 @@ import {default as floorPlanReducer} from "./floorPlan/slice/floorPlanSlice.ts";
 import {default as spatialAnchorReducer} from "./spatialAnchor/slice/spatialAnchorSlice.ts";
 import {default as measurementReducer} from "./measurement/slice/measurementSlice.ts";
 import {default as fascicoloReducer} from "./fascicolo/slice/fascicoloSlice.ts";
-import {default as aiReducer} from "./ai/slice/aiSlice.ts";
+import {default as aiReducer} from "./fake_ai/slice/aiSlice.ts";
 import {default as buildingsReducer} from "./buildings/buildingsSlice.ts";
 import {default as arazioReducer} from "./arazio/arazioSlice.ts";
 

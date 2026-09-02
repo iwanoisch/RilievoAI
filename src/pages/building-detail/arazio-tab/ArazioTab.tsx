@@ -2,9 +2,9 @@ import {FC, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {useParams} from "react-router-dom";
 import {DocumentTextIcon, CheckCircleIcon} from "@heroicons/react/24/outline";
-import {ARAZIO_SECTIONS} from "../../constants/arazio-sections.constant.ts";
-import {useArazio} from "../../features/arazio/useArazio.ts";
-import {ArazioSectionForm} from "./ArazioSectionForm.tsx";
+import {ARAZIO_SECTIONS} from "../../../constants/arazio-sections.constant.ts";
+import {useArazio} from "../../../features/arazio/useArazio.ts";
+import {ArazioSectionForm} from "../arazio-section-form/ArazioSectionForm.tsx";
 
 export const ArazioTab: FC = () => {
     const {t} = useTranslation();

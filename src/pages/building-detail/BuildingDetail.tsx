@@ -13,7 +13,7 @@ import {
     CubeIcon,
 } from "@heroicons/react/24/outline";
 import {useBuildings} from "../../features/buildings/useBuildings.ts";
-import {ArazioTab} from "./ArazioTab.tsx";
+import {ArazioTab} from "./arazio-tab/ArazioTab.tsx";
 import {BUILDING_STATUS_LABEL} from "../../constants/buildings.constant.ts";
 import {EditBuildingModal} from "./modals/EditBuildingModal.tsx";
 

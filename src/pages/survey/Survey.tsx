@@ -3,7 +3,7 @@ import {PageTitle} from "../../common/page-title/PageTitle.tsx";
 import {store} from "../../store/store.ts";
 import {useSurvey} from "../../features/survey/hooks/useSurvey.ts";
 import {useEdificio} from "../../features/edificio/useEdificio.ts";
-import {useAiAnalysis} from "../../features/ai/hooks/useAiAnalysis.ts";
+import {useAiAnalysis} from "../../features/fake_ai/hooks/useAiAnalysis.ts";
 import {PhotoModal} from "./modals/PhotoModal.tsx";
 import {VoiceModal} from "./modals/VoiceModal.tsx";
 import {MeasurementModal} from "./modals/MeasurementModal.tsx";
@@ -128,12 +128,12 @@ export const Survey: FC = () => {
 
     const handleAcceptSuggestion = async (id: string) => {
         await acceptSuggestion(id);
-        showAlert({title: t('ai.feedback_sent'), type: 'success', message: ''});
+        showAlert({title: t('fake_ai.feedback_sent'), type: 'success', message: ''});
     };
 
     const handleRejectSuggestion = async (id: string) => {
         await rejectSuggestion(id);
-        showAlert({title: t('ai.feedback_sent'), type: 'info', message: ''});
+        showAlert({title: t('fake_ai.feedback_sent'), type: 'info', message: ''});
     };
 
     const getStatusBadgeClass = (): string => {
@@ -260,7 +260,7 @@ export const Survey: FC = () => {
                                     <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary-500 motion-safe:animate-spin"/>
                                 </div>
                                 <SparklesIcon className="h-5 w-5 text-primary-500 flex-shrink-0"/>
-                                <p className="text-sm text-text-secondary">{t('ai.analyzing')}</p>
+                                <p className="text-sm text-text-secondary">{t('fake_ai.analyzing')}</p>
                             </div>
                         )}
 

@@ -728,7 +728,12 @@
     "add": "Aggiungi",
     "no_instances": "Nessun elemento aggiunto. Clicca \"Aggiungi\" per iniziare.",
     "add_section": "Aggiungi sezione\u2026",
-    "remove_section": "Rimuovi"
+    "remove_section": "Rimuovi",
+    "ai_prefill": "Precompila con AI",
+    "ai_loading": "Analisi in corso\u2026",
+    "ai_success": "Form precompilato con successo dall'AI",
+    "ai_error": "Errore durante l'analisi AI",
+    "ai_no_files": "Nessun file supportato trovato"
   },
   "building": {
     "title": "Modello Edificio",

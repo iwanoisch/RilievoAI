@@ -49,7 +49,7 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
         }
     }, [audioPath, isEditMode]);
 
-    // Detecta modifiche ai campi
+    // Detecta modifiche fake_ai campi
     useEffect(() => {
         if (hasRecorded) {
             const changed = localTranscription !== originalTranscription || targetElementId !== originalTargetElementId;

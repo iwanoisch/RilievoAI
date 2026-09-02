@@ -114,7 +114,14 @@ export default defineConfig({
 
         // Configurazione aggiuntiva per il proxy se necessario
         proxy: {
-            // Esempio: '/api': 'http://localhost:3000'
+            '/api/anthropic': {
+                target: 'https://api.anthropic.com',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api\/anthropic/, ''),
+                headers: {
+                    'anthropic-dangerous-direct-browser-access': 'true',
+                },
+            },
         }
     },
 

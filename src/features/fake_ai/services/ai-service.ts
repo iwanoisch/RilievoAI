@@ -6,7 +6,7 @@ import {mockAiService} from "./ai-service.mock.ts";
 // quando il backend AI sarà disponibile.
 //
 // Esempio:
-//   import {realAiService} from "./ai-service.real.ts";
+//   import {realAiService} from "./fake_ai-service.real.ts";
 //   export const aiService: AiService = realAiService;
 // ============================================================
 

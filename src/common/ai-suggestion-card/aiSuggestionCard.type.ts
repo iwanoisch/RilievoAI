@@ -1,4 +1,4 @@
-import type {AiSuggestionWithStatus} from "../../features/ai/slice/ai.type.ts";
+import type {AiSuggestionWithStatus} from "../../features/fake_ai/slice/ai.type.ts";
 
 export interface AiSuggestionCardProps {
     suggestion: AiSuggestionWithStatus;

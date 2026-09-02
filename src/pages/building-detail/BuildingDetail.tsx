@@ -9,7 +9,7 @@ import {
     ExclamationTriangleIcon,
     CalendarDaysIcon,
     ChartBarIcon,
-    MapIcon,
+    FolderOpenIcon,
     CubeIcon,
 } from "@heroicons/react/24/outline";
 import {useBuildings} from "../../features/buildings/useBuildings.ts";
@@ -159,8 +159,8 @@ export const BuildingDetail: FC = () => {
                             onClick={() => setActiveTab('planimetria')}
                             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors min-h-[44px] ${activeTab === 'planimetria' ? 'text-primary-600 border-b-2 border-primary-500' : 'text-text-muted hover:text-text-primary'}`}
                         >
-                            <MapIcon className="h-4 w-4"/>
-                            {t('floorPlan.title')}
+                            <FolderOpenIcon className="h-4 w-4"/>
+                            {t('buildingDetail.documentation')}
                         </button>
                         <button
                             onClick={() => setActiveTab('arazio')}
@@ -174,11 +174,13 @@ export const BuildingDetail: FC = () => {
                     {/* Mobile */}
                     <div className="sm:hidden p-2">
                         <select
+                            id="building-detail-tab-select"
+                            name="building-detail-tab-select"
                             className="input w-full text-sm"
                             value={activeTab}
                             onChange={(e) => setActiveTab(e.target.value as 'planimetria' | 'arazio')}
                         >
-                            <option value="planimetria">{t('floorPlan.title')}</option>
+                            <option value="planimetria">{t('buildingDetail.documentation')}</option>
                             <option value="arazio">{t('buildingDetail.arazio')}</option>
                         </select>
                     </div>
@@ -187,8 +189,8 @@ export const BuildingDetail: FC = () => {
                 {/* Contenuto tab (placeholder) */}
                 {activeTab === 'planimetria' && (
                     <div className="card mt-4 text-center py-12">
-                        <MapIcon className="h-12 w-12 text-text-muted mx-auto mb-3"/>
-                        <p className="text-sm text-text-muted">{t('floorPlan.title')}</p>
+                        <FolderOpenIcon className="h-12 w-12 text-text-muted mx-auto mb-3"/>
+                        <p className="text-sm text-text-muted">{t('buildingDetail.documentation')}</p>
                     </div>
                 )}
                 {activeTab === 'arazio' && <ArazioTab/>}

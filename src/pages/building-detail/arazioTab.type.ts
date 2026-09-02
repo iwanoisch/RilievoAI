@@ -1,5 +1,4 @@
-export interface ArazioSection {
-    id: string;
-    number: number;
-    label: string;
+export interface ArazioSectionFormProps {
+    buildingId: string;
+    sectionId: string;
 }

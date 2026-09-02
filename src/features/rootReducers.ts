@@ -8,6 +8,7 @@ import {default as measurementReducer} from "./measurement/slice/measurementSlic
 import {default as fascicoloReducer} from "./fascicolo/slice/fascicoloSlice.ts";
 import {default as aiReducer} from "./ai/slice/aiSlice.ts";
 import {default as buildingsReducer} from "./buildings/buildingsSlice.ts";
+import {default as arazioReducer} from "./arazio/arazioSlice.ts";
 
 export const reducers = {
     init: initReducer,
@@ -20,4 +21,5 @@ export const reducers = {
     fascicolo: fascicoloReducer,
     ai: aiReducer,
     buildings: buildingsReducer,
+    arazio: arazioReducer,
 };

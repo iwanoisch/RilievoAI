@@ -20,7 +20,7 @@ const rootReducer = combineReducers({
 const persistConfig = {
     key: 'root',
     storage,
-    whitelist: ['auth', 'survey', 'buildings']
+    whitelist: ['auth', 'survey', 'buildings', 'arazio']
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -33,6 +33,7 @@ export const store = configureStore({
             serializableCheck: {
                 ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
             },
+            immutableCheck: {warnAfter: 128},
         }),
 });
 

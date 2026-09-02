@@ -690,6 +690,15 @@
     "instructions_with_markers": "Clicca su un marker sulla planimetria per visualizzare i dettagli, modificare l'angolo, riposizionare o rimuovere la foto.",
     "placed_photos": "Foto posizionate"
   },
+  "buildingDetail": {
+    "arazio": "Arazio",
+    "arazio_title": "Archivio documentale",
+    "arazio_hint": "Seleziona una scheda dall'elenco a sinistra per visualizzarne i contenuti.",
+    "select_section": "Seleziona una scheda...",
+    "section": "Scheda",
+    "of": "di",
+    "section_empty": "Nessun contenuto ancora disponibile per questa scheda."
+  },
   "building": {
     "title": "Modello Edificio",
     "subtitle": "Struttura gerarchica dell'edificio",

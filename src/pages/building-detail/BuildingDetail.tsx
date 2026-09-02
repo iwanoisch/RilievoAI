@@ -10,8 +10,10 @@ import {
     CalendarDaysIcon,
     ChartBarIcon,
     MapIcon,
+    CubeIcon,
 } from "@heroicons/react/24/outline";
 import {useBuildings} from "../../features/buildings/useBuildings.ts";
+import {ArazioTab} from "./ArazioTab.tsx";
 import {BUILDING_STATUS_LABEL} from "../../constants/buildings.constant.ts";
 import {EditBuildingModal} from "./modals/EditBuildingModal.tsx";
 
@@ -22,6 +24,7 @@ export const BuildingDetail: FC = () => {
     const {buildings} = useBuildings();
 
     const [showEditModal, setShowEditModal] = useState(false);
+    const [activeTab, setActiveTab] = useState<'planimetria' | 'arazio'>('planimetria');
 
     const building = buildings.find(b => b.id === id);
 
@@ -152,25 +155,43 @@ export const BuildingDetail: FC = () => {
                 <div className="sticky top-0 z-10 bg-surface-card border-b border-border-default rounded-xl mt-4 -mx-0">
                     {/* Desktop */}
                     <div className="hidden sm:flex overflow-x-auto">
-                        <button className="flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors min-h-[44px] text-primary-600 border-b-2 border-primary-500">
+                        <button
+                            onClick={() => setActiveTab('planimetria')}
+                            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors min-h-[44px] ${activeTab === 'planimetria' ? 'text-primary-600 border-b-2 border-primary-500' : 'text-text-muted hover:text-text-primary'}`}
+                        >
                             <MapIcon className="h-4 w-4"/>
                             {t('floorPlan.title')}
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('arazio')}
+                            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors min-h-[44px] ${activeTab === 'arazio' ? 'text-primary-600 border-b-2 border-primary-500' : 'text-text-muted hover:text-text-primary'}`}
+                        >
+                            <CubeIcon className="h-4 w-4"/>
+                            {t('buildingDetail.arazio')}
                         </button>
                     </div>
 
                     {/* Mobile */}
                     <div className="sm:hidden p-2">
-                        <select className="input w-full text-sm">
-                            <option>{t('floorPlan.title')}</option>
+                        <select
+                            className="input w-full text-sm"
+                            value={activeTab}
+                            onChange={(e) => setActiveTab(e.target.value as 'planimetria' | 'arazio')}
+                        >
+                            <option value="planimetria">{t('floorPlan.title')}</option>
+                            <option value="arazio">{t('buildingDetail.arazio')}</option>
                         </select>
                     </div>
                 </div>
 
                 {/* Contenuto tab (placeholder) */}
-                <div className="card mt-4 text-center py-12">
-                    <MapIcon className="h-12 w-12 text-text-muted mx-auto mb-3"/>
-                    <p className="text-sm text-text-muted">{t('floorPlan.title')}</p>
-                </div>
+                {activeTab === 'planimetria' && (
+                    <div className="card mt-4 text-center py-12">
+                        <MapIcon className="h-12 w-12 text-text-muted mx-auto mb-3"/>
+                        <p className="text-sm text-text-muted">{t('floorPlan.title')}</p>
+                    </div>
+                )}
+                {activeTab === 'arazio' && <ArazioTab/>}
 
             {/* Modale modifica */}
             {showEditModal && (

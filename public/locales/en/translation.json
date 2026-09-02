@@ -687,6 +687,15 @@
     "instructions_with_markers": "Click on a marker on the floor plan to view details, change the angle, reposition or remove the photo.",
     "placed_photos": "Placed photos"
   },
+  "buildingDetail": {
+    "arazio": "Arazio",
+    "arazio_title": "Document archive",
+    "arazio_hint": "Select a section from the list on the left to view its contents.",
+    "select_section": "Select a section...",
+    "section": "Section",
+    "of": "of",
+    "section_empty": "No content available yet for this section."
+  },
   "building": {
     "title": "Building Model",
     "subtitle": "Hierarchical building structure",

@@ -52,13 +52,38 @@ export interface AiBulkRequest {
 export interface AiBulkResponse {
     sections: Record<string, AiArazioResponse>;
     globalNotes: AiAnnotation[];
+    documentDate?: string;
 }
 
 export type AiStatus = 'idle' | 'extracting' | 'analyzing' | 'done' | 'error';
+
+export interface AiUploadedFile {
+    name: string;
+    sizeMb: number;
+    sessionId: string;
+    archived: boolean;
+}
+
+export interface AiSession {
+    id: string;
+    timestamp: string;
+    fileCount: number;
+    sectionsProcessed: number;
+}
 
 export interface AiState {
     status: AiStatus;
     annotations: AiAnnotation[];
     sectionsProcessed: number;
+    totalSectionsProcessed: number;
     error: string | null;
+    uploadedFiles: AiUploadedFile[];
+    sessions: AiSession[];
+    currentSessionId: string | null;
+    userPrompt: string;
+    extractionProgress: number;
+    extractionFileName: string;
+    failedBatches: number;
+    totalBatches: number;
+    currentBatch: number;
 }

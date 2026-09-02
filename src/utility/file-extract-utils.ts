@@ -148,12 +148,18 @@ export const extractFilesFromZip = async (zipFile: File): Promise<ExtractionResu
     return {files, skipped, totalSizeMb: Math.round(totalSize / 1024 / 1024)};
 };
 
-export const extractFilesFromList = async (fileList: File[]): Promise<ExtractionResult> => {
+export const extractFilesFromList = async (
+    fileList: File[],
+    onProgress?: (percent: number, fileName: string) => void
+): Promise<ExtractionResult> => {
     const files: AiExtractedFile[] = [];
     const skipped: SkippedFile[] = [];
     let totalSize = 0;
+    const total = fileList.length;
 
-    for (const file of fileList) {
+    for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        onProgress?.(Math.round((i / total) * 100), file.name);
         if (file.name.toLowerCase().endsWith('.zip')) {
             const zipResult = await extractFilesFromZip(file);
             files.push(...zipResult.files);
@@ -185,5 +191,6 @@ export const extractFilesFromList = async (fileList: File[]): Promise<Extraction
         totalSize += file.size;
     }
 
+    onProgress?.(100, '');
     return {files, skipped, totalSizeMb: Math.round(totalSize / 1024 / 1024)};
 };

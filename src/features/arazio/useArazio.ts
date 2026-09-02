@@ -283,10 +283,20 @@ export const useArazio = () => {
         const groupValutazioni = aiResponse.groupValutazioni ?? {};
         const repeatables = aiResponse.repeatables ?? {};
 
-        // Filtra valori vuoti dall'AI
+        // Filtra valori vuoti dall'AI — gestisce anche oggetti restituiti per errore
         const nonEmptyValues: Record<string, string> = {};
         for (const [k, v] of Object.entries(values)) {
-            if (v && v.trim() !== '') nonEmptyValues[k] = v;
+            let str = '';
+            if (typeof v === 'string') {
+                str = v;
+            } else if (v != null && typeof v === 'object') {
+                const obj = v as Record<string, unknown>;
+                const first = Object.values(obj).find(val => typeof val === 'string' && val.trim() !== '');
+                str = typeof first === 'string' ? first : JSON.stringify(v);
+            } else if (v != null) {
+                str = String(v);
+            }
+            if (str.trim() !== '') nonEmptyValues[k] = str;
         }
 
         const mergedValues = {...current.values, ...nonEmptyValues};

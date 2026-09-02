@@ -16,6 +16,7 @@ export interface BuildingCardData {
     deadline?: string;
     imageUrl?: string;
     status: BuildingStatus;
+    dataDate?: string;
 }
 
 export interface BuildingsState {

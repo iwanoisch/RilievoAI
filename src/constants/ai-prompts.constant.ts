@@ -9,8 +9,9 @@ REGOLE:
 - Per i campi checkbox, usa "true" o "" (stringa vuota)
 - Per i campi file/heading, ignora
 - Se non trovi l'informazione, lascia la stringa vuota ""
-- Per i gruppi ripetibili, crea un array di oggetti con values e valutazione
+- Per i gruppi ripetibili (marcati come "repeatable" nello schema), crea UN ARRAY di istanze separate. Se trovi 2 cortili interni, crea 2 oggetti nell'array. Ogni istanza ha "values" e "valutazione" (vuota).
 - La valutazione va lasciata vuota (l'utente la compilerà)
+- Se un campo ha più valori possibili da documenti diversi, USA IL VALORE PIÙ RECENTE (basato sulla data del documento)
 - IMPORTANTE: nel campo "notes" segnala tutto ciò che non hai trovato, conflitti tra documenti, dati ambigui o informazioni importanti
 
 Tipi di note:
@@ -50,11 +51,22 @@ Devi analizzare TUTTI i documenti e precompilare TUTTE le sezioni possibili.
 SEZIONI E CAMPI:
 {{sectionsSchema}}
 
+REGOLE VALORI:
+- Ogni valore in "values" DEVE essere una STRINGA SEMPLICE, MAI un oggetto o array
+- Esempio CORRETTO: "piani_fuori_terra": "2"
+- Esempio SBAGLIATO: "piani_fuori_terra": { "descrizione": "2 livelli" }
+
+REGOLA DATA DOCUMENTO:
+- Cerca in OGNI documento analizzato la data di emissione/redazione/protocollo
+- Nel campo "documentDate" restituisci la data del documento PIÙ RECENTE tra quelli analizzati, in formato YYYY-MM-DD
+- Se non trovi nessuna data, restituisci stringa vuota ""
+
 FORMATO:
 {
+  "documentDate": "2024-07-15",
   "sections": {
     "sectionId": {
-      "values": {},
+      "values": { "chiave_campo": "valore_stringa" },
       "groupValutazioni": {},
       "repeatables": {},
       "notes": []

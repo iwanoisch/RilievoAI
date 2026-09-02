@@ -14,18 +14,16 @@ import {ARAZIO_SECTIONS, EMPTY_VALUTAZIONE} from "../../../constants/arazio-sect
 import {useArazio} from "../../../features/arazio/useArazio.ts";
 import {useAlert} from "../../../common/alert/useAlert.ts";
 import {formatFileSize} from "../../../utility/arazio-utils.ts";
-import {extractFilesFromList} from "../../../utility/file-extract-utils.ts";
-import {buildFieldSchema} from "../../../utility/ai-schema-utils.ts";
-import {callClaudeForArazio} from "../../../features/ai/ai-arazio-service.ts";
+import {useAi} from "../../../features/ai/useAi.ts";
 import type {ArazioFieldConfig, ArazioGroupConfig, ArazioRepeatableInstance, ArazioValutazione} from "../../../features/arazio/arazio.type.ts";
 import type {ArazioSectionFormProps} from "./arazioSectionForm.type.ts";
 
 export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, sectionId}) => {
     const {t} = useTranslation();
     const arazio = useArazio();
+    const ai = useAi();
     const {showAlert} = useAlert();
     const [saving, setSaving] = useState(false);
-    const [aiLoading, setAiLoading] = useState(false);
     const [expandedInstances, setExpandedInstances] = useState<Record<string, boolean>>({});
     const aiFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,28 +59,17 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
 
     const handleAiPrefill = async (files: FileList) => {
         if (!config || files.length === 0) return;
-        setAiLoading(true);
-        try {
-            const extracted = await extractFilesFromList(Array.from(files));
-            if (extracted.length === 0) {
-                showAlert({title: t('arazio.ai_no_files'), type: 'warning', message: ''});
-                setAiLoading(false);
-                return;
-            }
-            const schema = buildFieldSchema(config);
-            const response = await callClaudeForArazio({
-                sectionId: config.id,
-                sectionLabel: config.label,
-                fieldSchema: schema,
-                files: extracted,
-            });
-            arazio.applyAiResponse(buildingId, sectionId, response);
-            showAlert({title: t('arazio.ai_success'), type: 'success', message: ''});
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore AI';
-            showAlert({title: t('arazio.ai_error'), type: 'error', message});
+        const extraction = await ai.extractFiles(Array.from(files));
+        if (extraction.files.length === 0) {
+            showAlert({title: t('arazio.ai_no_files'), type: 'warning', message: ''});
+            return;
         }
-        setAiLoading(false);
+        const result = await ai.analyzeSection(buildingId, sectionId, extraction.files);
+        if (result) {
+            showAlert({title: t('arazio.ai_success'), type: 'success', message: ''});
+        } else {
+            showAlert({title: t('arazio.ai_error'), type: 'error', message: ai.error ?? ''});
+        }
     };
 
     // ── Render field ──
@@ -560,11 +547,11 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                     <button
                         type="button"
                         onClick={() => aiFileInputRef.current?.click()}
-                        disabled={aiLoading}
+                        disabled={ai.status === 'analyzing' || ai.status === 'extracting'}
                         className="btn btn-primary flex items-center gap-2 min-h-[44px] text-sm"
                     >
-                        <SparklesIcon className={`h-4 w-4 ${aiLoading ? 'animate-spin' : ''}`}/>
-                        {aiLoading ? t('arazio.ai_loading') : t('arazio.ai_prefill')}
+                        <SparklesIcon className={`h-4 w-4 ${ai.status === 'analyzing' ? 'animate-spin' : ''}`}/>
+                        {ai.status === 'analyzing' ? t('arazio.ai_loading') : t('arazio.ai_prefill')}
                     </button>
                     <input
                         ref={aiFileInputRef}

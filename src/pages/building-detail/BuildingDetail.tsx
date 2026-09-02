@@ -14,6 +14,7 @@ import {
 } from "@heroicons/react/24/outline";
 import {useBuildings} from "../../features/buildings/useBuildings.ts";
 import {ArazioTab} from "./arazio-tab/ArazioTab.tsx";
+import {DocumentazioneTab} from "./documentazione-tab/DocumentazioneTab.tsx";
 import {BUILDING_STATUS_LABEL} from "../../constants/buildings.constant.ts";
 import {EditBuildingModal} from "./modals/EditBuildingModal.tsx";
 
@@ -187,12 +188,7 @@ export const BuildingDetail: FC = () => {
                 </div>
 
                 {/* Contenuto tab (placeholder) */}
-                {activeTab === 'planimetria' && (
-                    <div className="card mt-4 text-center py-12">
-                        <FolderOpenIcon className="h-12 w-12 text-text-muted mx-auto mb-3"/>
-                        <p className="text-sm text-text-muted">{t('buildingDetail.documentation')}</p>
-                    </div>
-                )}
+                {activeTab === 'planimetria' && <DocumentazioneTab/>}
                 {activeTab === 'arazio' && <ArazioTab/>}
 
             {/* Modale modifica */}

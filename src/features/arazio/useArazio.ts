@@ -1,4 +1,4 @@
-import {useAppDispatch, useAppSelector} from "../../store/store.ts";
+import {useAppDispatch, useAppSelector, store} from "../../store/store.ts";
 import {setSections, setArazioError} from "./arazioSlice.ts";
 import type {ArazioAttachment, ArazioRepeatableInstance, ArazioSectionData, ArazioValutazione} from "./arazio.type.ts";
 import type {AiArazioResponse} from "../ai/ai.type.ts";
@@ -8,6 +8,9 @@ import {mapInstance, createEmptyInstance, createEmptySection} from "../../utilit
 export const useArazio = () => {
     const dispatch = useAppDispatch();
     const state = useAppSelector(state => state.arazio);
+
+    // Per leggere state fresco in contesti async (evita stale closure)
+    const getFreshState = () => store.getState().arazio;
 
     const getSectionsForBuilding = (buildingId: string): ArazioSectionData[] => {
         return ARAZIO_SECTIONS.map(config => {
@@ -270,26 +273,46 @@ export const useArazio = () => {
     // ── Applicazione risposta AI ──
 
     const applyAiResponse = (buildingId: string, sectionId: string, aiResponse: AiArazioResponse) => {
-        const current = getSectionData(buildingId, sectionId);
+        // Usa state fresco per evitare stale closure in loop async
+        const freshState = getFreshState();
+        const existing = freshState.sections.find(
+            s => s.sectionId === sectionId && s.buildingId === buildingId
+        );
+        const current = existing ?? createEmptySection(sectionId, buildingId);
+        const values = aiResponse.values ?? {};
+        const groupValutazioni = aiResponse.groupValutazioni ?? {};
+        const repeatables = aiResponse.repeatables ?? {};
 
-        const mergedValues = {...current.values, ...aiResponse.values};
-        const mergedGroupValutazioni = {...current.groupValutazioni, ...aiResponse.groupValutazioni};
+        // Filtra valori vuoti dall'AI
+        const nonEmptyValues: Record<string, string> = {};
+        for (const [k, v] of Object.entries(values)) {
+            if (v && v.trim() !== '') nonEmptyValues[k] = v;
+        }
+
+        const mergedValues = {...current.values, ...nonEmptyValues};
+        const mergedGroupValutazioni = {...current.groupValutazioni, ...groupValutazioni};
 
         const mergedRepeatables: Record<string, ArazioRepeatableInstance[]> = {...current.repeatables};
-        for (const [groupKey, aiInstances] of Object.entries(aiResponse.repeatables)) {
+        for (const [groupKey, aiInstances] of Object.entries(repeatables)) {
+            if (!Array.isArray(aiInstances)) continue;
             const newInstances: ArazioRepeatableInstance[] = aiInstances.map(ai => ({
                 ...createEmptyInstance(),
-                values: ai.values,
-                valutazione: ai.valutazione,
+                values: ai.values ?? {},
+                valutazione: ai.valutazione ?? {...EMPTY_VALUTAZIONE},
             }));
             mergedRepeatables[groupKey] = [...(mergedRepeatables[groupKey] ?? []), ...newInstances];
         }
 
-        updateSection(buildingId, sectionId, {
+        const updated: ArazioSectionData = {
+            ...current,
             values: mergedValues,
             groupValutazioni: mergedGroupValutazioni,
             repeatables: mergedRepeatables,
-        });
+        };
+        const freshOthers = getFreshState().sections.filter(
+            s => !(s.sectionId === sectionId && s.buildingId === buildingId)
+        );
+        dispatch(setSections([...freshOthers, updated]));
     };
 
     // ── Salvataggio ──

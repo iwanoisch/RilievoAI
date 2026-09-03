@@ -1,7 +1,7 @@
-import type {ArazioSectionConfig} from "../features/arazio/arazio.type.ts";
+import type {AnagraficaSectionConfig} from "../features/anagrafica/anagrafica.type.ts";
 import type {AiFieldSchema} from "../features/ai/ai.type.ts";
 
-export const buildFieldSchema = (config: ArazioSectionConfig): AiFieldSchema[] => {
+export const buildFieldSchema = (config: AnagraficaSectionConfig): AiFieldSchema[] => {
     const schema: AiFieldSchema[] = [];
 
     for (const group of config.groups) {

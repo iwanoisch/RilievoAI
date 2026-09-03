@@ -692,10 +692,10 @@
   },
   "buildingDetail": {
     "documentation": "Documentazione",
-    "arazio": "Arazio",
+    "anagrafica": "Anagrafica Immobile",
     "rilievo": "Rilievo",
-    "arazio_title": "Archivio documentale",
-    "arazio_hint": "Seleziona una scheda dall'elenco a sinistra per visualizzarne i contenuti.",
+    "anagrafica_title": "Anagrafica Immobile",
+    "anagrafica_hint": "Seleziona una scheda dall'elenco a sinistra per visualizzarne i contenuti.",
     "select_section": "Seleziona una scheda...",
     "section": "Scheda",
     "of": "di",
@@ -754,6 +754,7 @@
     "add_child": "Aggiungi figlio",
     "delete_item": "Elimina",
     "name_placeholder": "Nome...",
+    "edit_node": "Modifica nome",
     "checklist": "Checklist",
     "camera_error": "Impossibile accedere alla fotocamera. Verifica i permessi.",
     "start_camera": "Avvia fotocamera",
@@ -768,7 +769,7 @@
     "voice_instructions": "Premi il pulsante per iniziare a registrare una nota vocale",
     "mic_error": "Impossibile accedere al microfono. Verifica i permessi."
   },
-  "arazio": {
+  "anagrafica": {
     "select_placeholder": "Seleziona...",
     "required": "\u00B7 obbligatoria",
     "valutazione_record": "Valutazione del record",
@@ -798,6 +799,9 @@
     "add_section": "Aggiungi sezione\u2026",
     "remove_section": "Rimuovi",
     "ai_prefill": "Precompila con AI",
+    "ai_use_doc_tab": "Usa la tab Documentazione",
+    "ai_use_doc_tab_hint": "Carica i documenti nella tab Documentazione e clicca 'Analizza e precompila' per compilare automaticamente tutte le sezioni.",
+    "ai_extracting": "Estrazione file\u2026",
     "ai_loading": "Analisi in corso\u2026",
     "ai_success": "Form precompilato con successo dall'AI",
     "ai_error": "Errore durante l'analisi AI",

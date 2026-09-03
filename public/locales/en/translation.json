@@ -689,10 +689,10 @@
   },
   "buildingDetail": {
     "documentation": "Documentation",
-    "arazio": "Arazio",
+    "anagrafica": "Building Registry",
     "rilievo": "Survey",
-    "arazio_title": "Document archive",
-    "arazio_hint": "Select a section from the list on the left to view its contents.",
+    "anagrafica_title": "Building Registry",
+    "anagrafica_hint": "Select a section from the list on the left to view its contents.",
     "select_section": "Select a section...",
     "section": "Section",
     "of": "of",
@@ -751,6 +751,7 @@
     "add_child": "Add child",
     "delete_item": "Delete",
     "name_placeholder": "Name...",
+    "edit_node": "Edit name",
     "checklist": "Checklist",
     "camera_error": "Cannot access camera. Check permissions.",
     "start_camera": "Start camera",
@@ -765,7 +766,7 @@
     "voice_instructions": "Press the button to start recording a voice note",
     "mic_error": "Cannot access microphone. Check permissions."
   },
-  "arazio": {
+  "anagrafica": {
     "select_placeholder": "Select...",
     "required": "\u00B7 required",
     "valutazione_record": "Record evaluation",
@@ -795,6 +796,9 @@
     "add_section": "Add section\u2026",
     "remove_section": "Remove",
     "ai_prefill": "Prefill with AI",
+    "ai_use_doc_tab": "Use the Documentation tab",
+    "ai_use_doc_tab_hint": "Upload documents in the Documentation tab and click 'Analyze and prefill' to automatically fill all sections.",
+    "ai_extracting": "Extracting files\u2026",
     "ai_loading": "Analyzing\u2026",
     "ai_success": "Form prefilled successfully by AI",
     "ai_error": "Error during AI analysis",

@@ -1,4 +1,4 @@
-import {FC, useRef, useState} from "react";
+import {FC, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {
     DocumentTextIcon,
@@ -6,34 +6,30 @@ import {
     TrashIcon,
     ChevronRightIcon,
     PlusIcon,
-    SparklesIcon,
 } from "@heroicons/react/24/outline";
 import {PaperClipIcon} from "@heroicons/react/24/solid";
 import {RadioGroup, Radio, Field, Label} from "@headlessui/react";
-import {ARAZIO_SECTIONS, EMPTY_VALUTAZIONE} from "../../constants/arazio-sections.constant.ts";
-import {useArazio} from "../../features/arazio/useArazio.ts";
+import {ANAGRAFICA_SECTIONS, EMPTY_VALUTAZIONE} from "../../constants/anagrafica-sections.constant.ts";
+import {useAnagrafica} from "../../features/anagrafica/useAnagrafica.ts";
 import {useAlert} from "../../common/alert/useAlert.ts";
-import {formatFileSize} from "../../utility/arazio-utils.ts";
-import {useAi} from "../../features/ai/useAi.ts";
-import type {ArazioFieldConfig, ArazioGroupConfig, ArazioRepeatableInstance, ArazioValutazione} from "../../features/arazio/arazio.type.ts";
-import type {ArazioSectionFormProps} from "./arazioSectionForm.type.ts";
+import {formatFileSize} from "../../utility/anagrafica-utils.ts";
+import type {AnagraficaFieldConfig, AnagraficaGroupConfig, AnagraficaRepeatableInstance, AnagraficaValutazione} from "../../features/anagrafica/anagrafica.type.ts";
+import type {AnagraficaSectionFormProps} from "./anagraficaSectionForm.type.ts";
 
-export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, sectionId}) => {
+export const AnagraficaSectionForm: FC<AnagraficaSectionFormProps> = ({buildingId, sectionId}) => {
     const {t} = useTranslation();
-    const arazio = useArazio();
-    const ai = useAi();
+    const anagrafica = useAnagrafica();
     const {showAlert} = useAlert();
     const [saving, setSaving] = useState(false);
     const [expandedInstances, setExpandedInstances] = useState<Record<string, boolean>>({});
-    const aiFileInputRef = useRef<HTMLInputElement>(null);
 
-    const config = ARAZIO_SECTIONS.find(s => s.id === sectionId);
-    const sectionData = arazio.getSectionData(buildingId, sectionId);
+    const config = ANAGRAFICA_SECTIONS.find(s => s.id === sectionId);
+    const sectionData = anagrafica.getSectionData(buildingId, sectionId);
 
     if (!config) return null;
 
     const fid = (key: string, instanceId?: string) =>
-        instanceId ? `arazio-${sectionId}-${instanceId}-${key}` : `arazio-${sectionId}-${key}`;
+        instanceId ? `anagrafica-${sectionId}-${instanceId}-${key}` : `anagrafica-${sectionId}-${key}`;
 
     const toggleInstance = (instanceId: string) => {
         setExpandedInstances(prev => ({...prev, [instanceId]: !prev[instanceId]}));
@@ -41,40 +37,26 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
 
     const handleSaveDraft = async () => {
         setSaving(true);
-        const result = await arazio.saveDraft(buildingId, sectionId);
+        const result = await anagrafica.saveDraft(buildingId, sectionId);
         setSaving(false);
-        if (result) showAlert({title: t('arazio.draft_saved'), type: 'success', message: ''});
+        if (result) showAlert({title: t('anagrafica.draft_saved'), type: 'success', message: ''});
     };
 
     const handleSaveComplete = async () => {
         setSaving(true);
-        const result = await arazio.saveAndComplete(buildingId, sectionId);
+        const result = await anagrafica.saveAndComplete(buildingId, sectionId);
         setSaving(false);
-        if (result) showAlert({title: t('arazio.section_completed'), type: 'success', message: ''});
+        if (result) showAlert({title: t('anagrafica.section_completed'), type: 'success', message: ''});
     };
 
     const handleCancel = () => {
         // TODO: reload from server
     };
 
-    const handleAiPrefill = async (files: FileList) => {
-        if (!config || files.length === 0) return;
-        const extraction = await ai.extractFiles(Array.from(files));
-        if (extraction.files.length === 0) {
-            showAlert({title: t('arazio.ai_no_files'), type: 'warning', message: ''});
-            return;
-        }
-        const result = await ai.analyzeSection(buildingId, sectionId, extraction.files);
-        if (result) {
-            showAlert({title: t('arazio.ai_success'), type: 'success', message: ''});
-        } else {
-            showAlert({title: t('arazio.ai_error'), type: 'error', message: ai.error ?? ''});
-        }
-    };
 
     // ── Render field ──
     const renderField = (
-        field: ArazioFieldConfig,
+        field: AnagraficaFieldConfig,
         getValue: () => string,
         onChange: (val: string) => void,
         _idPrefix: string,
@@ -130,7 +112,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => arazio.removeAttachment(buildingId, sectionId, att.id)}
+                                            onClick={() => anagrafica.removeAttachment(buildingId, sectionId, att.id)}
                                             className="p-1.5 rounded-lg text-text-disabled hover:text-error hover:bg-error-light transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                                             aria-label={t('common.delete')}
                                         >
@@ -143,7 +125,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                         {showUploadButton && (
                             <label htmlFor={id} className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-primary-600 bg-primary-50 border border-dashed border-primary-200 rounded-lg cursor-pointer hover:bg-primary-100 hover:border-primary-300 transition-colors min-h-[44px]">
                                 <ArrowUpTrayIcon className="h-4 w-4"/>
-                                {t('arazio.upload_file')}
+                                {t('anagrafica.upload_file')}
                                 <input
                                     id={id}
                                     name={id}
@@ -154,7 +136,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                                     onChange={(e) => {
                                         const files = e.target.files;
                                         if (files && files.length > 0) {
-                                            arazio.addAttachments(buildingId, sectionId, field.key, Array.from(files), instanceId);
+                                            anagrafica.addAttachments(buildingId, sectionId, field.key, Array.from(files), instanceId);
                                             e.target.value = '';
                                         }
                                     }}
@@ -164,7 +146,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                         {!isMultiple && hasFile && (
                             <label htmlFor={`${id}-replace`} className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-text-secondary bg-surface-card border border-dashed border-border-strong rounded-lg cursor-pointer hover:bg-surface-hover transition-colors min-h-[44px]">
                                 <ArrowUpTrayIcon className="h-4 w-4"/>
-                                {t('arazio.replace_file')}
+                                {t('anagrafica.replace_file')}
                                 <input
                                     id={`${id}-replace`}
                                     name={`${id}-replace`}
@@ -174,8 +156,8 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                                     onChange={(e) => {
                                         const files = e.target.files;
                                         if (files && files.length > 0) {
-                                            attachments.forEach(att => arazio.removeAttachment(buildingId, sectionId, att.id));
-                                            arazio.addAttachments(buildingId, sectionId, field.key, [files[0]], instanceId);
+                                            attachments.forEach(att => anagrafica.removeAttachment(buildingId, sectionId, att.id));
+                                            anagrafica.addAttachments(buildingId, sectionId, field.key, [files[0]], instanceId);
                                             e.target.value = '';
                                         }
                                     }}
@@ -192,7 +174,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
             case 'select':
                 return (
                     <select id={id} name={id} className="input w-full text-sm" value={fieldValue} onChange={(e) => onChange(e.target.value)}>
-                        <option value="">{t('arazio.select_placeholder')}</option>
+                        <option value="">{t('anagrafica.select_placeholder')}</option>
                         {field.options?.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                     </select>
                 );
@@ -218,7 +200,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
 
     // ── Render griglia campi ──
     const renderFieldGrid = (
-        fields: ArazioFieldConfig[],
+        fields: AnagraficaFieldConfig[],
         getValue: (key: string) => string,
         onChange: (key: string, val: string) => void,
         idPrefix: string,
@@ -260,16 +242,16 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
 
     // ── Render valutazione ──
     const renderValutazione = (
-        valutazione: ArazioValutazione,
-        onChangeVal: (key: keyof ArazioValutazione, value: string) => void,
+        valutazione: AnagraficaValutazione,
+        onChangeVal: (key: keyof AnagraficaValutazione, value: string) => void,
         idSuffix: string,
     ) => (
         <div className="mt-4 rounded-xl border border-warning/30 bg-warning-light/30 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-warning-dark mb-3">{t('arazio.valutazione_record')}</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-warning-dark mb-3">{t('anagrafica.valutazione_record')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {([
-                    ['responsabile', t('arazio.val_responsabile'), 'text'],
-                    ['scadenza', t('arazio.val_scadenza'), 'date'],
+                    ['responsabile', t('anagrafica.val_responsabile'), 'text'],
+                    ['scadenza', t('anagrafica.val_scadenza'), 'date'],
                 ] as const).map(([key, label, type]) => (
                     <div key={key}>
                         <label htmlFor={`val-${idSuffix}-${key}`} className="block text-xs font-medium text-text-muted mb-1">{label}</label>
@@ -277,11 +259,11 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                     </div>
                 ))}
                 {([
-                    ['criticita', t('arazio.val_criticita'), [{v: 'si', l: t('arazio.yes')}, {v: 'no', l: t('arazio.no')}]],
-                    ['priorita', t('arazio.val_priorita'), [{v: 'a', l: 'A'}, {v: 'b', l: 'B'}, {v: 'c', l: 'C'}]],
-                    ['rischio', t('arazio.val_rischio'), [{v: '1', l: '1'}, {v: '2', l: '2'}, {v: '3', l: '3'}, {v: '4', l: '4'}, {v: '5', l: '5'}]],
-                    ['impatto', t('arazio.val_impatto'), [{v: '1', l: '1'}, {v: '2', l: '2'}, {v: '3', l: '3'}, {v: '4', l: '4'}, {v: '5', l: '5'}]],
-                ] as [keyof ArazioValutazione, string, {v: string; l: string}[]][]).map(([key, label, opts]) => (
+                    ['criticita', t('anagrafica.val_criticita'), [{v: 'si', l: t('anagrafica.yes')}, {v: 'no', l: t('anagrafica.no')}]],
+                    ['priorita', t('anagrafica.val_priorita'), [{v: 'a', l: 'A'}, {v: 'b', l: 'B'}, {v: 'c', l: 'C'}]],
+                    ['rischio', t('anagrafica.val_rischio'), [{v: '1', l: '1'}, {v: '2', l: '2'}, {v: '3', l: '3'}, {v: '4', l: '4'}, {v: '5', l: '5'}]],
+                    ['impatto', t('anagrafica.val_impatto'), [{v: '1', l: '1'}, {v: '2', l: '2'}, {v: '3', l: '3'}, {v: '4', l: '4'}, {v: '5', l: '5'}]],
+                ] as [keyof AnagraficaValutazione, string, {v: string; l: string}[]][]).map(([key, label, opts]) => (
                     <div key={key}>
                         <label htmlFor={`val-${idSuffix}-${key}`} className="block text-xs font-medium text-text-muted mb-1">{label}</label>
                         <select id={`val-${idSuffix}-${key}`} name={`val-${idSuffix}-${key}`} className="input w-full text-sm" value={valutazione[key]} onChange={(e) => onChangeVal(key, e.target.value)}>
@@ -291,7 +273,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                     </div>
                 ))}
                 <div className="sm:col-span-2">
-                    <label htmlFor={`val-${idSuffix}-azione`} className="block text-xs font-medium text-text-muted mb-1">{t('arazio.val_azione')}</label>
+                    <label htmlFor={`val-${idSuffix}-azione`} className="block text-xs font-medium text-text-muted mb-1">{t('anagrafica.val_azione')}</label>
                     <input id={`val-${idSuffix}-azione`} name={`val-${idSuffix}-azione`} className="input w-full text-sm" type="text" value={valutazione.azioneRichiesta} onChange={(e) => onChangeVal('azioneRichiesta', e.target.value)}/>
                 </div>
             </div>
@@ -299,7 +281,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
     );
 
     // ── Render sotto-gruppo standard (dentro istanza ripetibile) ──
-    const renderNestedStandardGroup = (subGroup: ArazioGroupConfig, parentGroupKey: string, parentInstance: ArazioRepeatableInstance) => {
+    const renderNestedStandardGroup = (subGroup: AnagraficaGroupConfig, parentGroupKey: string, parentInstance: AnagraficaRepeatableInstance) => {
         const valutazione = parentInstance.subGroupValutazioni[subGroup.key] ?? EMPTY_VALUTAZIONE;
 
         return (
@@ -308,20 +290,20 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                     <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
                         {subGroup.label}
                         {subGroup.required && (
-                            <span className="ml-2 text-primary-500 normal-case font-medium">{t('arazio.required')}</span>
+                            <span className="ml-2 text-primary-500 normal-case font-medium">{t('anagrafica.required')}</span>
                         )}
                     </h4>
                 </div>
                 {renderFieldGrid(
                     subGroup.fields,
                     (key) => parentInstance.values[key] ?? '',
-                    (key, val) => arazio.updateRepeatableField(buildingId, sectionId, parentGroupKey, parentInstance.id, key, val),
+                    (key, val) => anagrafica.updateRepeatableField(buildingId, sectionId, parentGroupKey, parentInstance.id, key, val),
                     `${parentGroupKey}-${parentInstance.id}-${subGroup.key}`,
                     parentInstance.id,
                 )}
                 {subGroup.hasValutazione && renderValutazione(
                     valutazione,
-                    (key, val) => arazio.updateSubGroupValutazione(buildingId, sectionId, parentGroupKey, parentInstance.id, subGroup.key, key, val),
+                    (key, val) => anagrafica.updateSubGroupValutazione(buildingId, sectionId, parentGroupKey, parentInstance.id, subGroup.key, key, val),
                     `${parentGroupKey}-${parentInstance.id}-${subGroup.key}`,
                 )}
             </div>
@@ -329,7 +311,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
     };
 
     // ── Render sotto-gruppo ripetibile (nidificato dentro istanza) ──
-    const renderNestedRepeatableGroup = (subGroup: ArazioGroupConfig, parentGroupKey: string, parentInstance: ArazioRepeatableInstance) => {
+    const renderNestedRepeatableGroup = (subGroup: AnagraficaGroupConfig, parentGroupKey: string, parentInstance: AnagraficaRepeatableInstance) => {
         const subInstances = parentInstance.subRepeatables[subGroup.key] ?? [];
 
         return (
@@ -337,15 +319,15 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                 <div className="flex items-center justify-between border-b border-border-default pb-2">
                     <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
                         {subGroup.label}
-                        <span className="ml-2 text-primary-500 normal-case font-medium">{t('arazio.repeatable')}</span>
+                        <span className="ml-2 text-primary-500 normal-case font-medium">{t('anagrafica.repeatable')}</span>
                     </h4>
                     <button
                         type="button"
-                        onClick={() => arazio.addSubRepeatableInstance(buildingId, sectionId, parentGroupKey, parentInstance.id, subGroup.key)}
+                        onClick={() => anagrafica.addSubRepeatableInstance(buildingId, sectionId, parentGroupKey, parentInstance.id, subGroup.key)}
                         className="inline-flex items-center gap-1 text-xs font-medium text-primary-700 hover:text-primary-800 min-h-[44px]"
                     >
                         <PlusIcon className="h-3.5 w-3.5"/>
-                        {t('arazio.add')} {subGroup.label.toLowerCase()}
+                        {t('anagrafica.add')} {subGroup.label.toLowerCase()}
                     </button>
                 </div>
 
@@ -364,7 +346,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                                     type="button"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        arazio.removeSubRepeatableInstance(buildingId, sectionId, parentGroupKey, parentInstance.id, subGroup.key, subInst.id);
+                                        anagrafica.removeSubRepeatableInstance(buildingId, sectionId, parentGroupKey, parentInstance.id, subGroup.key, subInst.id);
                                     }}
                                     className="p-1.5 rounded-lg text-text-disabled hover:text-error hover:bg-error-light transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                                     aria-label={t('common.delete')}
@@ -377,13 +359,13 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                                     {renderFieldGrid(
                                         subGroup.fields,
                                         (key) => subInst.values[key] ?? '',
-                                        (key, val) => arazio.updateSubRepeatableField(buildingId, sectionId, parentGroupKey, parentInstance.id, subGroup.key, subInst.id, key, val),
+                                        (key, val) => anagrafica.updateSubRepeatableField(buildingId, sectionId, parentGroupKey, parentInstance.id, subGroup.key, subInst.id, key, val),
                                         `${parentGroupKey}-${parentInstance.id}-${subGroup.key}-${subInst.id}`,
                                         subInst.id,
                                     )}
                                     {subGroup.hasValutazione && renderValutazione(
                                         subInst.valutazione,
-                                        (key, val) => arazio.updateSubRepeatableValutazione(buildingId, sectionId, parentGroupKey, parentInstance.id, subGroup.key, subInst.id, key, val),
+                                        (key, val) => anagrafica.updateSubRepeatableValutazione(buildingId, sectionId, parentGroupKey, parentInstance.id, subGroup.key, subInst.id, key, val),
                                         `${parentGroupKey}-${parentInstance.id}-${subGroup.key}-${subInst.id}`,
                                     )}
                                 </div>
@@ -393,14 +375,14 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                 })}
 
                 {subInstances.length === 0 && (
-                    <p className="text-sm text-text-muted italic py-2">{t('arazio.no_instances')}</p>
+                    <p className="text-sm text-text-muted italic py-2">{t('anagrafica.no_instances')}</p>
                 )}
             </div>
         );
     };
 
     // ── Render gruppo ripetibile ──
-    const renderRepeatableGroup = (group: ArazioGroupConfig) => {
+    const renderRepeatableGroup = (group: AnagraficaGroupConfig) => {
         const instances = sectionData.repeatables[group.key] ?? [];
 
         return (
@@ -408,15 +390,15 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                 <div className="flex items-center justify-between border-b border-border-default pb-2">
                     <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
                         {group.label}
-                        <span className="ml-2 text-primary-500 normal-case font-medium">{t('arazio.repeatable')}</span>
+                        <span className="ml-2 text-primary-500 normal-case font-medium">{t('anagrafica.repeatable')}</span>
                     </h4>
                     <button
                         type="button"
-                        onClick={() => arazio.addRepeatableInstance(buildingId, sectionId, group.key)}
+                        onClick={() => anagrafica.addRepeatableInstance(buildingId, sectionId, group.key)}
                         className="inline-flex items-center gap-1 text-xs font-medium text-primary-700 hover:text-primary-800 min-h-[44px]"
                     >
                         <PlusIcon className="h-3.5 w-3.5"/>
-                        {t('arazio.add')} {group.label.toLowerCase()}
+                        {t('anagrafica.add')} {group.label.toLowerCase()}
                     </button>
                 </div>
 
@@ -436,7 +418,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                                     type="button"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        arazio.removeRepeatableInstance(buildingId, sectionId, group.key, instance.id);
+                                        anagrafica.removeRepeatableInstance(buildingId, sectionId, group.key, instance.id);
                                     }}
                                     className="p-1.5 rounded-lg text-text-disabled hover:text-error hover:bg-error-light transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                                     aria-label={t('common.delete')}
@@ -452,13 +434,13 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                                     {group.fields.length > 0 && renderFieldGrid(
                                         group.fields,
                                         (key) => instance.values[key] ?? '',
-                                        (key, val) => arazio.updateRepeatableField(buildingId, sectionId, group.key, instance.id, key, val),
+                                        (key, val) => anagrafica.updateRepeatableField(buildingId, sectionId, group.key, instance.id, key, val),
                                         `${group.key}-${instance.id}`,
                                         instance.id,
                                     )}
                                     {group.hasValutazione && renderValutazione(
                                         instance.valutazione,
-                                        (key, val) => arazio.updateRepeatableValutazione(buildingId, sectionId, group.key, instance.id, key, val),
+                                        (key, val) => anagrafica.updateRepeatableValutazione(buildingId, sectionId, group.key, instance.id, key, val),
                                         `${group.key}-${instance.id}`,
                                     )}
 
@@ -475,14 +457,14 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                 })}
 
                 {instances.length === 0 && (
-                    <p className="text-sm text-text-muted italic py-3">{t('arazio.no_instances')}</p>
+                    <p className="text-sm text-text-muted italic py-3">{t('anagrafica.no_instances')}</p>
                 )}
             </div>
         );
     };
 
     // ── Render gruppo standard ──
-    const renderStandardGroup = (group: ArazioGroupConfig) => {
+    const renderStandardGroup = (group: AnagraficaGroupConfig) => {
         const groupValutazione = sectionData.groupValutazioni[group.key] ?? {...EMPTY_VALUTAZIONE};
 
         return (
@@ -491,17 +473,17 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                     <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
                         {group.label}
                         {group.required && (
-                            <span className="ml-2 text-primary-500 normal-case font-medium">{t('arazio.required')}</span>
+                            <span className="ml-2 text-primary-500 normal-case font-medium">{t('anagrafica.required')}</span>
                         )}
                     </h4>
                     {group.optional && (
                         <button
                             type="button"
-                            onClick={() => arazio.removeOptionalGroup(buildingId, sectionId, group.key)}
+                            onClick={() => anagrafica.removeOptionalGroup(buildingId, sectionId, group.key)}
                             className="inline-flex items-center gap-1 text-xs font-medium text-primary-700 hover:text-primary-800 min-h-[44px]"
                         >
                             <TrashIcon className="h-3.5 w-3.5"/>
-                            {t('arazio.remove_section')}
+                            {t('anagrafica.remove_section')}
                         </button>
                     )}
                 </div>
@@ -509,7 +491,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                 {renderFieldGrid(
                     group.fields,
                     (key) => sectionData.values[key] ?? '',
-                    (key, val) => arazio.updateSection(buildingId, sectionId, {
+                    (key, val) => anagrafica.updateSection(buildingId, sectionId, {
                         values: {...sectionData.values, [key]: val},
                     }),
                     group.key,
@@ -517,7 +499,7 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
 
                 {group.hasValutazione && renderValutazione(
                     groupValutazione,
-                    (key, val) => arazio.updateGroupValutazione(buildingId, sectionId, group.key, key, val),
+                    (key, val) => anagrafica.updateGroupValutazione(buildingId, sectionId, group.key, key, val),
                     group.key,
                 )}
             </div>
@@ -542,28 +524,8 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                             : sectionData.status === 'draft' ? 'badge-warning'
                                 : 'badge-info'
                     }`}>
-                        {t(`arazio.status_${sectionData.status}`)}
+                        {t(`anagrafica.status_${sectionData.status}`)}
                     </span>
-                    <button
-                        type="button"
-                        onClick={() => aiFileInputRef.current?.click()}
-                        disabled={ai.status === 'analyzing' || ai.status === 'extracting'}
-                        className="btn btn-primary flex items-center gap-2 min-h-[44px] text-sm"
-                    >
-                        <SparklesIcon className={`h-4 w-4 ${ai.status === 'analyzing' ? 'animate-spin' : ''}`}/>
-                        {ai.status === 'analyzing' ? t('arazio.ai_loading') : t('arazio.ai_prefill')}
-                    </button>
-                    <input
-                        ref={aiFileInputRef}
-                        type="file"
-                        multiple
-                        accept=".zip,.pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx,.txt,.csv"
-                        className="hidden"
-                        onChange={(e) => {
-                            if (e.target.files) handleAiPrefill(e.target.files);
-                            e.target.value = '';
-                        }}
-                    />
                 </div>
             </div>
 
@@ -589,11 +551,11 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
                             value=""
                             onChange={(e) => {
                                 if (e.target.value) {
-                                    arazio.addOptionalGroup(buildingId, sectionId, e.target.value);
+                                    anagrafica.addOptionalGroup(buildingId, sectionId, e.target.value);
                                 }
                             }}
                         >
-                            <option value="">+ {t('arazio.add_section')}</option>
+                            <option value="">+ {t('anagrafica.add_section')}</option>
                             {hiddenOptional.map(g => (
                                 <option key={g.key} value={g.key}>{g.label}</option>
                             ))}
@@ -605,13 +567,13 @@ export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, secti
             {/* Bottoni */}
             <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-6 mt-6 border-t border-border-default">
                 <button className="btn btn-ghost min-h-[44px]" onClick={handleCancel} disabled={saving}>
-                    {t('arazio.cancel')}
+                    {t('anagrafica.cancel')}
                 </button>
                 <button className="btn btn-outline min-h-[44px]" onClick={handleSaveDraft} disabled={saving}>
-                    {t('arazio.save_draft')}
+                    {t('anagrafica.save_draft')}
                 </button>
                 <button className="btn btn-primary min-h-[44px]" onClick={handleSaveComplete} disabled={saving}>
-                    {t('arazio.save_complete')}
+                    {t('anagrafica.save_complete')}
                 </button>
             </div>
         </div>

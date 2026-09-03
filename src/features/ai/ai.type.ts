@@ -1,4 +1,4 @@
-import type {ArazioValutazione} from "../arazio/arazio.type.ts";
+import type {AnagraficaValutazione} from "../anagrafica/anagrafica.type.ts";
 
 export interface AiExtractedFile {
     name: string;
@@ -6,7 +6,7 @@ export interface AiExtractedFile {
     base64: string;
 }
 
-export interface AiArazioRequest {
+export interface AiAnagraficaRequest {
     sectionId: string;
     sectionLabel: string;
     fieldSchema: AiFieldSchema[];
@@ -23,16 +23,16 @@ export interface AiFieldSchema {
     options?: string[];
 }
 
-export interface AiArazioResponse {
+export interface AiAnagraficaResponse {
     values: Record<string, string>;
-    groupValutazioni: Record<string, ArazioValutazione>;
+    groupValutazioni: Record<string, AnagraficaValutazione>;
     repeatables: Record<string, AiRepeatableData[]>;
     notes: AiAnnotation[];
 }
 
 export interface AiRepeatableData {
     values: Record<string, string>;
-    valutazione: ArazioValutazione;
+    valutazione: AnagraficaValutazione;
 }
 
 export type AiAnnotationType = 'missing' | 'warning' | 'info' | 'conflict';
@@ -45,7 +45,7 @@ export interface AiAnnotation {
 }
 
 export interface AiBulkRequest {
-    sections: AiArazioRequest[];
+    sections: AiAnagraficaRequest[];
     userPrompt: string;
     files: AiExtractedFile[];
 }
@@ -96,7 +96,7 @@ export interface AiBuildingStructure {
 }
 
 export interface AiBulkResponse {
-    sections: Record<string, AiArazioResponse>;
+    sections: Record<string, AiAnagraficaResponse>;
     globalNotes: AiAnnotation[];
     documentDate?: string;
     buildingStructure?: AiBuildingStructure;

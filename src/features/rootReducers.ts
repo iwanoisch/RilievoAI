@@ -9,7 +9,7 @@ import {default as fascicoloReducer} from "./fascicolo/slice/fascicoloSlice.ts";
 import {default as fakeAiReducer} from "./fake_ai/slice/aiSlice.ts";
 import {default as aiReducer} from "./ai/aiSlice.ts";
 import {default as buildingsReducer} from "./buildings/buildingsSlice.ts";
-import {default as arazioReducer} from "./arazio/arazioSlice.ts";
+import {default as anagraficaReducer} from "./anagrafica/anagraficaSlice.ts";
 import {default as rilievoReducer} from "./rilievo/rilievoSlice.ts";
 
 export const reducers = {
@@ -24,6 +24,6 @@ export const reducers = {
     fakeAi: fakeAiReducer,
     ai: aiReducer,
     buildings: buildingsReducer,
-    arazio: arazioReducer,
+    anagrafica: anagraficaReducer,
     rilievo: rilievoReducer,
 };

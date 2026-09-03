@@ -28,7 +28,7 @@ export const RilievoTab: FC = () => {
     const {t} = useTranslation();
     const {
         items, generated, generating, error, selectedItemId,
-        regenerateFromArazio, selectItem, toggleCheck, reset, deleteItem, addItem,
+        regenerateFromAnagrafica, selectItem, toggleCheck, reset, deleteItem, addItem, updateItem,
         getChildren, getRoots, getCompletionPercent, totalCompletion,
         addPhoto, updatePhoto, deletePhoto, getPhotosForItem,
         addAudio, updateAudio, deleteAudio, getAudiosForItem,
@@ -41,6 +41,23 @@ export const RilievoTab: FC = () => {
     const [addingChildFor, setAddingChildFor] = useState<string | null>(null);
     const [newItemLabel, setNewItemLabel] = useState('');
     const [newItemType, setNewItemType] = useState<RilievoItemType>('room');
+
+    // Editing nodo inline
+    const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
+    const [editingNodeLabel, setEditingNodeLabel] = useState('');
+
+    const startEditNode = (item: RilievoItem) => {
+        setEditingNodeId(item.id);
+        setEditingNodeLabel(item.label);
+    };
+
+    const saveEditNode = () => {
+        if (editingNodeId && editingNodeLabel.trim()) {
+            updateItem(editingNodeId, {label: editingNodeLabel.trim()});
+        }
+        setEditingNodeId(null);
+        setEditingNodeLabel('');
+    };
 
     // Modali creazione
     const [showPhotoModal, setShowPhotoModal] = useState(false);
@@ -128,7 +145,7 @@ export const RilievoTab: FC = () => {
 
                         <button
                             type="button"
-                            onClick={regenerateFromArazio}
+                            onClick={regenerateFromAnagrafica}
                             disabled={generating}
                             className="btn btn-primary flex items-center gap-2 min-h-[44px] mx-auto disabled:opacity-60"
                         >
@@ -193,11 +210,28 @@ export const RilievoTab: FC = () => {
                     <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${statusCfg.bg}`}/>
 
                     <div className="flex-1 min-w-0">
-                        <span className={`text-sm font-medium truncate block ${isSelected ? 'text-primary-700' : 'text-text-primary'}`}>
-                            {item.label}
-                        </span>
-                        {item.detail && (
-                            <span className="text-xs text-text-muted truncate block">{item.detail}</span>
+                        {editingNodeId === item.id ? (
+                            <input
+                                className="input text-sm py-0.5 w-full"
+                                value={editingNodeLabel}
+                                onChange={(e) => setEditingNodeLabel(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') saveEditNode();
+                                    if (e.key === 'Escape') { setEditingNodeId(null); setEditingNodeLabel(''); }
+                                }}
+                                onBlur={saveEditNode}
+                                onClick={(e) => e.stopPropagation()}
+                                autoFocus
+                            />
+                        ) : (
+                            <>
+                                <span className={`text-sm font-medium truncate block ${isSelected ? 'text-primary-700' : 'text-text-primary'}`}>
+                                    {item.label}
+                                </span>
+                                {item.detail && (
+                                    <span className="text-xs text-text-muted truncate block">{item.detail}</span>
+                                )}
+                            </>
                         )}
                     </div>
 
@@ -206,6 +240,19 @@ export const RilievoTab: FC = () => {
                     }`}>
                         {completion}%
                     </span>
+
+                    {/* Modifica nome */}
+                    <button
+                        type="button"
+                        className="p-1 rounded text-text-disabled hover:text-primary-600 hover:bg-primary-50 transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
+                        aria-label={t('rilievo.edit_node')}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            startEditNode(item);
+                        }}
+                    >
+                        <PencilSquareIcon className="h-3.5 w-3.5"/>
+                    </button>
 
                     {allowedTypes.length > 0 && (
                         <button
@@ -527,7 +574,7 @@ export const RilievoTab: FC = () => {
 
                 {/* Layout: Albero + Card */}
                 <div className="flex flex-col lg:flex-row gap-4">
-                    <div className="lg:w-1/2 border border-border-light rounded-xl overflow-hidden bg-surface-card max-h-[600px] overflow-y-auto">
+                    <div className="lg:w-1/2 border border-border-light rounded-xl overflow-hidden bg-surface-card max-h-[400px] lg:max-h-[600px] overflow-y-auto">
                         {roots.map(root => renderItem(root))}
                     </div>
 

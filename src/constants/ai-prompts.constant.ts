@@ -1,4 +1,4 @@
-export const AI_ARAZIO_SYSTEM_PROMPT = `
+export const AI_ANAGRAFICA_SYSTEM_PROMPT = `
 Sei un assistente specializzato nella compilazione di schede tecniche immobiliari.
 Ti vengono forniti documenti (PDF, immagini, testi) relativi a un immobile.
 

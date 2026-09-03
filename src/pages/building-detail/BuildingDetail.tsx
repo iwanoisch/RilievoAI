@@ -1,4 +1,4 @@
-import {FC, useState} from "react";
+import {FC, useEffect, useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import {
@@ -14,7 +14,10 @@ import {
     ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 import {useBuildings} from "../../features/buildings/useBuildings.ts";
-import {ArazioTab} from "./arazio-tab/ArazioTab.tsx";
+import {useAppDispatch} from "../../store/store.ts";
+import {setActiveBuildingId} from "../../features/ai/aiSlice.ts";
+import {setRilievoActiveBuildingId} from "../../features/rilievo/rilievoSlice.ts";
+import {AnagraficaTab} from "./anagrafica-tab/AnagraficaTab.tsx";
 import {DocumentazioneTab} from "./documentazione-tab/DocumentazioneTab.tsx";
 import {RilievoTab} from "./rilievo-tab/RilievoTab.tsx";
 import {BUILDING_STATUS_LABEL} from "../../constants/buildings.constant.ts";
@@ -24,10 +27,17 @@ export const BuildingDetail: FC = () => {
     const {t, i18n} = useTranslation();
     const navigate = useNavigate();
     const {id} = useParams<{id: string}>();
+    const dispatch = useAppDispatch();
     const {buildings} = useBuildings();
+    useEffect(() => {
+        if (id) {
+            dispatch(setActiveBuildingId(id));
+            dispatch(setRilievoActiveBuildingId(id));
+        }
+    }, [id, dispatch]);
 
     const [showEditModal, setShowEditModal] = useState(false);
-    const [activeTab, setActiveTab] = useState<'planimetria' | 'arazio' | 'rilievo'>('planimetria');
+    const [activeTab, setActiveTab] = useState<'planimetria' | 'anagrafica' | 'rilievo'>('planimetria');
 
     const building = buildings.find(b => b.id === id);
 
@@ -166,11 +176,11 @@ export const BuildingDetail: FC = () => {
                             {t('buildingDetail.documentation')}
                         </button>
                         <button
-                            onClick={() => setActiveTab('arazio')}
-                            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors min-h-[44px] ${activeTab === 'arazio' ? 'text-primary-600 border-b-2 border-primary-500' : 'text-text-muted hover:text-text-primary'}`}
+                            onClick={() => setActiveTab('anagrafica')}
+                            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors min-h-[44px] ${activeTab === 'anagrafica' ? 'text-primary-600 border-b-2 border-primary-500' : 'text-text-muted hover:text-text-primary'}`}
                         >
                             <CubeIcon className="h-4 w-4"/>
-                            {t('buildingDetail.arazio')}
+                            {t('buildingDetail.anagrafica')}
                         </button>
                         <button
                             onClick={() => setActiveTab('rilievo')}
@@ -188,10 +198,10 @@ export const BuildingDetail: FC = () => {
                             name="building-detail-tab-select"
                             className="input w-full text-sm"
                             value={activeTab}
-                            onChange={(e) => setActiveTab(e.target.value as 'planimetria' | 'arazio' | 'rilievo')}
+                            onChange={(e) => setActiveTab(e.target.value as 'planimetria' | 'anagrafica' | 'rilievo')}
                         >
                             <option value="planimetria">{t('buildingDetail.documentation')}</option>
-                            <option value="arazio">{t('buildingDetail.arazio')}</option>
+                            <option value="anagrafica">{t('buildingDetail.anagrafica')}</option>
                             <option value="rilievo">{t('buildingDetail.rilievo')}</option>
                         </select>
                     </div>
@@ -199,7 +209,7 @@ export const BuildingDetail: FC = () => {
 
                 {/* Contenuto tab (placeholder) */}
                 {activeTab === 'planimetria' && <DocumentazioneTab/>}
-                {activeTab === 'arazio' && <ArazioTab/>}
+                {activeTab === 'anagrafica' && <AnagraficaTab/>}
                 {activeTab === 'rilievo' && <RilievoTab/>}
 
             {/* Modale modifica */}

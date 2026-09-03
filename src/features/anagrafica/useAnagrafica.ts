@@ -1,19 +1,18 @@
 import {useAppDispatch, useAppSelector, store} from "../../store/store.ts";
-import {setSections, setArazioError} from "./arazioSlice.ts";
-import type {ArazioAttachment, ArazioRepeatableInstance, ArazioSectionData, ArazioValutazione} from "./arazio.type.ts";
-import type {AiArazioResponse} from "../ai/ai.type.ts";
-import {ARAZIO_SECTIONS, EMPTY_VALUTAZIONE} from "../../constants/arazio-sections.constant.ts";
-import {mapInstance, createEmptyInstance, createEmptySection} from "../../utility/arazio-utils.ts";
+import {setSections, setAnagraficaError} from "./anagraficaSlice.ts";
+import type {AnagraficaAttachment, AnagraficaRepeatableInstance, AnagraficaSectionData, AnagraficaValutazione} from "./anagrafica.type.ts";
+import type {AiAnagraficaResponse} from "../ai/ai.type.ts";
+import {ANAGRAFICA_SECTIONS, EMPTY_VALUTAZIONE} from "../../constants/anagrafica-sections.constant.ts";
+import {mapInstance, createEmptyInstance, createEmptySection} from "../../utility/anagrafica-utils.ts";
 
-export const useArazio = () => {
+export const useAnagrafica = () => {
     const dispatch = useAppDispatch();
-    const state = useAppSelector(state => state.arazio);
+    const state = useAppSelector(state => state.anagrafica);
 
-    // Per leggere state fresco in contesti async (evita stale closure)
-    const getFreshState = () => store.getState().arazio;
+    const getFreshState = () => store.getState().anagrafica;
 
-    const getSectionsForBuilding = (buildingId: string): ArazioSectionData[] => {
-        return ARAZIO_SECTIONS.map(config => {
+    const getSectionsForBuilding = (buildingId: string): AnagraficaSectionData[] => {
+        return ANAGRAFICA_SECTIONS.map(config => {
             const existing = state.sections.find(
                 s => s.sectionId === config.id && s.buildingId === buildingId
             );
@@ -22,7 +21,7 @@ export const useArazio = () => {
         });
     };
 
-    const getSectionData = (buildingId: string, sectionId: string): ArazioSectionData => {
+    const getSectionData = (buildingId: string, sectionId: string): AnagraficaSectionData => {
         const existing = state.sections.find(
             s => s.sectionId === sectionId && s.buildingId === buildingId
         );
@@ -33,20 +32,18 @@ export const useArazio = () => {
         };
     };
 
-    const updateSection = (buildingId: string, sectionId: string, patch: Partial<ArazioSectionData>) => {
+    const updateSection = (buildingId: string, sectionId: string, patch: Partial<AnagraficaSectionData>) => {
         const current = getSectionData(buildingId, sectionId);
-        const updated: ArazioSectionData = {...current, ...patch};
+        const updated: AnagraficaSectionData = {...current, ...patch};
         const others = state.sections.filter(
             s => !(s.sectionId === sectionId && s.buildingId === buildingId)
         );
         dispatch(setSections([...others, updated]));
     };
 
-    // ── Allegati ──
-
     const addAttachments = (buildingId: string, sectionId: string, fieldKey: string, files: File[], instanceId?: string) => {
         const current = getSectionData(buildingId, sectionId);
-        const newAttachments: ArazioAttachment[] = files.map(file => ({
+        const newAttachments: AnagraficaAttachment[] = files.map(file => ({
             id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
             fieldKey,
             instanceId,
@@ -66,8 +63,6 @@ export const useArazio = () => {
             attachments: current.attachments.filter(a => a.id !== attachmentId),
         });
     };
-
-    // ── Gruppi ripetibili (livello sezione) ──
 
     const addRepeatableInstance = (buildingId: string, sectionId: string, groupKey: string) => {
         const current = getSectionData(buildingId, sectionId);
@@ -110,7 +105,7 @@ export const useArazio = () => {
 
     const updateRepeatableValutazione = (
         buildingId: string, sectionId: string, groupKey: string,
-        instanceId: string, key: keyof ArazioValutazione, value: string
+        instanceId: string, key: keyof AnagraficaValutazione, value: string
     ) => {
         const current = getSectionData(buildingId, sectionId);
         const instances = current.repeatables[groupKey] ?? [];
@@ -123,8 +118,6 @@ export const useArazio = () => {
             },
         });
     };
-
-    // ── Sub-repeatables (nidificati dentro un'istanza) ──
 
     const addSubRepeatableInstance = (
         buildingId: string, sectionId: string, groupKey: string,
@@ -193,7 +186,7 @@ export const useArazio = () => {
     const updateSubRepeatableValutazione = (
         buildingId: string, sectionId: string, groupKey: string,
         parentInstanceId: string, subGroupKey: string,
-        subInstanceId: string, key: keyof ArazioValutazione, value: string
+        subInstanceId: string, key: keyof AnagraficaValutazione, value: string
     ) => {
         const current = getSectionData(buildingId, sectionId);
         const instances = current.repeatables[groupKey] ?? [];
@@ -216,7 +209,7 @@ export const useArazio = () => {
     const updateSubGroupValutazione = (
         buildingId: string, sectionId: string, groupKey: string,
         parentInstanceId: string, subGroupKey: string,
-        key: keyof ArazioValutazione, value: string
+        key: keyof AnagraficaValutazione, value: string
     ) => {
         const current = getSectionData(buildingId, sectionId);
         const instances = current.repeatables[groupKey] ?? [];
@@ -237,8 +230,6 @@ export const useArazio = () => {
         });
     };
 
-    // ── Gruppi opzionali ──
-
     const addOptionalGroup = (buildingId: string, sectionId: string, groupKey: string) => {
         const current = getSectionData(buildingId, sectionId);
         if (current.visibleOptionalGroups.includes(groupKey)) return;
@@ -254,11 +245,9 @@ export const useArazio = () => {
         });
     };
 
-    // ── Valutazione per gruppo (non ripetibile, livello sezione) ──
-
     const updateGroupValutazione = (
         buildingId: string, sectionId: string, groupKey: string,
-        key: keyof ArazioValutazione, value: string
+        key: keyof AnagraficaValutazione, value: string
     ) => {
         const current = getSectionData(buildingId, sectionId);
         const existing = current.groupValutazioni[groupKey] ?? {...EMPTY_VALUTAZIONE};
@@ -270,10 +259,7 @@ export const useArazio = () => {
         });
     };
 
-    // ── Applicazione risposta AI ──
-
-    const applyAiResponse = (buildingId: string, sectionId: string, aiResponse: AiArazioResponse) => {
-        // Usa state fresco per evitare stale closure in loop async
+    const applyAiResponse = (buildingId: string, sectionId: string, aiResponse: AiAnagraficaResponse) => {
         const freshState = getFreshState();
         const existing = freshState.sections.find(
             s => s.sectionId === sectionId && s.buildingId === buildingId
@@ -283,7 +269,6 @@ export const useArazio = () => {
         const groupValutazioni = aiResponse.groupValutazioni ?? {};
         const repeatables = aiResponse.repeatables ?? {};
 
-        // Filtra valori vuoti dall'AI — gestisce anche oggetti restituiti per errore
         const nonEmptyValues: Record<string, string> = {};
         for (const [k, v] of Object.entries(values)) {
             let str = '';
@@ -302,10 +287,10 @@ export const useArazio = () => {
         const mergedValues = {...current.values, ...nonEmptyValues};
         const mergedGroupValutazioni = {...current.groupValutazioni, ...groupValutazioni};
 
-        const mergedRepeatables: Record<string, ArazioRepeatableInstance[]> = {...current.repeatables};
+        const mergedRepeatables: Record<string, AnagraficaRepeatableInstance[]> = {...current.repeatables};
         for (const [groupKey, aiInstances] of Object.entries(repeatables)) {
             if (!Array.isArray(aiInstances)) continue;
-            const newInstances: ArazioRepeatableInstance[] = aiInstances.map(ai => ({
+            const newInstances: AnagraficaRepeatableInstance[] = aiInstances.map(ai => ({
                 ...createEmptyInstance(),
                 values: ai.values ?? {},
                 valutazione: ai.valutazione ?? {...EMPTY_VALUTAZIONE},
@@ -313,7 +298,7 @@ export const useArazio = () => {
             mergedRepeatables[groupKey] = [...(mergedRepeatables[groupKey] ?? []), ...newInstances];
         }
 
-        const updated: ArazioSectionData = {
+        const updated: AnagraficaSectionData = {
             ...current,
             values: mergedValues,
             groupValutazioni: mergedGroupValutazioni,
@@ -325,15 +310,13 @@ export const useArazio = () => {
         dispatch(setSections([...freshOthers, updated]));
     };
 
-    // ── Salvataggio ──
-
     const saveDraft = async (buildingId: string, sectionId: string) => {
         try {
             updateSection(buildingId, sectionId, {status: 'draft'});
             return {success: true};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
-            dispatch(setArazioError(message));
+            dispatch(setAnagraficaError(message));
             return null;
         }
     };
@@ -344,7 +327,7 @@ export const useArazio = () => {
             return {success: true};
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Errore sconosciuto';
-            dispatch(setArazioError(message));
+            dispatch(setAnagraficaError(message));
             return null;
         }
     };

@@ -1,6 +1,6 @@
-import type {ArazioSectionConfig, ArazioValutazione} from "../features/arazio/arazio.type.ts";
+import type {AnagraficaSectionConfig, AnagraficaValutazione} from "../features/anagrafica/anagrafica.type.ts";
 
-export const EMPTY_VALUTAZIONE: ArazioValutazione = {
+export const EMPTY_VALUTAZIONE: AnagraficaValutazione = {
     responsabile: '',
     scadenza: '',
     criticita: '',
@@ -22,7 +22,7 @@ const DOCUMENT_SUBSECTION_FIELDS = (prefix: string) => [
     {key: `${prefix}_allegati`, label: "Allegati progetto", type: "file" as const, colSpan: 2 as const},
 ];
 
-export const ARAZIO_SECTIONS: ArazioSectionConfig[] = [
+export const ANAGRAFICA_SECTIONS: AnagraficaSectionConfig[] = [
     // ── 1. Ubicazione Immobile ──
     {
         id: "ubicazione",

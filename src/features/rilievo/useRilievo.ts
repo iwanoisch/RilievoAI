@@ -9,11 +9,12 @@ import {
     AI_MODEL, AI_MAX_TOKENS, AI_API_URL, AI_API_VERSION, AI_RILIEVO_SYSTEM_PROMPT,
 } from "../../constants/ai-prompts.constant.ts";
 import type {AiBuildingStructure} from "../ai/ai.type.ts";
+import {selectActiveRilievo} from "./rilievoSlice.ts";
 import type {RilievoItem, RilievoCheck, RilievoPhoto, RilievoAudio, RilievoMeasurement} from "./rilievo.type.ts";
 
 const API_KEY = import.meta.env.VITE_CLAUDE_KEY as string;
 
-const serializeArazioForPrompt = (sections: Array<{sectionId: string; values: Record<string, string>; repeatables: Record<string, Array<{values: Record<string, string>}>>}>): string => {
+const serializeAnagraficaForPrompt = (sections: Array<{sectionId: string; values: Record<string, string>; repeatables: Record<string, Array<{values: Record<string, string>}>>}>): string => {
     const parts: string[] = [];
     for (const section of sections) {
         const nonEmpty = Object.entries(section.values || {}).filter(([_, v]) => v && v.trim());
@@ -44,8 +45,8 @@ const serializeArazioForPrompt = (sections: Array<{sectionId: string; values: Re
 
 export const useRilievo = () => {
     const dispatch = useAppDispatch();
-    const rawState = useAppSelector(state => state.rilievo);
-    const arazioSections = useAppSelector(state => state.arazio.sections);
+    const rawState = useAppSelector(selectActiveRilievo);
+    const anagraficaSections = useAppSelector(state => state.anagrafica.sections);
     const state = {
         ...rawState,
         photos: rawState.photos ?? [],
@@ -55,13 +56,13 @@ export const useRilievo = () => {
 
     const [generating, setGenerating] = useState(false);
 
-    const regenerateFromArazio = async () => {
-        if (!arazioSections || arazioSections.length === 0) {
+    const regenerateFromAnagrafica = async () => {
+        if (!anagraficaSections || anagraficaSections.length === 0) {
             dispatch(setRilievoError('Nessun dato disponibile. Analizza prima i documenti nella tab Documentazione.'));
             return null;
         }
 
-        const serialized = serializeArazioForPrompt(arazioSections);
+        const serialized = serializeAnagraficaForPrompt(anagraficaSections);
         if (serialized.trim().length < 50) {
             dispatch(setRilievoError('Dati insufficienti. Analizza prima i documenti nella tab Documentazione.'));
             return null;
@@ -376,7 +377,7 @@ export const useRilievo = () => {
         selectedItem,
         generating,
         // Generate
-        regenerateFromArazio,
+        regenerateFromAnagrafica,
         // Item
         selectItem,
         addItem,

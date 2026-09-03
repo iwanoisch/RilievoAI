@@ -14,8 +14,8 @@ import {
     ArchiveBoxIcon,
 } from "@heroicons/react/24/outline";
 import {useAi} from "../../../features/ai/useAi.ts";
-import {useArazio} from "../../../features/arazio/useArazio.ts";
-import {ARAZIO_SECTIONS} from "../../../constants/arazio-sections.constant.ts";
+import {useAnagrafica} from "../../../features/anagrafica/useAnagrafica.ts";
+import {ANAGRAFICA_SECTIONS} from "../../../constants/anagrafica-sections.constant.ts";
 import {useAlert} from "../../../common/alert/useAlert.ts";
 import type {AiAnnotation, AiExtractedFile} from "../../../features/ai/ai.type.ts";
 import type {SkippedFile} from "../../../utility/file-extract-utils.ts";
@@ -24,7 +24,7 @@ export const DocumentazioneTab: FC = () => {
     const {t} = useTranslation();
     const {id: buildingId} = useParams<{id: string}>();
     const ai = useAi();
-    const arazio = useArazio();
+    const anagrafica = useAnagrafica();
     const {showAlert} = useAlert();
 
     const [extractedFiles, setExtractedFiles] = useState<AiExtractedFile[]>([]);
@@ -251,7 +251,7 @@ export const DocumentazioneTab: FC = () => {
                             {t('doc.archived_files')} ({archivedFiles.length} {t('doc.files_in')} {ai.sessions.length} {t('doc.sessions_label')})
                         </h4>
                         <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {[...ai.sessions].reverse().map(session => {
+                            {[...ai.sessions].filter((s, i, arr) => arr.findIndex(x => x.id === s.id) === i).reverse().map(session => {
                                 const sessionFiles = archivedFiles.filter(f => f.sessionId === session.id);
                                 if (sessionFiles.length === 0) return null;
                                 const sessionDate = new Date(session.timestamp);
@@ -366,8 +366,8 @@ export const DocumentazioneTab: FC = () => {
 
                 {/* Dati estratti dall'AI */}
                 {buildingId && (() => {
-                    const filledSections = ARAZIO_SECTIONS.map(config => {
-                        const sectionData = arazio.sections.find(
+                    const filledSections = ANAGRAFICA_SECTIONS.map(config => {
+                        const sectionData = anagrafica.sections.find(
                             s => s.sectionId === config.id && s.buildingId === buildingId
                         );
                         if (!sectionData) return null;

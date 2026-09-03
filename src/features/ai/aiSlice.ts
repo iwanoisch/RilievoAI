@@ -2,7 +2,7 @@ import {createSlice} from "@reduxjs/toolkit";
 import type {PayloadAction} from "@reduxjs/toolkit";
 import type {AiAnnotation, AiSession, AiState, AiStatus, AiUploadedFile} from "./ai.type.ts";
 
-const initialState: AiState = {
+const emptyAiState: AiState = {
     status: 'idle',
     annotations: [],
     sectionsProcessed: 0,
@@ -19,68 +19,128 @@ const initialState: AiState = {
     currentBatch: 0,
 };
 
+interface AiPerBuildingState {
+    activeBuildingId: string | null;
+    byBuilding: Record<string, AiState>;
+}
+
+const initialState: AiPerBuildingState = {
+    activeBuildingId: null,
+    byBuilding: {},
+};
+
+const getCurrent = (state: AiPerBuildingState): AiState => {
+    if (!state.activeBuildingId) return emptyAiState;
+    return state.byBuilding[state.activeBuildingId] ?? emptyAiState;
+};
+
+const setCurrent = (state: AiPerBuildingState, data: AiState) => {
+    if (state.activeBuildingId) {
+        state.byBuilding[state.activeBuildingId] = data;
+    }
+};
+
+const updateCurrent = (state: AiPerBuildingState, updater: (s: AiState) => void) => {
+    if (!state.activeBuildingId) return;
+    if (!state.byBuilding[state.activeBuildingId]) {
+        state.byBuilding[state.activeBuildingId] = {...emptyAiState};
+    }
+    updater(state.byBuilding[state.activeBuildingId]);
+};
+
 const aiSlice = createSlice({
     name: 'ai',
     initialState,
     reducers: {
+        setActiveBuildingId: (state, action: PayloadAction<string | null>) => {
+            state.activeBuildingId = action.payload;
+        },
         setAiStatus: (state, action: PayloadAction<AiStatus>) => {
-            state.status = action.payload;
+            updateCurrent(state, s => { s.status = action.payload; });
         },
         setAnnotations: (state, action: PayloadAction<AiAnnotation[]>) => {
-            state.annotations = action.payload;
+            updateCurrent(state, s => { s.annotations = action.payload; });
         },
         addAnnotations: (state, action: PayloadAction<AiAnnotation[]>) => {
-            state.annotations = [...state.annotations, ...action.payload];
+            updateCurrent(state, s => { s.annotations = [...s.annotations, ...action.payload]; });
         },
         setSectionsProcessed: (state, action: PayloadAction<number>) => {
-            state.sectionsProcessed = action.payload;
+            updateCurrent(state, s => { s.sectionsProcessed = action.payload; });
         },
         addSectionsProcessed: (state, action: PayloadAction<number>) => {
-            state.sectionsProcessed = state.sectionsProcessed + action.payload;
-            state.totalSectionsProcessed = state.totalSectionsProcessed + action.payload;
+            updateCurrent(state, s => {
+                s.sectionsProcessed = s.sectionsProcessed + action.payload;
+                s.totalSectionsProcessed = s.totalSectionsProcessed + action.payload;
+            });
         },
         setAiError: (state, action: PayloadAction<string | null>) => {
-            state.error = action.payload;
+            updateCurrent(state, s => { s.error = action.payload; });
         },
         setUploadedFiles: (state, action: PayloadAction<AiUploadedFile[]>) => {
-            state.uploadedFiles = action.payload;
+            updateCurrent(state, s => { s.uploadedFiles = action.payload; });
         },
         addUploadedFiles: (state, action: PayloadAction<AiUploadedFile[]>) => {
-            state.uploadedFiles = [...state.uploadedFiles, ...action.payload];
+            updateCurrent(state, s => { s.uploadedFiles = [...s.uploadedFiles, ...action.payload]; });
         },
         archiveSessionFiles: (state, action: PayloadAction<string>) => {
-            state.uploadedFiles = state.uploadedFiles.map(f =>
-                f.sessionId === action.payload ? {...f, archived: true} : f
-            );
+            updateCurrent(state, s => {
+                s.uploadedFiles = s.uploadedFiles.map(f =>
+                    f.sessionId === action.payload ? {...f, archived: true} : f
+                );
+            });
         },
         removeUploadedFile: (state, action: PayloadAction<number>) => {
-            state.uploadedFiles = state.uploadedFiles.filter((_, i) => i !== action.payload);
+            updateCurrent(state, s => {
+                s.uploadedFiles = s.uploadedFiles.filter((_, i) => i !== action.payload);
+            });
         },
         addSession: (state, action: PayloadAction<AiSession>) => {
-            state.sessions = [...state.sessions, action.payload];
+            updateCurrent(state, s => {
+                const exists = s.sessions.some(ss => ss.id === action.payload.id);
+                if (!exists) {
+                    s.sessions = [...s.sessions, action.payload];
+                }
+            });
         },
         setCurrentSessionId: (state, action: PayloadAction<string | null>) => {
-            state.currentSessionId = action.payload;
+            updateCurrent(state, s => { s.currentSessionId = action.payload; });
         },
         setUserPrompt: (state, action: PayloadAction<string>) => {
-            state.userPrompt = action.payload;
+            updateCurrent(state, s => { s.userPrompt = action.payload; });
         },
         setExtractionProgress: (state, action: PayloadAction<{percent: number; fileName: string}>) => {
-            state.extractionProgress = action.payload.percent;
-            state.extractionFileName = action.payload.fileName;
+            updateCurrent(state, s => {
+                s.extractionProgress = action.payload.percent;
+                s.extractionFileName = action.payload.fileName;
+            });
         },
         setBatchProgress: (state, action: PayloadAction<{current: number; total: number; failed: number}>) => {
-            state.currentBatch = action.payload.current;
-            state.totalBatches = action.payload.total;
-            state.failedBatches = action.payload.failed;
+            updateCurrent(state, s => {
+                s.currentBatch = action.payload.current;
+                s.totalBatches = action.payload.total;
+                s.failedBatches = action.payload.failed;
+            });
+        },
+        resetAi: (state) => {
+            if (state.activeBuildingId) {
+                state.byBuilding[state.activeBuildingId] = {...emptyAiState};
+            }
         },
     },
 });
 
 export const {
+    setActiveBuildingId,
     setAiStatus, setAnnotations, addAnnotations,
     setSectionsProcessed, addSectionsProcessed, setAiError,
     setUploadedFiles, addUploadedFiles, archiveSessionFiles, removeUploadedFile,
     addSession, setCurrentSessionId, setUserPrompt, setExtractionProgress, setBatchProgress,
+    resetAi,
 } = aiSlice.actions;
+
+// Selector: restituisce lo state AI per il building attivo
+export const selectActiveAi = (rootState: {ai: AiPerBuildingState}): AiState => {
+    return getCurrent(rootState.ai);
+};
+
 export default aiSlice.reducer;

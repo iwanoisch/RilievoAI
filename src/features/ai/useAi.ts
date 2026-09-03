@@ -4,10 +4,11 @@ import {
     setAiStatus, addAnnotations, setSectionsProcessed, addSectionsProcessed,
     setAiError, addUploadedFiles, archiveSessionFiles, removeUploadedFile,
     addSession, setCurrentSessionId, setUserPrompt, setExtractionProgress, setBatchProgress,
+    selectActiveAi,
 } from "./aiSlice.ts";
-import {ARAZIO_SECTIONS} from "../../constants/arazio-sections.constant.ts";
+import {ANAGRAFICA_SECTIONS} from "../../constants/anagrafica-sections.constant.ts";
 import {
-    AI_ARAZIO_SYSTEM_PROMPT,
+    AI_ANAGRAFICA_SYSTEM_PROMPT,
     AI_SECTION_PROMPT_TEMPLATE,
     AI_BULK_PROMPT_TEMPLATE,
     AI_MODEL,
@@ -18,12 +19,12 @@ import {
 } from "../../constants/ai-prompts.constant.ts";
 import {buildFieldSchema} from "../../utility/ai-schema-utils.ts";
 import {extractFilesFromList} from "../../utility/file-extract-utils.ts";
-import {useArazio} from "../arazio/useArazio.ts";
+import {useAnagrafica} from "../anagrafica/useAnagrafica.ts";
 import {useBuildings} from "../buildings/useBuildings.ts";
 import {setRilievoItems, setGenerated} from "../rilievo/rilievoSlice.ts";
 import {convertAiStructureToItems} from "../../utility/rilievo-utils.ts";
 import type {BuildingCardData} from "../buildings/buildings.type.ts";
-import type {AiArazioRequest, AiArazioResponse, AiAnnotation, AiBulkResponse, AiExtractedFile, AiSession, AiUploadedFile} from "./ai.type.ts";
+import type {AiAnagraficaRequest, AiAnagraficaResponse, AiAnnotation, AiBulkResponse, AiExtractedFile, AiSession, AiUploadedFile} from "./ai.type.ts";
 import type {SkippedFile} from "../../utility/file-extract-utils.ts";
 
 const API_KEY = import.meta.env.VITE_CLAUDE_KEY as string;
@@ -130,9 +131,9 @@ const AI_STATE_DEFAULTS = {
 
 export const useAi = () => {
     const dispatch = useAppDispatch();
-    const rawState = useAppSelector(state => state.ai);
+    const rawState = useAppSelector(selectActiveAi);
     const state = {...AI_STATE_DEFAULTS, ...rawState};
-    const arazio = useArazio();
+    const anagrafica = useAnagrafica();
     const buildings = useBuildings();
     const abortControllerRef = useRef<AbortController | null>(null);
     const failedBatchesRef = useRef<Array<{
@@ -147,7 +148,7 @@ export const useAi = () => {
     const generateSessionId = () => `session-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
     const extractBuildingUpdates = (
-        responseSections: Record<string, AiArazioResponse>,
+        responseSections: Record<string, AiAnagraficaResponse>,
         newestDocDate: string,
         current: BuildingCardData
     ): Partial<BuildingCardData> => {
@@ -259,20 +260,20 @@ export const useAi = () => {
             dispatch(setAiStatus('analyzing'));
             dispatch(setAiError(null));
 
-            const config = ARAZIO_SECTIONS.find(s => s.id === sectionId);
+            const config = ANAGRAFICA_SECTIONS.find(s => s.id === sectionId);
             if (!config) throw new Error(`Sezione ${sectionId} non trovata`);
 
             const fieldSchema = buildFieldSchema(config);
-            const systemPrompt = AI_ARAZIO_SYSTEM_PROMPT + (userPrompt ? `\nISTRUZIONI UTENTE:\n${userPrompt}\n` : '');
+            const systemPrompt = AI_ANAGRAFICA_SYSTEM_PROMPT + (userPrompt ? `\nISTRUZIONI UTENTE:\n${userPrompt}\n` : '');
             const sectionPrompt = AI_SECTION_PROMPT_TEMPLATE
                 .replace('{{sectionLabel}}', config.label)
                 .replace('{{fieldSchema}}', JSON.stringify(fieldSchema, null, 2));
 
             const content = buildContentBlocks(files, sectionPrompt);
             const data = await callClaude(systemPrompt, content, abortControllerRef.current.signal);
-            const response = parseResponse<AiArazioResponse>(data);
+            const response = parseResponse<AiAnagraficaResponse>(data);
 
-            arazio.applyAiResponse(buildingId, sectionId, response);
+            anagrafica.applyAiResponse(buildingId, sectionId, response);
             dispatch(addAnnotations(response.notes ?? []));
             dispatch(addSectionsProcessed(1));
             dispatch(setAiStatus('done'));
@@ -306,7 +307,7 @@ export const useAi = () => {
             dispatch(setCurrentSessionId(sessionId));
 
             const batches = splitIntoBatches(files);
-            const sections: AiArazioRequest[] = ARAZIO_SECTIONS.map(config => ({
+            const sections: AiAnagraficaRequest[] = ANAGRAFICA_SECTIONS.map(config => ({
                 sectionId: config.id,
                 sectionLabel: config.label,
                 fieldSchema: buildFieldSchema(config),
@@ -320,7 +321,7 @@ export const useAi = () => {
                 fields: s.fieldSchema,
             }));
 
-            const systemPrompt = AI_ARAZIO_SYSTEM_PROMPT + (userPrompt ? `\nISTRUZIONI UTENTE:\n${userPrompt}\n` : '');
+            const systemPrompt = AI_ANAGRAFICA_SYSTEM_PROMPT + (userPrompt ? `\nISTRUZIONI UTENTE:\n${userPrompt}\n` : '');
             const bulkPrompt = AI_BULK_PROMPT_TEMPLATE
                 .replace('{{sectionsSchema}}', JSON.stringify(sectionsSchema, null, 2));
 
@@ -328,7 +329,7 @@ export const useAi = () => {
             let failedCount = 0;
             let newestDocDate = '';
             const allNotes: AiAnnotation[] = [];
-            const mergedSections: Record<string, AiArazioResponse> = {};
+            const mergedSections: Record<string, AiAnagraficaResponse> = {};
             const failedBatchIndices: number[] = [];
             let mergedBuildingStructure: AiBulkResponse['buildingStructure'] = undefined;
 
@@ -356,7 +357,7 @@ export const useAi = () => {
 
                     const responseSections = response.sections ?? {};
                     for (const [sectionId, sectionResponse] of Object.entries(responseSections)) {
-                        arazio.applyAiResponse(buildingId, sectionId, sectionResponse);
+                        anagrafica.applyAiResponse(buildingId, sectionId, sectionResponse);
                         batchProcessed++;
                         if (!mergedSections[sectionId]) {
                             mergedSections[sectionId] = sectionResponse;
@@ -473,7 +474,7 @@ export const useAi = () => {
 
                     const responseSections = response.sections ?? {};
                     for (const [sectionId, sectionResponse] of Object.entries(responseSections)) {
-                        arazio.applyAiResponse(item.buildingId, sectionId, sectionResponse);
+                        anagrafica.applyAiResponse(item.buildingId, sectionId, sectionResponse);
                     }
                     retried++;
 

@@ -1,5 +1,5 @@
-import type {ArazioRepeatableInstance, ArazioSectionData} from "../features/arazio/arazio.type.ts";
-import {EMPTY_VALUTAZIONE} from "../constants/arazio-sections.constant.ts";
+import type {AnagraficaRepeatableInstance, AnagraficaSectionData} from "../features/anagrafica/anagrafica.type.ts";
+import {EMPTY_VALUTAZIONE} from "../constants/anagrafica-sections.constant.ts";
 
 export const formatFileSize = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
@@ -8,13 +8,13 @@ export const formatFileSize = (bytes: number): string => {
 };
 
 export const mapInstance = (
-    instances: ArazioRepeatableInstance[],
+    instances: AnagraficaRepeatableInstance[],
     instanceId: string,
-    updater: (inst: ArazioRepeatableInstance) => ArazioRepeatableInstance
-): ArazioRepeatableInstance[] =>
+    updater: (inst: AnagraficaRepeatableInstance) => AnagraficaRepeatableInstance
+): AnagraficaRepeatableInstance[] =>
     instances.map(inst => inst.id === instanceId ? updater(inst) : inst);
 
-export const createEmptyInstance = (): ArazioRepeatableInstance => ({
+export const createEmptyInstance = (): AnagraficaRepeatableInstance => ({
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     values: {},
     valutazione: {...EMPTY_VALUTAZIONE},
@@ -22,7 +22,7 @@ export const createEmptyInstance = (): ArazioRepeatableInstance => ({
     subGroupValutazioni: {},
 });
 
-export const createEmptySection = (sectionId: string, buildingId: string): ArazioSectionData => ({
+export const createEmptySection = (sectionId: string, buildingId: string): AnagraficaSectionData => ({
     sectionId,
     buildingId,
     status: 'empty',

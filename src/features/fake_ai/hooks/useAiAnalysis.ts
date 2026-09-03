@@ -1,5 +1,5 @@
-import {useAppDispatch, useAppSelector, store} from "../../../store/store.ts";
-import {setSuggestions, setIsAnalyzing, setAnalyzingSourceId, setAiError, resetAi} from "../slice/aiSlice.ts";
+import {useState, useCallback, useRef} from "react";
+import {store} from "../../../store/store.ts";
 import {setElement} from "../../edificio/edificioSlice.ts";
 import {setPhotos, setVoiceObservations} from "../../survey/slice/surveySlice.ts";
 import {aiService} from "../services/ai-service.ts";
@@ -8,54 +8,57 @@ import type {AiSuggestionWithStatus, SuggestionStatus} from "../slice/ai.type.ts
 import type {EdificioElement} from "../../edificio/edificio.type.ts";
 
 export const useAiAnalysis = () => {
-    const dispatch = useAppDispatch();
-    const state = useAppSelector(state => state.ai);
+    const [suggestions, setSuggestions] = useState<AiSuggestionWithStatus[]>([]);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analyzingSourceId, setAnalyzingSourceId] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    const analyzePhoto = async (request: AiPhotoAnalysisRequest) => {
+    const suggestionsRef = useRef(suggestions);
+    suggestionsRef.current = suggestions;
+
+    const analyzePhoto = useCallback(async (request: AiPhotoAnalysisRequest) => {
         try {
-            dispatch(setIsAnalyzing(true));
-            dispatch(setAnalyzingSourceId(request.photoId));
-            dispatch(setAiError(null));
+            setIsAnalyzing(true);
+            setAnalyzingSourceId(request.photoId);
+            setError(null);
 
             const suggestion = await aiService.analyzePhoto(request);
             const withStatus: AiSuggestionWithStatus = {...suggestion, status: 'pending'};
 
-            const freshSuggestions = store.getState().ai.suggestions;
-            dispatch(setSuggestions([...freshSuggestions, withStatus]));
+            setSuggestions(prev => [...prev, withStatus]);
             return {data: withStatus};
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore analisi AI';
-            dispatch(setAiError(message));
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Errore analisi AI';
+            setError(message);
             return null;
         } finally {
-            dispatch(setIsAnalyzing(false));
-            dispatch(setAnalyzingSourceId(null));
+            setIsAnalyzing(false);
+            setAnalyzingSourceId(null);
         }
-    };
+    }, []);
 
-    const analyzeVoice = async (request: AiVoiceAnalysisRequest) => {
+    const analyzeVoice = useCallback(async (request: AiVoiceAnalysisRequest) => {
         try {
-            dispatch(setIsAnalyzing(true));
-            dispatch(setAnalyzingSourceId(request.observationId));
-            dispatch(setAiError(null));
+            setIsAnalyzing(true);
+            setAnalyzingSourceId(request.observationId);
+            setError(null);
 
             const suggestion = await aiService.analyzeVoice(request);
             const withStatus: AiSuggestionWithStatus = {...suggestion, status: 'pending'};
 
-            const freshSuggestions = store.getState().ai.suggestions;
-            dispatch(setSuggestions([...freshSuggestions, withStatus]));
+            setSuggestions(prev => [...prev, withStatus]);
             return {data: withStatus};
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore analisi AI';
-            dispatch(setAiError(message));
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Errore analisi AI';
+            setError(message);
             return null;
         } finally {
-            dispatch(setIsAnalyzing(false));
-            dispatch(setAnalyzingSourceId(null));
+            setIsAnalyzing(false);
+            setAnalyzingSourceId(null);
         }
-    };
+    }, []);
 
-    const analyzePhotoBatch = async (
+    const analyzePhotoBatch = useCallback(async (
         requests: AiPhotoAnalysisRequest[],
         onProgress?: (completed: number, total: number) => void,
     ) => {
@@ -68,26 +71,23 @@ export const useAiAnalysis = () => {
             onProgress?.(i + 1, requests.length);
         }
         return results;
-    };
+    }, [analyzePhoto]);
 
-    const respondToSuggestion = async (suggestionId: string, action: SuggestionStatus, correction?: Partial<AiSuggestionWithStatus>) => {
+    const respondToSuggestion = useCallback(async (suggestionId: string, action: SuggestionStatus, correction?: Partial<AiSuggestionWithStatus>) => {
         try {
-            const freshSuggestions = store.getState().ai.suggestions;
-            const suggestion = freshSuggestions.find(s => s.id === suggestionId);
+            const suggestion = suggestionsRef.current.find(s => s.id === suggestionId);
             if (!suggestion) return null;
 
             await aiService.sendFeedback(suggestionId, action as 'accepted' | 'modified' | 'rejected', correction);
 
-            // Se accettato: crea elemento nell'edificio + aggiorna osservazione
             if (action === 'accepted' || action === 'modified') {
                 const now = new Date().toISOString();
                 const elementId = String(Date.now());
                 const buildingState = store.getState().edificio;
+                const dispatch = store.dispatch;
 
-                // Trova un parent valido
                 let parentId = suggestion.proposedParentId || null;
                 if (!parentId || !buildingState.elements[parentId]) {
-                    // Cerca un edificio esistente (rootBuildingId o qualsiasi building)
                     const existingBuilding = buildingState.rootBuildingId && buildingState.elements[buildingState.rootBuildingId]
                         ? buildingState.rootBuildingId
                         : Object.values(buildingState.elements).find(el => el.type === 'building')?.id;
@@ -95,7 +95,6 @@ export const useAiAnalysis = () => {
                     if (existingBuilding) {
                         parentId = existingBuilding;
                     } else {
-                        // Nessun edificio: crea radice generica
                         const rootId = 'building-root';
                         if (!buildingState.elements[rootId]) {
                             dispatch(setElement({
@@ -115,7 +114,6 @@ export const useAiAnalysis = () => {
                     }
                 }
 
-                // Crea elemento nell'albero edificio
                 const newElement: EdificioElement = {
                     id: elementId,
                     label: correction?.proposedElementLabel || suggestion.proposedElementLabel,
@@ -130,7 +128,6 @@ export const useAiAnalysis = () => {
 
                 dispatch(setElement(newElement));
 
-                // Aggiorna osservazione con targetElementId e dataStatus PROPOSED
                 const surveyState = store.getState().survey;
 
                 if (suggestion.sourceType === 'photo') {
@@ -152,32 +149,42 @@ export const useAiAnalysis = () => {
                 }
             }
 
-            // Aggiorna stato suggerimento
-            const latestSuggestions = store.getState().ai.suggestions;
-            const updated = latestSuggestions.map(s =>
-                s.id === suggestionId ? {...s, ...correction, status: action} : s
+            setSuggestions(prev =>
+                prev.map(s => s.id === suggestionId ? {...s, ...correction, status: action} : s)
             );
-            dispatch(setSuggestions(updated));
             return {success: true};
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore sconosciuto';
-            dispatch(setAiError(message));
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Errore sconosciuto';
+            setError(message);
             return null;
         }
-    };
+    }, []);
 
-    const acceptSuggestion = (suggestionId: string) => respondToSuggestion(suggestionId, 'accepted');
-    const rejectSuggestion = (suggestionId: string) => respondToSuggestion(suggestionId, 'rejected');
-    const modifySuggestion = (suggestionId: string, correction: Partial<AiSuggestionWithStatus>) =>
-        respondToSuggestion(suggestionId, 'modified', correction);
+    const acceptSuggestion = useCallback((suggestionId: string) =>
+        respondToSuggestion(suggestionId, 'accepted'), [respondToSuggestion]);
 
-    const pendingSuggestions = state.suggestions.filter(s => s.status === 'pending');
-    const getSuggestionBySourceId = (sourceId: string) => state.suggestions.find(s => s.sourceId === sourceId);
+    const rejectSuggestion = useCallback((suggestionId: string) =>
+        respondToSuggestion(suggestionId, 'rejected'), [respondToSuggestion]);
 
-    const reset = () => dispatch(resetAi());
+    const modifySuggestion = useCallback((suggestionId: string, correction: Partial<AiSuggestionWithStatus>) =>
+        respondToSuggestion(suggestionId, 'modified', correction), [respondToSuggestion]);
+
+    const pendingSuggestions = suggestions.filter(s => s.status === 'pending');
+    const getSuggestionBySourceId = useCallback((sourceId: string) =>
+        suggestionsRef.current.find(s => s.sourceId === sourceId), []);
+
+    const reset = useCallback(() => {
+        setSuggestions([]);
+        setIsAnalyzing(false);
+        setAnalyzingSourceId(null);
+        setError(null);
+    }, []);
 
     return {
-        ...state,
+        suggestions,
+        isAnalyzing,
+        analyzingSourceId,
+        error,
         pendingSuggestions,
         analyzePhoto,
         analyzePhotoBatch,

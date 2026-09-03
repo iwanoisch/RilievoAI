@@ -74,7 +74,7 @@ const pdfToPageImages = async (pdfData: ArrayBuffer, filename: string): Promise<
         canvas.height = viewport.height;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        await page.render({canvasContext: ctx, viewport}).promise;
+        await page.render({canvas, canvasContext: ctx, viewport}).promise;
 
         const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
         const base64 = dataUrl.split(',')[1];

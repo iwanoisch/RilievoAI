@@ -152,25 +152,25 @@ export const useRilievo = () => {
     // ===== Checks =====
 
     const toggleCheck = (itemId: string, checkId: string) => {
-        const updated = state.items.map(item => {
+        const withToggledCheck = state.items.map(item => {
             if (item.id !== itemId) return item;
             const checks = item.checks.map(c =>
                 c.id === checkId ? {...c, done: !c.done} : c
             );
-            return {...item, checks, status: computeStatus(checks)};
+            return {...item, checks};
         });
-        dispatch(setRilievoItems(updated));
+        dispatch(setRilievoItems(recomputeAllStatuses(withToggledCheck)));
     };
 
     const updateCheckValue = (itemId: string, checkId: string, value: string) => {
-        const updated = state.items.map(item => {
+        const withUpdatedCheck = state.items.map(item => {
             if (item.id !== itemId) return item;
             const checks = item.checks.map(c =>
                 c.id === checkId ? {...c, value, done: true} : c
             );
-            return {...item, checks, status: computeStatus(checks)};
+            return {...item, checks};
         });
-        dispatch(setRilievoItems(updated));
+        dispatch(setRilievoItems(recomputeAllStatuses(withUpdatedCheck)));
     };
 
     const addCheck = (itemId: string, check: RilievoCheck) => {
@@ -193,7 +193,15 @@ export const useRilievo = () => {
     };
 
     const deletePhoto = (photoId: string) => {
-        dispatch(setRilievoPhotos(state.photos.filter(p => p.id !== photoId)));
+        const photo = state.photos.find(p => p.id === photoId);
+        const remaining = state.photos.filter(p => p.id !== photoId);
+        dispatch(setRilievoPhotos(remaining));
+        if (photo) {
+            const stillHasPhotos = remaining.some(p => p.itemId === photo.itemId);
+            if (!stillHasPhotos) {
+                uncheckAllOfType(photo.itemId, 'photo');
+            }
+        }
     };
 
     const getPhotosForItem = (itemId: string) =>
@@ -204,6 +212,7 @@ export const useRilievo = () => {
     const addAudio = (audio: RilievoAudio) => {
         dispatch(setRilievoAudios([...state.audios, audio]));
         markCheckDone(audio.itemId, 'audio');
+        markCheckDone(audio.itemId, 'note');
     };
 
     const updateAudio = (audioId: string, updates: Partial<RilievoAudio>) => {
@@ -211,7 +220,16 @@ export const useRilievo = () => {
     };
 
     const deleteAudio = (audioId: string) => {
-        dispatch(setRilievoAudios(state.audios.filter(a => a.id !== audioId)));
+        const audio = state.audios.find(a => a.id === audioId);
+        const remaining = state.audios.filter(a => a.id !== audioId);
+        dispatch(setRilievoAudios(remaining));
+        if (audio) {
+            const stillHasAudios = remaining.some(a => a.itemId === audio.itemId);
+            if (!stillHasAudios) {
+                uncheckAllOfType(audio.itemId, 'audio');
+                uncheckAllOfType(audio.itemId, 'note');
+            }
+        }
     };
 
     const getAudiosForItem = (itemId: string) =>
@@ -229,7 +247,15 @@ export const useRilievo = () => {
     };
 
     const deleteMeasurement = (measurementId: string) => {
-        dispatch(setRilievoMeasurements(state.measurements.filter(m => m.id !== measurementId)));
+        const measurement = state.measurements.find(m => m.id === measurementId);
+        const remaining = state.measurements.filter(m => m.id !== measurementId);
+        dispatch(setRilievoMeasurements(remaining));
+        if (measurement) {
+            const stillHasMeasurements = remaining.some(m => m.itemId === measurement.itemId);
+            if (!stillHasMeasurements) {
+                uncheckAllOfType(measurement.itemId, 'measurement');
+            }
+        }
     };
 
     const getMeasurementsForItem = (itemId: string) =>
@@ -246,11 +272,62 @@ export const useRilievo = () => {
         }
     };
 
-    const computeStatus = (checks: RilievoCheck[]): RilievoItem['status'] => {
+    const uncheckAllOfType = (itemId: string, checkType: string) => {
+        const item = state.items.find(i => i.id === itemId);
+        if (!item) return;
+        const hasCheckedOfType = item.checks.some(c => c.type === checkType && c.done);
+        if (!hasCheckedOfType) return;
+        const withUnchecked = state.items.map(i => {
+            if (i.id !== itemId) return i;
+            const checks = i.checks.map(c =>
+                c.type === checkType ? {...c, done: false} : c
+            );
+            return {...i, checks};
+        });
+        dispatch(setRilievoItems(recomputeAllStatuses(withUnchecked)));
+    };
+
+    const computeLeafStatus = (checks: RilievoCheck[]): RilievoItem['status'] => {
         if (checks.length === 0) return 'pending';
         const allDone = checks.every(c => c.done);
         const anyDone = checks.some(c => c.done);
         return allDone ? 'done' : anyDone ? 'in_progress' : 'pending';
+    };
+
+    const recomputeAllStatuses = (itemsList: RilievoItem[]): RilievoItem[] => {
+        const childrenOf = (parentId: string) =>
+            itemsList.filter(i => i.parentId === parentId);
+
+        const getItemCompletion = (item: RilievoItem): number => {
+            const children = childrenOf(item.id);
+            if (children.length === 0) {
+                if (item.checks.length === 0) return 0;
+                return Math.round(item.checks.filter(c => c.done).length / item.checks.length * 100);
+            }
+            const childPercents = children.map(c => getItemCompletion(c));
+            if (childPercents.length === 0) return 0;
+            return Math.round(childPercents.reduce((a, b) => a + b, 0) / childPercents.length);
+        };
+
+        return itemsList.map(item => {
+            const children = childrenOf(item.id);
+            const ownStatus = computeLeafStatus(item.checks);
+
+            if (children.length === 0) {
+                return {...item, status: ownStatus};
+            }
+
+            const childrenCompletion = getItemCompletion(item);
+            const ownAllDone = item.checks.length === 0 || item.checks.every(c => c.done);
+
+            if (ownAllDone && childrenCompletion === 100) {
+                return {...item, status: 'done'};
+            }
+            if (ownStatus !== 'pending' || childrenCompletion > 0) {
+                return {...item, status: 'in_progress'};
+            }
+            return {...item, status: 'pending'};
+        });
     };
 
     const selectedItem = state.selectedItemId

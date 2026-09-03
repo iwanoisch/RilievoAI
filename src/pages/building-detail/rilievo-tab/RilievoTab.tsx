@@ -1,4 +1,4 @@
-import {FC, useState} from "react";
+import {FC, useState, useRef} from "react";
 import {useTranslation} from "react-i18next";
 import {
     ClipboardDocumentCheckIcon,
@@ -11,15 +11,18 @@ import {
     CameraIcon,
     MicrophoneIcon,
     ArrowsPointingOutIcon,
+    ArrowUpTrayIcon,
     XMarkIcon,
 } from "@heroicons/react/24/outline";
-// CameraIcon, MicrophoneIcon, ArrowsPointingOutIcon usati nelle sezioni foto/audio/misurazioni della card
 import {useRilievo} from "../../../features/rilievo/useRilievo.ts";
 import {RILIEVO_CHECK_ICON, RILIEVO_STATUS_CONFIG, RILIEVO_TYPE_LABELS, RILIEVO_ALLOWED_CHILDREN} from "../../../constants/rilievo.constant.ts";
-import {RilievoPhotoCapture} from "../../../components/rilievo-photo-capture/RilievoPhotoCapture.tsx";
-import {RilievoAudioCapture} from "../../../components/rilievo-audio-capture/RilievoAudioCapture.tsx";
-import {RilievoMeasurementInput} from "../../../components/rilievo-measurement-input/RilievoMeasurementInput.tsx";
-import type {RilievoItem, RilievoItemType} from "../../../features/rilievo/rilievo.type.ts";
+import {RilievoPhotoModal} from "./modals/RilievoPhotoModal.tsx";
+import {RilievoAudioModal} from "./modals/RilievoAudioModal.tsx";
+import {RilievoMeasurementModal} from "./modals/RilievoMeasurementModal.tsx";
+import {RilievoEditPhotoModal} from "./modals/RilievoEditPhotoModal.tsx";
+import {RilievoEditAudioModal} from "./modals/RilievoEditAudioModal.tsx";
+import {RilievoEditMeasurementModal} from "./modals/RilievoEditMeasurementModal.tsx";
+import type {RilievoItem, RilievoItemType, RilievoPhoto, RilievoAudio, RilievoMeasurement} from "../../../features/rilievo/rilievo.type.ts";
 
 export const RilievoTab: FC = () => {
     const {t} = useTranslation();
@@ -27,15 +30,27 @@ export const RilievoTab: FC = () => {
         items, generated, generating, error, selectedItemId,
         regenerateFromArazio, selectItem, toggleCheck, reset, deleteItem, addItem,
         getChildren, getRoots, getCompletionPercent, totalCompletion,
-        addPhoto, deletePhoto, getPhotosForItem,
-        addAudio, deleteAudio, getAudiosForItem,
-        addMeasurement, deleteMeasurement, getMeasurementsForItem,
+        addPhoto, updatePhoto, deletePhoto, getPhotosForItem,
+        addAudio, updateAudio, deleteAudio, getAudiosForItem,
+        addMeasurement, updateMeasurement, deleteMeasurement, getMeasurementsForItem,
     } = useRilievo();
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
     const [addingChildFor, setAddingChildFor] = useState<string | null>(null);
     const [newItemLabel, setNewItemLabel] = useState('');
     const [newItemType, setNewItemType] = useState<RilievoItemType>('room');
+
+    // Modali creazione
+    const [showPhotoModal, setShowPhotoModal] = useState(false);
+    const [showAudioModal, setShowAudioModal] = useState(false);
+    const [showMeasurementModal, setShowMeasurementModal] = useState(false);
+
+    // Modali editing
+    const [editingPhoto, setEditingPhoto] = useState<RilievoPhoto | null>(null);
+    const [editingAudio, setEditingAudio] = useState<RilievoAudio | null>(null);
+    const [editingMeasurement, setEditingMeasurement] = useState<RilievoMeasurement | null>(null);
 
     const toggleExpand = (id: string) => {
         setExpandedIds(prev => {
@@ -63,7 +78,26 @@ export const RilievoTab: FC = () => {
         if (!expandedIds.has(parentId)) toggleExpand(parentId);
     };
 
-    // I handler reali sono nei componenti RilievoPhotoCapture, RilievoAudioCapture, RilievoMeasurementInput
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || !selectedItemId) return;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.onload = () => {
+                const photo: RilievoPhoto = {
+                    id: `photo-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                    itemId: selectedItemId,
+                    uri: reader.result as string,
+                    timestamp: new Date().toISOString(),
+                    note: file.name,
+                };
+                addPhoto(photo);
+            };
+            reader.readAsDataURL(file);
+        }
+        e.target.value = '';
+    };
 
     // Stato vuoto
     if (!generated || items.length === 0) {
@@ -173,12 +207,11 @@ export const RilievoTab: FC = () => {
                         {completion}%
                     </span>
 
-                    {/* Azioni rapide inline */}
                     {allowedTypes.length > 0 && (
                         <button
                             type="button"
                             className="p-1 rounded text-text-disabled hover:text-primary-600 hover:bg-primary-50 transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
-                            aria-label="Aggiungi figlio"
+                            aria-label={t('rilievo.add_child')}
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setAddingChildFor(addingChildFor === item.id ? null : item.id);
@@ -193,7 +226,7 @@ export const RilievoTab: FC = () => {
                     <button
                         type="button"
                         className="p-1 rounded text-text-disabled hover:text-error hover:bg-error-light transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
-                        aria-label="Elimina"
+                        aria-label={t('rilievo.delete_item')}
                         onClick={(e) => {
                             e.stopPropagation();
                             deleteItem(item.id);
@@ -203,7 +236,6 @@ export const RilievoTab: FC = () => {
                     </button>
                 </div>
 
-                {/* Form aggiungi figlio inline */}
                 {addingChildFor === item.id && (
                     <div
                         className="flex items-center gap-2 px-3 py-2 bg-primary-50/50 border-l-2 border-primary-300"
@@ -220,7 +252,7 @@ export const RilievoTab: FC = () => {
                         </select>
                         <input
                             className="input text-sm py-1 flex-1"
-                            placeholder="Nome..."
+                            placeholder={t('rilievo.name_placeholder')}
                             value={newItemLabel}
                             onChange={(e) => setNewItemLabel(e.target.value)}
                             onKeyDown={(e) => { if (e.key === 'Enter') handleAddChild(item.id); }}
@@ -231,7 +263,7 @@ export const RilievoTab: FC = () => {
                             className="btn btn-primary py-1 px-3 text-xs min-h-[32px]"
                             onClick={() => handleAddChild(item.id)}
                         >
-                            Aggiungi
+                            {t('rilievo.btn_add')}
                         </button>
                         <button
                             type="button"
@@ -243,7 +275,6 @@ export const RilievoTab: FC = () => {
                     </div>
                 )}
 
-                {/* Children */}
                 {hasChildren && isExpanded && (
                     <div>
                         {children.map(child => renderItem(child, depth + 1))}
@@ -253,7 +284,6 @@ export const RilievoTab: FC = () => {
         );
     };
 
-    // Card dettaglio elemento selezionato
     const renderSelectedCard = () => {
         if (!selectedItemData) return null;
 
@@ -277,17 +307,55 @@ export const RilievoTab: FC = () => {
                     </span>
                 </div>
 
-                {/* Azioni rapide */}
-                <div className="flex flex-wrap gap-2">
-                    <RilievoPhotoCapture itemId={selectedItemData.id} onCapture={addPhoto}/>
-                    <RilievoAudioCapture itemId={selectedItemData.id} onCapture={addAudio}/>
+                {/* 4 bottoni azione in una riga */}
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        className="btn btn-outline flex items-center gap-1.5 text-xs min-h-[40px] flex-1"
+                        onClick={() => setShowPhotoModal(true)}
+                    >
+                        <CameraIcon className="h-4 w-4"/>
+                        {t('rilievo.btn_capture')}
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-outline flex items-center gap-1.5 text-xs min-h-[40px] flex-1"
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <ArrowUpTrayIcon className="h-4 w-4"/>
+                        {t('rilievo.btn_upload')}
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-outline flex items-center gap-1.5 text-xs min-h-[40px] flex-1"
+                        onClick={() => setShowAudioModal(true)}
+                    >
+                        <MicrophoneIcon className="h-4 w-4"/>
+                        {t('rilievo.btn_audio')}
+                    </button>
+                    <button
+                        type="button"
+                        className="btn btn-outline flex items-center gap-1.5 text-xs min-h-[40px] flex-1"
+                        onClick={() => setShowMeasurementModal(true)}
+                    >
+                        <ArrowsPointingOutIcon className="h-4 w-4"/>
+                        {t('rilievo.btn_measure')}
+                    </button>
                 </div>
-                <RilievoMeasurementInput itemId={selectedItemData.id} onAdd={addMeasurement}/>
+
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileUpload}
+                />
 
                 {/* Checklist */}
                 {selectedItemData.checks.length > 0 && (
                     <div className="space-y-1.5">
-                        <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Checklist</h5>
+                        <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">{t('rilievo.checklist')}</h5>
                         {selectedItemData.checks.map(check => {
                             const Icon = RILIEVO_CHECK_ICON[check.type] || PencilSquareIcon;
                             return (
@@ -317,13 +385,26 @@ export const RilievoTab: FC = () => {
                 {/* Foto associate */}
                 {photos.length > 0 && (
                     <div className="space-y-1.5">
-                        <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Foto ({photos.length})</h5>
+                        <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">{t('rilievo.photos')} ({photos.length})</h5>
                         {photos.map(p => (
-                            <div key={p.id} className="flex items-center gap-2 px-3 py-2 bg-surface-page rounded-lg text-sm">
-                                <CameraIcon className="h-4 w-4 text-primary-500 shrink-0"/>
-                                <span className="flex-1 text-text-primary truncate">{p.note || 'Foto'}</span>
+                            <div
+                                key={p.id}
+                                className="flex items-center gap-2 px-3 py-2 bg-surface-page rounded-lg text-sm cursor-pointer hover:bg-surface-hover transition-colors"
+                                onClick={() => setEditingPhoto(p)}
+                            >
+                                {p.uri ? (
+                                    <img src={p.uri} alt={p.note || 'Foto'} className="h-8 w-8 rounded object-cover shrink-0"/>
+                                ) : (
+                                    <CameraIcon className="h-4 w-4 text-primary-500 shrink-0"/>
+                                )}
+                                <span className="flex-1 text-text-primary truncate">{p.note || t('rilievo.photo_default')}</span>
                                 <span className="text-xs text-text-muted">{new Date(p.timestamp).toLocaleTimeString()}</span>
-                                <button type="button" onClick={() => deletePhoto(p.id)} className="p-1 text-text-disabled hover:text-error">
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); deletePhoto(p.id); }}
+                                    className="p-1 text-text-disabled hover:text-error hover:bg-error-light rounded transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
+                                    aria-label={t('rilievo.modal_delete_photo')}
+                                >
                                     <TrashIcon className="h-3.5 w-3.5"/>
                                 </button>
                             </div>
@@ -334,13 +415,23 @@ export const RilievoTab: FC = () => {
                 {/* Audio associati */}
                 {audios.length > 0 && (
                     <div className="space-y-1.5">
-                        <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Audio ({audios.length})</h5>
+                        <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">{t('rilievo.audios')} ({audios.length})</h5>
                         {audios.map(a => (
-                            <div key={a.id} className="flex items-center gap-2 px-3 py-2 bg-surface-page rounded-lg text-sm">
+                            <div
+                                key={a.id}
+                                className="flex items-center gap-2 px-3 py-2 bg-surface-page rounded-lg text-sm cursor-pointer hover:bg-surface-hover transition-colors"
+                                onClick={() => setEditingAudio(a)}
+                            >
                                 <MicrophoneIcon className="h-4 w-4 text-primary-500 shrink-0"/>
-                                <span className="flex-1 text-text-primary">{a.transcription || 'Registrazione'}</span>
+                                <span className="flex-1 text-text-primary truncate">{a.transcription || t('rilievo.audio_default')}</span>
+                                <span className="text-xs text-text-muted">{a.duration}s</span>
                                 <span className="text-xs text-text-muted">{new Date(a.timestamp).toLocaleTimeString()}</span>
-                                <button type="button" onClick={() => deleteAudio(a.id)} className="p-1 text-text-disabled hover:text-error">
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); deleteAudio(a.id); }}
+                                    className="p-1 text-text-disabled hover:text-error hover:bg-error-light rounded transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
+                                    aria-label={t('rilievo.modal_delete_audio')}
+                                >
                                     <TrashIcon className="h-3.5 w-3.5"/>
                                 </button>
                             </div>
@@ -351,13 +442,22 @@ export const RilievoTab: FC = () => {
                 {/* Misurazioni associate */}
                 {measurements.length > 0 && (
                     <div className="space-y-1.5">
-                        <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Misurazioni ({measurements.length})</h5>
+                        <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">{t('rilievo.measurements')} ({measurements.length})</h5>
                         {measurements.map(m => (
-                            <div key={m.id} className="flex items-center gap-2 px-3 py-2 bg-surface-page rounded-lg text-sm">
+                            <div
+                                key={m.id}
+                                className="flex items-center gap-2 px-3 py-2 bg-surface-page rounded-lg text-sm cursor-pointer hover:bg-surface-hover transition-colors"
+                                onClick={() => setEditingMeasurement(m)}
+                            >
                                 <ArrowsPointingOutIcon className="h-4 w-4 text-primary-500 shrink-0"/>
                                 <span className="flex-1 text-text-primary">{m.label}</span>
                                 <span className="text-sm font-bold text-text-primary">{m.value} {m.unit}</span>
-                                <button type="button" onClick={() => deleteMeasurement(m.id)} className="p-1 text-text-disabled hover:text-error">
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); deleteMeasurement(m.id); }}
+                                    className="p-1 text-text-disabled hover:text-error hover:bg-error-light rounded transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
+                                    aria-label={t('rilievo.modal_delete_measurement')}
+                                >
                                     <TrashIcon className="h-3.5 w-3.5"/>
                                 </button>
                             </div>
@@ -427,12 +527,10 @@ export const RilievoTab: FC = () => {
 
                 {/* Layout: Albero + Card */}
                 <div className="flex flex-col lg:flex-row gap-4">
-                    {/* Albero */}
                     <div className="lg:w-1/2 border border-border-light rounded-xl overflow-hidden bg-surface-card max-h-[600px] overflow-y-auto">
                         {roots.map(root => renderItem(root))}
                     </div>
 
-                    {/* Card dettaglio */}
                     <div className="lg:w-1/2">
                         {selectedItemData ? renderSelectedCard() : (
                             <div className="border border-dashed border-border-strong rounded-xl p-8 text-center">
@@ -442,6 +540,55 @@ export const RilievoTab: FC = () => {
                         )}
                     </div>
                 </div>
+
+                {/* Modali creazione */}
+                {showPhotoModal && selectedItemId && (
+                    <RilievoPhotoModal
+                        itemId={selectedItemId}
+                        onSave={addPhoto}
+                        onClose={() => setShowPhotoModal(false)}
+                    />
+                )}
+                {showAudioModal && selectedItemId && (
+                    <RilievoAudioModal
+                        itemId={selectedItemId}
+                        onSave={addAudio}
+                        onClose={() => setShowAudioModal(false)}
+                    />
+                )}
+                {showMeasurementModal && selectedItemId && (
+                    <RilievoMeasurementModal
+                        itemId={selectedItemId}
+                        onSave={addMeasurement}
+                        onClose={() => setShowMeasurementModal(false)}
+                    />
+                )}
+
+                {/* Modali editing */}
+                {editingPhoto && (
+                    <RilievoEditPhotoModal
+                        photo={editingPhoto}
+                        onSave={(updates) => updatePhoto(editingPhoto.id, updates)}
+                        onDelete={() => deletePhoto(editingPhoto.id)}
+                        onClose={() => setEditingPhoto(null)}
+                    />
+                )}
+                {editingAudio && (
+                    <RilievoEditAudioModal
+                        audio={editingAudio}
+                        onSave={(updates) => updateAudio(editingAudio.id, updates)}
+                        onDelete={() => deleteAudio(editingAudio.id)}
+                        onClose={() => setEditingAudio(null)}
+                    />
+                )}
+                {editingMeasurement && (
+                    <RilievoEditMeasurementModal
+                        measurement={editingMeasurement}
+                        onSave={(updates) => updateMeasurement(editingMeasurement.id, updates)}
+                        onDelete={() => deleteMeasurement(editingMeasurement.id)}
+                        onClose={() => setEditingMeasurement(null)}
+                    />
+                )}
             </div>
         </div>
     );

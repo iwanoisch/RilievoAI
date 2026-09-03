@@ -5,13 +5,14 @@
 [functions]
   directory = "netlify/functions"
 
-# Proxy API calls to the Netlify Function
+# Proxy API calls to the Netlify Function - MUST be before SPA fallback
 [[redirects]]
-  from = "/api/anthropic/v1/messages"
+  from = "/api/anthropic/*"
   to = "/.netlify/functions/anthropic-proxy"
   status = 200
+  force = true
 
-# SPA fallback - must be last
+# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"

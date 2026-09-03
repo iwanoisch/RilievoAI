@@ -50,10 +50,56 @@ export interface AiBulkRequest {
     files: AiExtractedFile[];
 }
 
+// ===== Building Structure (per tab Rilievo) =====
+
+export interface AiStructureOpening {
+    label: string;
+    type: 'door' | 'window' | 'french_door' | 'other';
+    width?: string;
+    height?: string;
+    note?: string;
+}
+
+export interface AiStructureElement {
+    label: string;
+    category: 'thermal' | 'electrical' | 'degradation' | 'finish' | 'other';
+    note?: string;
+}
+
+export interface AiStructureWall {
+    label: string;
+    length?: string;
+    height?: string;
+    openings: AiStructureOpening[];
+    elements: AiStructureElement[];
+}
+
+export interface AiStructureRoom {
+    label: string;
+    area?: string;
+    height?: string;
+    destinationUse?: string;
+    walls: AiStructureWall[];
+}
+
+export interface AiStructureFloor {
+    label: string;
+    level: number;
+    rooms: AiStructureRoom[];
+}
+
+export interface AiBuildingStructure {
+    label: string;
+    address?: string;
+    floors: AiStructureFloor[];
+    externalElements?: AiStructureElement[];
+}
+
 export interface AiBulkResponse {
     sections: Record<string, AiArazioResponse>;
     globalNotes: AiAnnotation[];
     documentDate?: string;
+    buildingStructure?: AiBuildingStructure;
 }
 
 export type AiStatus = 'idle' | 'extracting' | 'analyzing' | 'done' | 'error';

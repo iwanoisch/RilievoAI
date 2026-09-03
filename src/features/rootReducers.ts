@@ -10,6 +10,7 @@ import {default as fakeAiReducer} from "./fake_ai/slice/aiSlice.ts";
 import {default as aiReducer} from "./ai/aiSlice.ts";
 import {default as buildingsReducer} from "./buildings/buildingsSlice.ts";
 import {default as arazioReducer} from "./arazio/arazioSlice.ts";
+import {default as rilievoReducer} from "./rilievo/rilievoSlice.ts";
 
 export const reducers = {
     init: initReducer,
@@ -24,4 +25,5 @@ export const reducers = {
     ai: aiReducer,
     buildings: buildingsReducer,
     arazio: arazioReducer,
+    rilievo: rilievoReducer,
 };

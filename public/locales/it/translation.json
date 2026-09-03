@@ -693,12 +693,29 @@
   "buildingDetail": {
     "documentation": "Documentazione",
     "arazio": "Arazio",
+    "rilievo": "Rilievo",
     "arazio_title": "Archivio documentale",
     "arazio_hint": "Seleziona una scheda dall'elenco a sinistra per visualizzarne i contenuti.",
     "select_section": "Seleziona una scheda...",
     "section": "Scheda",
     "of": "di",
     "section_empty": "Nessun contenuto ancora disponibile per questa scheda."
+  },
+  "rilievo": {
+    "title": "Rilievo",
+    "subtitle": "Checklist guidata per il sopralluogo tecnico",
+    "empty_title": "Nessuna checklist generata",
+    "empty_description": "Genera la checklist delle rilevazioni partendo dai dati della documentazione analizzata. La struttura dell'edificio (piani, ambienti, elementi) viene creata automaticamente.",
+    "generate_btn": "Genera da documentazione",
+    "generating": "Generazione in corso...",
+    "regenerate_btn": "Rigenera",
+    "reset": "Elimina checklist",
+    "completion": "Completamento rilievo",
+    "status_pending": "da rilevare",
+    "status_in_progress": "in corso",
+    "status_done": "completato",
+    "status_to_verify": "da verificare",
+    "select_element": "Seleziona un elemento dall'albero per visualizzare i dettagli e aggiungere foto, audio e misurazioni"
   },
   "arazio": {
     "select_placeholder": "Seleziona...",

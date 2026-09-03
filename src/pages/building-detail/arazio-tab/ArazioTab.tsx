@@ -4,7 +4,7 @@ import {useParams} from "react-router-dom";
 import {DocumentTextIcon, CheckCircleIcon} from "@heroicons/react/24/outline";
 import {ARAZIO_SECTIONS} from "../../../constants/arazio-sections.constant.ts";
 import {useArazio} from "../../../features/arazio/useArazio.ts";
-import {ArazioSectionForm} from "../arazio-section-form/ArazioSectionForm.tsx";
+import {ArazioSectionForm} from "../../../components/arazio-section-form/ArazioSectionForm.tsx";
 
 export const ArazioTab: FC = () => {
     const {t} = useTranslation();

@@ -10,12 +10,12 @@ import {
 } from "@heroicons/react/24/outline";
 import {PaperClipIcon} from "@heroicons/react/24/solid";
 import {RadioGroup, Radio, Field, Label} from "@headlessui/react";
-import {ARAZIO_SECTIONS, EMPTY_VALUTAZIONE} from "../../../constants/arazio-sections.constant.ts";
-import {useArazio} from "../../../features/arazio/useArazio.ts";
-import {useAlert} from "../../../common/alert/useAlert.ts";
-import {formatFileSize} from "../../../utility/arazio-utils.ts";
-import {useAi} from "../../../features/ai/useAi.ts";
-import type {ArazioFieldConfig, ArazioGroupConfig, ArazioRepeatableInstance, ArazioValutazione} from "../../../features/arazio/arazio.type.ts";
+import {ARAZIO_SECTIONS, EMPTY_VALUTAZIONE} from "../../constants/arazio-sections.constant.ts";
+import {useArazio} from "../../features/arazio/useArazio.ts";
+import {useAlert} from "../../common/alert/useAlert.ts";
+import {formatFileSize} from "../../utility/arazio-utils.ts";
+import {useAi} from "../../features/ai/useAi.ts";
+import type {ArazioFieldConfig, ArazioGroupConfig, ArazioRepeatableInstance, ArazioValutazione} from "../../features/arazio/arazio.type.ts";
 import type {ArazioSectionFormProps} from "./arazioSectionForm.type.ts";
 
 export const ArazioSectionForm: FC<ArazioSectionFormProps> = ({buildingId, sectionId}) => {

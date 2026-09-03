@@ -71,6 +71,17 @@ REGOLA DATA DOCUMENTO:
 - Nel campo "documentDate" restituisci la data del documento PIÙ RECENTE tra quelli analizzati, in formato YYYY-MM-DD
 - Se non trovi nessuna data, restituisci stringa vuota ""
 
+REGOLA STRUTTURA EDIFICIO (buildingStructure):
+- Analizzando i documenti (soprattutto planimetrie, piante, sezioni, relazioni tecniche), genera la struttura gerarchica dell'edificio
+- La gerarchia e': Edificio > Piani > Ambienti > Pareti > Aperture/Elementi
+- Per ogni AMBIENTE: indica label, superficie (area in mq), altezza se disponibile
+- Per ogni PARETE: indica label progressiva (W01, W02...), lunghezza e altezza se desumibili
+- Per ogni APERTURA su parete: indica tipo (door/window/french_door/other), label progressiva (D01, F01...), dimensioni
+- Per ogni ELEMENTO su parete: indica categoria (thermal/electrical/degradation/finish/other), label (R01, AC01, E01...)
+- Se non trovi planimetrie dettagliate, genera comunque la struttura base con piani e ambienti desunti dalle relazioni
+- Le pareti vanno nominate in senso orario partendo da Nord: W01=Nord, W02=Est, W03=Sud, W04=Ovest
+- Se un ambiente ha forma non rettangolare, aggiungi pareti extra (W05, W06...)
+
 FORMATO:
 {
   "documentDate": "2024-07-15",
@@ -84,9 +95,88 @@ FORMATO:
   },
   "globalNotes": [
     { "type": "missing|warning|info|conflict", "section": "nome", "field": "chiave", "message": "descrizione" }
-  ]
+  ],
+  "buildingStructure": {
+    "label": "Nome edificio",
+    "address": "Via/indirizzo",
+    "floors": [
+      {
+        "label": "Piano Terra",
+        "level": 0,
+        "rooms": [
+          {
+            "label": "Soggiorno",
+            "area": "42.50",
+            "height": "2.70",
+            "walls": [
+              {
+                "label": "W01",
+                "length": "4.20",
+                "height": "2.70",
+                "openings": [
+                  { "label": "D01", "type": "door", "width": "0.90", "height": "2.10" }
+                ],
+                "elements": [
+                  { "label": "R01", "category": "thermal", "note": "Radiatore" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "externalElements": []
+  }
 }
 `;
+
+export const AI_RILIEVO_SYSTEM_PROMPT = `Sei un assistente specializzato nell'analisi di edifici. Ti vengono forniti i dati gia estratti dalla documentazione tecnica di un immobile (compilati in precedenza analizzando relazioni, planimetrie, tavole di progetto).
+
+Devi generare la struttura gerarchica dell'edificio per guidare il tecnico durante il sopralluogo.
+
+REGOLE:
+- Rispondi SOLO con un JSON valido, senza markdown, senza spiegazioni
+- La gerarchia e': Edificio > Piani > Ambienti > Pareti > Aperture/Elementi
+- Per ogni AMBIENTE: indica label, superficie (area in mq se disponibile), altezza se disponibile
+- Per ogni PARETE: indica label progressiva (W01, W02...), lunghezza e altezza se desumibili dai dati
+- Per ogni APERTURA su parete: indica tipo (door/window/french_door/other), label progressiva (D01, F01...), dimensioni se disponibili
+- Per ogni ELEMENTO su parete: indica categoria (thermal/electrical/degradation/finish/other), label (R01, AC01, E01...)
+- Le pareti vanno nominate in senso orario: W01=Nord, W02=Est, W03=Sud, W04=Ovest
+- Se i dati non hanno abbastanza dettaglio per le pareti, genera comunque 4 pareti base per ogni ambiente rettangolare
+- Genera la struttura PIU DETTAGLIATA possibile con i dati che hai
+
+FORMATO JSON:
+{
+  "label": "Nome edificio",
+  "address": "Indirizzo",
+  "floors": [
+    {
+      "label": "Piano Terra",
+      "level": 0,
+      "rooms": [
+        {
+          "label": "Soggiorno",
+          "area": "42.50",
+          "height": "2.70",
+          "walls": [
+            {
+              "label": "W01",
+              "length": "4.20",
+              "height": "2.70",
+              "openings": [
+                { "label": "D01", "type": "door", "width": "0.90", "height": "2.10" }
+              ],
+              "elements": [
+                { "label": "R01", "category": "thermal", "note": "Radiatore" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "externalElements": []
+}`;
 
 export const AI_MODEL = 'claude-sonnet-4-6';
 export const AI_MAX_TOKENS = 16384;

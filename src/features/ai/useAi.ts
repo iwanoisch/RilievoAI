@@ -20,6 +20,8 @@ import {buildFieldSchema} from "../../utility/ai-schema-utils.ts";
 import {extractFilesFromList} from "../../utility/file-extract-utils.ts";
 import {useArazio} from "../arazio/useArazio.ts";
 import {useBuildings} from "../buildings/useBuildings.ts";
+import {setRilievoItems, setGenerated} from "../rilievo/rilievoSlice.ts";
+import {convertAiStructureToItems} from "../../utility/rilievo-utils.ts";
 import type {BuildingCardData} from "../buildings/buildings.type.ts";
 import type {AiArazioRequest, AiArazioResponse, AiAnnotation, AiBulkResponse, AiExtractedFile, AiSession, AiUploadedFile} from "./ai.type.ts";
 import type {SkippedFile} from "../../utility/file-extract-utils.ts";
@@ -328,6 +330,7 @@ export const useAi = () => {
             const allNotes: AiAnnotation[] = [];
             const mergedSections: Record<string, AiArazioResponse> = {};
             const failedBatchIndices: number[] = [];
+            let mergedBuildingStructure: AiBulkResponse['buildingStructure'] = undefined;
 
             dispatch(setBatchProgress({current: 0, total: batches.length, failed: 0}));
 
@@ -365,6 +368,11 @@ export const useAi = () => {
                         }
                     }
 
+                    // Salva buildingStructure (l'ultimo batch con struttura vince)
+                    if (response.buildingStructure?.floors?.length) {
+                        mergedBuildingStructure = response.buildingStructure;
+                    }
+
                     if (response.globalNotes?.length) allNotes.push(...response.globalNotes);
                     for (const sectionResponse of Object.values(responseSections)) {
                         if (sectionResponse.notes?.length) allNotes.push(...sectionResponse.notes);
@@ -389,6 +397,15 @@ export const useAi = () => {
 
             dispatch(addAnnotations(allNotes));
             dispatch(addSectionsProcessed(batchProcessed));
+
+            // Genera alberatura rilievo dall'ultimo batch che contiene buildingStructure
+            if (mergedBuildingStructure) {
+                const rilievoItems = convertAiStructureToItems(mergedBuildingStructure);
+                if (rilievoItems.length > 0) {
+                    dispatch(setRilievoItems(rilievoItems));
+                    dispatch(setGenerated(true));
+                }
+            }
 
             dispatch(addSession({
                 id: sessionId,

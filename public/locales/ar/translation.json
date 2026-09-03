@@ -680,12 +680,29 @@
   "buildingDetail": {
     "documentation": "التوثيق",
     "arazio": "أرازيو",
+    "rilievo": "المسح",
     "arazio_title": "أرشيف المستندات",
     "arazio_hint": "اختر قسمًا من القائمة على اليسار لعرض محتوياته.",
     "select_section": "اختر قسمًا...",
     "section": "القسم",
     "of": "من",
     "section_empty": "لا يوجد محتوى متاح بعد لهذا القسم."
+  },
+  "rilievo": {
+    "title": "المسح",
+    "subtitle": "قائمة مرجعية موجهة للمسح الفني",
+    "empty_title": "لم يتم إنشاء قائمة مرجعية",
+    "empty_description": "أنشئ قائمة المسح من بيانات الوثائق المحللة. يتم إنشاء هيكل المبنى (الطوابق، الغرف، العناصر) تلقائيًا.",
+    "generate_btn": "إنشاء من الوثائق",
+    "generating": "جارٍ الإنشاء...",
+    "regenerate_btn": "إعادة الإنشاء",
+    "reset": "حذف القائمة",
+    "completion": "اكتمال المسح",
+    "status_pending": "معلق",
+    "status_in_progress": "جارٍ",
+    "status_done": "مكتمل",
+    "status_to_verify": "للتحقق",
+    "select_element": "اختر عنصرًا من الشجرة لعرض التفاصيل وإضافة الصور والصوت والقياسات"
   },
   "arazio": {
     "select_placeholder": "اختر...",

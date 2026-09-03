@@ -690,12 +690,29 @@
   "buildingDetail": {
     "documentation": "Documentation",
     "arazio": "Arazio",
+    "rilievo": "Survey",
     "arazio_title": "Document archive",
     "arazio_hint": "Select a section from the list on the left to view its contents.",
     "select_section": "Select a section...",
     "section": "Section",
     "of": "of",
     "section_empty": "No content available yet for this section."
+  },
+  "rilievo": {
+    "title": "Survey",
+    "subtitle": "Guided checklist for technical inspection",
+    "empty_title": "No checklist generated",
+    "empty_description": "Generate the survey checklist from the analyzed documentation data. The building structure (floors, rooms, elements) is created automatically.",
+    "generate_btn": "Generate from documentation",
+    "generating": "Generating...",
+    "regenerate_btn": "Regenerate",
+    "reset": "Delete checklist",
+    "completion": "Survey completion",
+    "status_pending": "pending",
+    "status_in_progress": "in progress",
+    "status_done": "completed",
+    "status_to_verify": "to verify",
+    "select_element": "Select an element from the tree to view details and add photos, audio and measurements"
   },
   "arazio": {
     "select_placeholder": "Select...",

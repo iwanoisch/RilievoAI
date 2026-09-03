@@ -11,10 +11,12 @@ import {
     ChartBarIcon,
     FolderOpenIcon,
     CubeIcon,
+    ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 import {useBuildings} from "../../features/buildings/useBuildings.ts";
 import {ArazioTab} from "./arazio-tab/ArazioTab.tsx";
 import {DocumentazioneTab} from "./documentazione-tab/DocumentazioneTab.tsx";
+import {RilievoTab} from "./rilievo-tab/RilievoTab.tsx";
 import {BUILDING_STATUS_LABEL} from "../../constants/buildings.constant.ts";
 import {EditBuildingModal} from "./modals/EditBuildingModal.tsx";
 
@@ -25,7 +27,7 @@ export const BuildingDetail: FC = () => {
     const {buildings} = useBuildings();
 
     const [showEditModal, setShowEditModal] = useState(false);
-    const [activeTab, setActiveTab] = useState<'planimetria' | 'arazio'>('planimetria');
+    const [activeTab, setActiveTab] = useState<'planimetria' | 'arazio' | 'rilievo'>('planimetria');
 
     const building = buildings.find(b => b.id === id);
 
@@ -170,6 +172,13 @@ export const BuildingDetail: FC = () => {
                             <CubeIcon className="h-4 w-4"/>
                             {t('buildingDetail.arazio')}
                         </button>
+                        <button
+                            onClick={() => setActiveTab('rilievo')}
+                            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors min-h-[44px] ${activeTab === 'rilievo' ? 'text-primary-600 border-b-2 border-primary-500' : 'text-text-muted hover:text-text-primary'}`}
+                        >
+                            <ClipboardDocumentCheckIcon className="h-4 w-4"/>
+                            {t('buildingDetail.rilievo')}
+                        </button>
                     </div>
 
                     {/* Mobile */}
@@ -179,10 +188,11 @@ export const BuildingDetail: FC = () => {
                             name="building-detail-tab-select"
                             className="input w-full text-sm"
                             value={activeTab}
-                            onChange={(e) => setActiveTab(e.target.value as 'planimetria' | 'arazio')}
+                            onChange={(e) => setActiveTab(e.target.value as 'planimetria' | 'arazio' | 'rilievo')}
                         >
                             <option value="planimetria">{t('buildingDetail.documentation')}</option>
                             <option value="arazio">{t('buildingDetail.arazio')}</option>
+                            <option value="rilievo">{t('buildingDetail.rilievo')}</option>
                         </select>
                     </div>
                 </div>
@@ -190,6 +200,7 @@ export const BuildingDetail: FC = () => {
                 {/* Contenuto tab (placeholder) */}
                 {activeTab === 'planimetria' && <DocumentazioneTab/>}
                 {activeTab === 'arazio' && <ArazioTab/>}
+                {activeTab === 'rilievo' && <RilievoTab/>}
 
             {/* Modale modifica */}
             {showEditModal && (

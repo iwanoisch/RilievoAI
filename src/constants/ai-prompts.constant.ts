@@ -9,7 +9,7 @@ REGOLE:
 - Per i campi checkbox, usa "true" o "" (stringa vuota)
 - Per i campi file/heading, ignora
 - Se non trovi l'informazione, lascia la stringa vuota ""
-- Per i gruppi ripetibili (marcati come "repeatable" nello schema), crea UN ARRAY di istanze separate. Se trovi 2 cortili interni, crea 2 oggetti nell'array. Ogni istanza ha "values" e "valutazione" (vuota).
+- Per i campi con "repeatable": true nello schema, NON metterli in "values" ma crea istanze in "repeatables" usando il groupKey. Ogni istanza ha "values" (campi del gruppo) e "valutazione" (vuota). Se trovi più elementi, crea più istanze nell'array. Se trovi un solo elemento, crea comunque un'istanza.
 - La valutazione va lasciata vuota (l'utente la compilerà)
 - Se un campo ha più valori possibili da documenti diversi, USA IL VALORE PIÙ RECENTE (basato sulla data del documento)
 - IMPORTANTE: nel campo "notes" segnala tutto ciò che non hai trovato, conflitti tra documenti, dati ambigui o informazioni importanti
@@ -56,6 +56,16 @@ REGOLE VALORI:
 - Esempio CORRETTO: "piani_fuori_terra": "2"
 - Esempio SBAGLIATO: "piani_fuori_terra": { "descrizione": "2 livelli" }
 
+REGOLA GRUPPI RIPETIBILI:
+- Nello schema dei campi, i campi con "repeatable": true appartengono a gruppi ripetibili
+- Per questi campi, NON mettere i valori in "values" della sezione
+- Invece, crea istanze nell'oggetto "repeatables" usando il groupKey come chiave
+- Ogni istanza ha "values" (coppie chiave-valore) e "valutazione" (lascia vuota)
+- Se trovi più elementi dello stesso tipo (es. 3 vincoli, 2 scale), crea un'istanza per ognuno
+- Se trovi un solo elemento, crea comunque un'istanza nell'array
+- Esempio: se trovi un vincolo sismico "Zona 3", metti:
+  "repeatables": { "vincolo_sismico": [{ "values": { "vincolo": "non_gravato", "descrizione": "Zona 3 - ..." }, "valutazione": {} }] }
+
 REGOLA DATA DOCUMENTO:
 - Cerca in OGNI documento analizzato la data di emissione/redazione/protocollo
 - Nel campo "documentDate" restituisci la data del documento PIÙ RECENTE tra quelli analizzati, in formato YYYY-MM-DD
@@ -77,8 +87,6 @@ FORMATO:
   ]
 }
 `;
-
-export const AI_FINAL_USER_MESSAGE = 'Analizza tutti i documenti forniti e restituisci il JSON con i valori estratti e le annotazioni.';
 
 export const AI_MODEL = 'claude-sonnet-4-6';
 export const AI_MAX_TOKENS = 16384;

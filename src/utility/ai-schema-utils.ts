@@ -13,6 +13,7 @@ export const buildFieldSchema = (config: ArazioSectionConfig): AiFieldSchema[] =
                     label: field.label,
                     type: field.type,
                     groupKey: group.key,
+                    repeatable: group.repeatable || undefined,
                     options: field.options?.map(o => o.value),
                 });
             }
@@ -27,6 +28,7 @@ export const buildFieldSchema = (config: ArazioSectionConfig): AiFieldSchema[] =
                         label: field.label,
                         type: field.type,
                         groupKey: `${group.key}.${subGroup.key}`,
+                        repeatable: subGroup.repeatable || undefined,
                         options: field.options?.map(o => o.value),
                     });
                 }

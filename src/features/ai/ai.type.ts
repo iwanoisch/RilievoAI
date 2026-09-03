@@ -19,6 +19,7 @@ export interface AiFieldSchema {
     label: string;
     type: string;
     groupKey: string;
+    repeatable?: boolean;
     options?: string[];
 }
 

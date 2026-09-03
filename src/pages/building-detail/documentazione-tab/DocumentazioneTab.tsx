@@ -29,7 +29,6 @@ export const DocumentazioneTab: FC = () => {
 
     const [extractedFiles, setExtractedFiles] = useState<AiExtractedFile[]>([]);
     const [skippedFiles, setSkippedFiles] = useState<SkippedFile[]>([]);
-    const [totalSizeMb, setTotalSizeMb] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,7 +50,6 @@ export const DocumentazioneTab: FC = () => {
 
         setExtractedFiles(prev => [...prev, ...result.files]);
         setSkippedFiles(prev => [...prev, ...result.skipped]);
-        setTotalSizeMb(prev => prev + result.totalSizeMb);
 
         if (result.skipped.length > 0) {
             showAlert({
@@ -98,7 +96,6 @@ export const DocumentazioneTab: FC = () => {
         ai.resetStatus();
         setExtractedFiles([]);
         setSkippedFiles([]);
-        setTotalSizeMb(0);
     };
 
     const annotationIcon = (type: AiAnnotation['type']) => {

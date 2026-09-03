@@ -2,6 +2,8 @@ import {useCallback, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import type {SpeechRecognitionInstance, SpeechRecognitionEvent, SpeechRecognitionErrorEvent} from "./useVoiceRecorder.type.ts";
 
+const isDesktop = () => !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 export const useVoiceRecorder = () => {
     const {i18n} = useTranslation();
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -14,11 +16,6 @@ export const useVoiceRecorder = () => {
     const [transcription, setTranscription] = useState('');
     const [audioPath, setAudioPath] = useState<string | null>(null);
     const [voiceError, setVoiceError] = useState<string | null>(null);
-    const [debugLog, setDebugLog] = useState<string[]>([]);
-
-    const addDebug = (msg: string) => {
-        setDebugLog(prev => [...prev.slice(-10), `${new Date().toLocaleTimeString()}: ${msg}`]);
-    };
 
     const _setTranscription = (text: string) => {
         transcriptionRef.current = text;
@@ -26,16 +23,15 @@ export const useVoiceRecorder = () => {
     };
 
     const startRecognition = useCallback((lang: string) => {
+        // Speech recognition doesn't work alongside MediaRecorder on mobile
+        if (!isDesktop()) return;
+
         const W = window as Window & {
             SpeechRecognition?: new () => SpeechRecognitionInstance;
             webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
         };
         const SpeechRecognitionCtor = W.SpeechRecognition || W.webkitSpeechRecognition;
-        if (!SpeechRecognitionCtor) {
-            addDebug('SpeechRecognition NOT available');
-            return;
-        }
-        addDebug('SpeechRecognition found, starting...');
+        if (!SpeechRecognitionCtor) return;
 
         if (recognitionRef.current) {
             try { recognitionRef.current.stop(); } catch (_) { /* ignore */ }
@@ -57,30 +53,24 @@ export const useVoiceRecorder = () => {
                     interimText += result[0].transcript;
                 }
             }
-            // Accumulate final transcript across restarts
             if (finalText) {
                 finalTranscriptRef.current += finalText;
             }
             _setTranscription(finalTranscriptRef.current + interimText);
-            addDebug(`onresult: final="${finalText}" interim="${interimText}"`);
         };
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
             const errorType = event.error || '';
-            addDebug(`onerror: ${errorType}`);
             if (errorType === 'no-speech' || errorType === 'aborted' || errorType === 'network') {
                 return;
             }
         };
 
-        // Auto-restart when recognition ends (happens frequently on Android)
         recognition.onend = () => {
-            addDebug(`onend: stopping=${isStoppingRef.current} recState=${mediaRecorderRef.current?.state}`);
             if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
                 setTimeout(() => {
                     if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
-                        addDebug('restarting recognition...');
-                        try { recognition.start(); } catch (e) { addDebug(`restart failed: ${e}`); }
+                        try { recognition.start(); } catch (_) { /* ignore */ }
                     }
                 }, 300);
             }
@@ -89,9 +79,8 @@ export const useVoiceRecorder = () => {
         try {
             recognition.start();
             recognitionRef.current = recognition;
-            addDebug(`recognition started, lang=${lang}`);
-        } catch (e) {
-            addDebug(`recognition start failed: ${e}`);
+        } catch (_) {
+            // SpeechRecognition not available or blocked
         }
     }, []);
 
@@ -101,21 +90,6 @@ export const useVoiceRecorder = () => {
                 setVoiceError('Microfono non supportato. Assicurati di usare HTTPS.');
                 return;
             }
-
-            chunksRef.current = [];
-            isStoppingRef.current = false;
-            finalTranscriptRef.current = '';
-            setIsRecording(true);
-            setAudioPath(null);
-            _setTranscription('');
-            setVoiceError(null);
-
-            // Start speech recognition FIRST (before MediaRecorder grabs the mic)
-            const langMap: Record<string, string> = {it: 'it-IT', en: 'en-US', ar: 'ar-SA'};
-            startRecognition(langMap[i18n.language] || 'it-IT');
-
-            // Small delay to let SpeechRecognition claim the mic first
-            await new Promise(r => setTimeout(r, 500));
 
             const stream = await navigator.mediaDevices.getUserMedia({audio: true});
 
@@ -130,6 +104,10 @@ export const useVoiceRecorder = () => {
             const mediaRecorder = mimeType
                 ? new MediaRecorder(stream, {mimeType})
                 : new MediaRecorder(stream);
+
+            chunksRef.current = [];
+            isStoppingRef.current = false;
+            finalTranscriptRef.current = '';
 
             mediaRecorder.ondataavailable = (e) => {
                 if (e.data.size > 0) {
@@ -146,7 +124,14 @@ export const useVoiceRecorder = () => {
 
             mediaRecorder.start(1000);
             mediaRecorderRef.current = mediaRecorder;
-            addDebug(`mediaRecorder state=${mediaRecorder.state}, stopping=${isStoppingRef.current}`);
+            setIsRecording(true);
+            setAudioPath(null);
+            _setTranscription('');
+            setVoiceError(null);
+
+            // Start speech recognition (desktop only — on mobile it conflicts with MediaRecorder)
+            const langMap: Record<string, string> = {it: 'it-IT', en: 'en-US', ar: 'ar-SA'};
+            startRecognition(langMap[i18n.language] || 'it-IT');
         } catch (error) {
             const err = error instanceof Error ? error : new Error('Errore accesso microfono');
             if (err.name === 'NotAllowedError') {
@@ -184,6 +169,5 @@ export const useVoiceRecorder = () => {
         startRecording,
         stopRecording,
         updateTranscription,
-        debugLog,
     };
 };

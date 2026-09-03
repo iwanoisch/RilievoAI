@@ -2,11 +2,14 @@
   command = "npm run build"
   publish = "dist"
 
+[functions]
+  directory = "netlify/functions"
+
+# Proxy API calls to the Netlify Function
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/api/anthropic/v1/messages"
+  to = "/.netlify/functions/anthropic-proxy"
   status = 200
-  conditions = {Role = ["admin"]}
 
 # SPA fallback - must be last
 [[redirects]]

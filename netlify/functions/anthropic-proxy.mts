@@ -1,6 +1,4 @@
-import type {Context} from "@netlify/functions";
-
-export default async (request: Request, _context: Context) => {
+export default async (request: Request) => {
     if (request.method === "OPTIONS") {
         return new Response(null, {
             status: 204,
@@ -40,8 +38,4 @@ export default async (request: Request, _context: Context) => {
             "Access-Control-Allow-Origin": "*",
         },
     });
-};
-
-export const config = {
-    path: "/api/anthropic/v1/messages",
 };

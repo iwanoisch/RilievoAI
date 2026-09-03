@@ -102,6 +102,21 @@ export const useVoiceRecorder = () => {
                 return;
             }
 
+            chunksRef.current = [];
+            isStoppingRef.current = false;
+            finalTranscriptRef.current = '';
+            setIsRecording(true);
+            setAudioPath(null);
+            _setTranscription('');
+            setVoiceError(null);
+
+            // Start speech recognition FIRST (before MediaRecorder grabs the mic)
+            const langMap: Record<string, string> = {it: 'it-IT', en: 'en-US', ar: 'ar-SA'};
+            startRecognition(langMap[i18n.language] || 'it-IT');
+
+            // Small delay to let SpeechRecognition claim the mic first
+            await new Promise(r => setTimeout(r, 500));
+
             const stream = await navigator.mediaDevices.getUserMedia({audio: true});
 
             const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
@@ -115,10 +130,6 @@ export const useVoiceRecorder = () => {
             const mediaRecorder = mimeType
                 ? new MediaRecorder(stream, {mimeType})
                 : new MediaRecorder(stream);
-
-            chunksRef.current = [];
-            isStoppingRef.current = false;
-            finalTranscriptRef.current = '';
 
             mediaRecorder.ondataavailable = (e) => {
                 if (e.data.size > 0) {
@@ -135,15 +146,6 @@ export const useVoiceRecorder = () => {
 
             mediaRecorder.start(1000);
             mediaRecorderRef.current = mediaRecorder;
-            setIsRecording(true);
-            setAudioPath(null);
-            _setTranscription('');
-            setVoiceError(null);
-
-            // Reset stopping flag right before starting recognition
-            isStoppingRef.current = false;
-            const langMap: Record<string, string> = {it: 'it-IT', en: 'en-US', ar: 'ar-SA'};
-            startRecognition(langMap[i18n.language] || 'it-IT');
             addDebug(`mediaRecorder state=${mediaRecorder.state}, stopping=${isStoppingRef.current}`);
         } catch (error) {
             const err = error instanceof Error ? error : new Error('Errore accesso microfono');

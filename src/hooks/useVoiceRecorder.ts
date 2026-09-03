@@ -8,6 +8,7 @@ export const useVoiceRecorder = () => {
     const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
     const chunksRef = useRef<Blob[]>([]);
     const transcriptionRef = useRef('');
+    const finalTranscriptRef = useRef('');
     const isStoppingRef = useRef(false);
     const [isRecording, setIsRecording] = useState(false);
     const [transcription, setTranscription] = useState('');
@@ -27,7 +28,6 @@ export const useVoiceRecorder = () => {
         const SpeechRecognitionCtor = W.SpeechRecognition || W.webkitSpeechRecognition;
         if (!SpeechRecognitionCtor) return;
 
-        // Stop previous if exists
         if (recognitionRef.current) {
             try { recognitionRef.current.stop(); } catch (_) { /* ignore */ }
         }
@@ -38,32 +38,40 @@ export const useVoiceRecorder = () => {
         recognition.lang = lang;
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-            let text = '';
+            let interimText = '';
+            let finalText = '';
             for (let i = 0; i < event.results.length; i++) {
-                text += event.results[i][0].transcript;
+                const result = event.results[i];
+                if (result.isFinal) {
+                    finalText += result[0].transcript;
+                } else {
+                    interimText += result[0].transcript;
+                }
             }
-            _setTranscription(text);
+            // Accumulate final transcript across restarts
+            if (finalText) {
+                finalTranscriptRef.current += finalText;
+            }
+            _setTranscription(finalTranscriptRef.current + interimText);
         };
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
             const errorType = event.error || '';
-            // Ignore transient errors and auto-restart
-            if (errorType === 'no-speech' || errorType === 'aborted') {
-                if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
-                    try { recognition.start(); } catch (_) { /* ignore */ }
-                }
-                return;
-            }
-            // Network errors on mobile — don't crash, just skip transcription
-            if (errorType === 'network') {
+            // These are normal on mobile — ignore and let onend handle restart
+            if (errorType === 'no-speech' || errorType === 'aborted' || errorType === 'network') {
                 return;
             }
         };
 
-        // Auto-restart when recognition ends unexpectedly (Android issue)
+        // Auto-restart when recognition ends (happens frequently on Android)
         recognition.onend = () => {
             if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
-                try { recognition.start(); } catch (_) { /* ignore */ }
+                // Small delay to avoid rapid restart loops
+                setTimeout(() => {
+                    if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
+                        try { recognition.start(); } catch (_) { /* ignore */ }
+                    }
+                }, 300);
             }
         };
 
@@ -84,7 +92,6 @@ export const useVoiceRecorder = () => {
 
             const stream = await navigator.mediaDevices.getUserMedia({audio: true});
 
-            // Find supported mime type
             const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
                 ? 'audio/webm;codecs=opus'
                 : MediaRecorder.isTypeSupported('audio/webm')
@@ -99,6 +106,7 @@ export const useVoiceRecorder = () => {
 
             chunksRef.current = [];
             isStoppingRef.current = false;
+            finalTranscriptRef.current = '';
 
             mediaRecorder.ondataavailable = (e) => {
                 if (e.data.size > 0) {
@@ -113,14 +121,13 @@ export const useVoiceRecorder = () => {
                 setAudioPath(URL.createObjectURL(audioBlob));
             };
 
-            mediaRecorder.start(1000); // collect data every second for reliability
+            mediaRecorder.start(1000);
             mediaRecorderRef.current = mediaRecorder;
             setIsRecording(true);
             setAudioPath(null);
             _setTranscription('');
             setVoiceError(null);
 
-            // Start speech recognition
             const langMap: Record<string, string> = {it: 'it-IT', en: 'en-US', ar: 'ar-SA'};
             startRecognition(langMap[i18n.language] || 'it-IT');
         } catch (error) {

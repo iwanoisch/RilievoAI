@@ -1,3 +1,14 @@
+export interface SpeechRecognitionResult {
+    readonly 0: {readonly transcript: string; readonly confidence: number};
+    readonly isFinal: boolean;
+    readonly length: number;
+}
+
+export interface SpeechRecognitionResultList {
+    readonly length: number;
+    [index: number]: SpeechRecognitionResult;
+}
+
 export interface SpeechRecognitionEvent {
     results: SpeechRecognitionResultList;
 }

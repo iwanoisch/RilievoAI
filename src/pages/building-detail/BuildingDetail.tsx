@@ -21,6 +21,7 @@ import {AnagraficaTab} from "./anagrafica-tab/AnagraficaTab.tsx";
 import {DocumentazioneTab} from "./documentazione-tab/DocumentazioneTab.tsx";
 import {RilievoTab} from "./rilievo-tab/RilievoTab.tsx";
 import {BUILDING_STATUS_LABEL} from "../../constants/buildings.constant.ts";
+import {useRilievo} from "../../features/rilievo/useRilievo.ts";
 import {EditBuildingModal} from "./modals/EditBuildingModal.tsx";
 
 export const BuildingDetail: FC = () => {
@@ -29,6 +30,7 @@ export const BuildingDetail: FC = () => {
     const {id} = useParams<{id: string}>();
     const dispatch = useAppDispatch();
     const {buildings} = useBuildings();
+    const {totalCompletion} = useRilievo();
     useEffect(() => {
         if (id) {
             dispatch(setActiveBuildingId(id));
@@ -131,9 +133,9 @@ export const BuildingDetail: FC = () => {
                             {/* Stat row */}
                             <div className="flex flex-wrap gap-x-8 gap-y-4">
                                 <div className="flex items-center gap-2">
-                                    <ChartBarIcon className={`h-7 w-7 ${getCompletionColor(building.completionPercent)}`}/>
+                                    <ChartBarIcon className={`h-7 w-7 ${getCompletionColor(totalCompletion())}`}/>
                                     <div>
-                                        <p className={`text-lg font-bold leading-none ${getCompletionColor(building.completionPercent)}`}>{building.completionPercent}%</p>
+                                        <p className={`text-lg font-bold leading-none ${getCompletionColor(totalCompletion())}`}>{totalCompletion()}%</p>
                                         <p className="text-xs text-text-muted mt-0.5">{t('buildings.field_completion')}</p>
                                     </div>
                                 </div>

@@ -12,6 +12,7 @@ export const RilievoAudioModal: FC<RilievoAudioModalProps> = ({itemId, onSave, o
     const [hasRecorded, setHasRecorded] = useState(false);
     const [localTranscription, setLocalTranscription] = useState('');
     const [recordingStartTime, setRecordingStartTime] = useState(0);
+    const [lastAudioPath, setLastAudioPath] = useState<string | null>(null);
 
     useEffect(() => {
         if (!hasRecorded) {
@@ -20,10 +21,11 @@ export const RilievoAudioModal: FC<RilievoAudioModalProps> = ({itemId, onSave, o
     }, [transcription, hasRecorded]);
 
     useEffect(() => {
-        if (audioPath && !hasRecorded) {
+        if (audioPath && audioPath !== lastAudioPath) {
+            setLastAudioPath(audioPath);
             setHasRecorded(true);
         }
-    }, [audioPath, hasRecorded]);
+    }, [audioPath, lastAudioPath]);
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
@@ -46,6 +48,7 @@ export const RilievoAudioModal: FC<RilievoAudioModalProps> = ({itemId, onSave, o
         setHasRecorded(false);
         setLocalTranscription('');
         setRecordingStartTime(0);
+        setLastAudioPath(audioPath);
     };
 
     const handleSave = () => {

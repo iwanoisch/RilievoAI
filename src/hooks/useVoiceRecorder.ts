@@ -140,8 +140,11 @@ export const useVoiceRecorder = () => {
             _setTranscription('');
             setVoiceError(null);
 
+            // Reset stopping flag right before starting recognition
+            isStoppingRef.current = false;
             const langMap: Record<string, string> = {it: 'it-IT', en: 'en-US', ar: 'ar-SA'};
             startRecognition(langMap[i18n.language] || 'it-IT');
+            addDebug(`mediaRecorder state=${mediaRecorder.state}, stopping=${isStoppingRef.current}`);
         } catch (error) {
             const err = error instanceof Error ? error : new Error('Errore accesso microfono');
             if (err.name === 'NotAllowedError') {

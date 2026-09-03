@@ -7,7 +7,7 @@ import type {RilievoAudio} from "../../../../features/rilievo/rilievo.type.ts";
 
 export const RilievoAudioModal: FC<RilievoAudioModalProps> = ({itemId, onSave, onClose}) => {
     const {t} = useTranslation();
-    const {isRecording, transcription, audioPath, voiceError, startRecording, stopRecording} = useVoiceRecorder();
+    const {isRecording, transcription, audioPath, voiceError, startRecording, stopRecording, debugLog} = useVoiceRecorder();
 
     const [hasRecorded, setHasRecorded] = useState(false);
     const [localTranscription, setLocalTranscription] = useState('');
@@ -145,6 +145,15 @@ export const RilievoAudioModal: FC<RilievoAudioModalProps> = ({itemId, onSave, o
                     {voiceError && (
                         <div className="card bg-error-light border border-error p-4">
                             <p className="text-error-dark text-sm text-center">{t('rilievo.mic_error')}</p>
+                        </div>
+                    )}
+
+                    {/* Debug log temporaneo — rimuovere dopo debug */}
+                    {debugLog.length > 0 && (
+                        <div className="bg-slate-900 text-green-400 text-xs font-mono p-3 rounded-lg max-h-40 overflow-y-auto">
+                            {debugLog.map((line, i) => (
+                                <div key={i}>{line}</div>
+                            ))}
                         </div>
                     )}
                 </div>

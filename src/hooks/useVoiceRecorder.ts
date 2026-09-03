@@ -14,6 +14,11 @@ export const useVoiceRecorder = () => {
     const [transcription, setTranscription] = useState('');
     const [audioPath, setAudioPath] = useState<string | null>(null);
     const [voiceError, setVoiceError] = useState<string | null>(null);
+    const [debugLog, setDebugLog] = useState<string[]>([]);
+
+    const addDebug = (msg: string) => {
+        setDebugLog(prev => [...prev.slice(-10), `${new Date().toLocaleTimeString()}: ${msg}`]);
+    };
 
     const _setTranscription = (text: string) => {
         transcriptionRef.current = text;
@@ -26,7 +31,11 @@ export const useVoiceRecorder = () => {
             webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
         };
         const SpeechRecognitionCtor = W.SpeechRecognition || W.webkitSpeechRecognition;
-        if (!SpeechRecognitionCtor) return;
+        if (!SpeechRecognitionCtor) {
+            addDebug('SpeechRecognition NOT available');
+            return;
+        }
+        addDebug('SpeechRecognition found, starting...');
 
         if (recognitionRef.current) {
             try { recognitionRef.current.stop(); } catch (_) { /* ignore */ }
@@ -53,11 +62,12 @@ export const useVoiceRecorder = () => {
                 finalTranscriptRef.current += finalText;
             }
             _setTranscription(finalTranscriptRef.current + interimText);
+            addDebug(`onresult: final="${finalText}" interim="${interimText}"`);
         };
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
             const errorType = event.error || '';
-            // These are normal on mobile — ignore and let onend handle restart
+            addDebug(`onerror: ${errorType}`);
             if (errorType === 'no-speech' || errorType === 'aborted' || errorType === 'network') {
                 return;
             }
@@ -65,11 +75,12 @@ export const useVoiceRecorder = () => {
 
         // Auto-restart when recognition ends (happens frequently on Android)
         recognition.onend = () => {
+            addDebug(`onend: stopping=${isStoppingRef.current} recState=${mediaRecorderRef.current?.state}`);
             if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
-                // Small delay to avoid rapid restart loops
                 setTimeout(() => {
                     if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
-                        try { recognition.start(); } catch (_) { /* ignore */ }
+                        addDebug('restarting recognition...');
+                        try { recognition.start(); } catch (e) { addDebug(`restart failed: ${e}`); }
                     }
                 }, 300);
             }
@@ -78,8 +89,9 @@ export const useVoiceRecorder = () => {
         try {
             recognition.start();
             recognitionRef.current = recognition;
-        } catch (_) {
-            // SpeechRecognition not available or blocked
+            addDebug(`recognition started, lang=${lang}`);
+        } catch (e) {
+            addDebug(`recognition start failed: ${e}`);
         }
     }, []);
 
@@ -167,5 +179,6 @@ export const useVoiceRecorder = () => {
         startRecording,
         stopRecording,
         updateTranscription,
+        debugLog,
     };
 };

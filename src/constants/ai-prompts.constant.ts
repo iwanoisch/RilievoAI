@@ -180,6 +180,8 @@ FORMATO JSON:
 
 export const AI_MODEL = 'claude-sonnet-4-6';
 export const AI_MAX_TOKENS = 16384;
-export const AI_API_URL = '/api/anthropic/v1/messages';
+export const AI_API_URL = import.meta.env.DEV
+    ? '/api/anthropic/v1/messages'
+    : 'https://api.anthropic.com/v1/messages';
 export const AI_API_VERSION = '2023-06-01';
 export const AI_MAX_PAYLOAD_BYTES = 5 * 1024 * 1024; // 5MB di base64 per batch

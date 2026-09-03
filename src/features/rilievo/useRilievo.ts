@@ -78,6 +78,7 @@ export const useRilievo = () => {
                     'Content-Type': 'application/json',
                     'x-api-key': API_KEY,
                     'anthropic-version': AI_API_VERSION,
+                    ...(import.meta.env.DEV ? {} : {'anthropic-dangerous-direct-browser-access': 'true'}),
                 },
                 body: JSON.stringify({
                     model: AI_MODEL,

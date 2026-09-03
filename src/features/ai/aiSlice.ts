@@ -34,12 +34,6 @@ const getCurrent = (state: AiPerBuildingState): AiState => {
     return state.byBuilding[state.activeBuildingId] ?? emptyAiState;
 };
 
-const setCurrent = (state: AiPerBuildingState, data: AiState) => {
-    if (state.activeBuildingId) {
-        state.byBuilding[state.activeBuildingId] = data;
-    }
-};
-
 const updateCurrent = (state: AiPerBuildingState, updater: (s: AiState) => void) => {
     if (!state.activeBuildingId) return;
     if (!state.byBuilding[state.activeBuildingId]) {

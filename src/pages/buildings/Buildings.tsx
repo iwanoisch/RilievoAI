@@ -31,7 +31,7 @@ export const Buildings: FC = () => {
     return (
         <>
         <div className="w-full px-4 sm:px-6 lg:px-8 py-6 bg-gradient-to-br from-primary-50/50 via-primary-100/30 to-slate-50 min-h-screen">
-            <div className="mx-auto w-full max-w-6xl">
+            <div className="w-full">
                 <div className="flex items-center justify-between">
                     <PageTitle
                         title={t('buildings.title')}

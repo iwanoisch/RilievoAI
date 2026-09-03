@@ -9,10 +9,31 @@ export const useCamera = () => {
 
     const startCamera = useCallback(async (video: HTMLVideoElement) => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: {facingMode: 'environment', width: {ideal: 1920}, height: {ideal: 1080}},
-                audio: false,
-            });
+            // Check if getUserMedia is available (requires HTTPS on mobile)
+            if (!navigator.mediaDevices?.getUserMedia) {
+                setCameraError('Camera non supportata. Assicurati di usare HTTPS.');
+                setIsCameraActive(false);
+                return;
+            }
+
+            // Try rear camera first, then fallback to any camera
+            let stream: MediaStream;
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {facingMode: {ideal: 'environment'}},
+                    audio: false,
+                });
+            } catch (_) {
+                // Fallback: any available camera
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false,
+                });
+            }
+
+            video.setAttribute('autoplay', '');
+            video.setAttribute('playsinline', '');
+            video.setAttribute('muted', '');
             video.srcObject = stream;
             await video.play();
             videoRef.current = video;
@@ -20,8 +41,18 @@ export const useCamera = () => {
             setIsCameraActive(true);
             setCameraError(null);
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Errore accesso camera';
-            setCameraError(message);
+            const err = error instanceof Error ? error : new Error('Errore accesso camera');
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                setCameraError('Permesso fotocamera negato. Consenti l\'accesso nelle impostazioni del browser.');
+            } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+                setCameraError('Nessuna fotocamera trovata sul dispositivo.');
+            } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+                setCameraError('La fotocamera è in uso da un\'altra applicazione.');
+            } else if (err.name === 'OverconstrainedError') {
+                setCameraError('Fotocamera non compatibile con i requisiti richiesti.');
+            } else {
+                setCameraError(err.message || 'Impossibile accedere alla fotocamera.');
+            }
             setIsCameraActive(false);
         }
     }, []);
@@ -41,9 +72,13 @@ export const useCamera = () => {
     const captureFrame = useCallback((): CaptureResult | null => {
         if (!videoRef.current) return null;
 
+        const vw = videoRef.current.videoWidth;
+        const vh = videoRef.current.videoHeight;
+        if (vw === 0 || vh === 0) return null;
+
         const canvas = document.createElement('canvas');
-        canvas.width = videoRef.current.videoWidth;
-        canvas.height = videoRef.current.videoHeight;
+        canvas.width = vw;
+        canvas.height = vh;
         const ctx = canvas.getContext('2d');
         if (!ctx) return null;
 
@@ -52,9 +87,9 @@ export const useCamera = () => {
         // Genera thumbnail
         const thumbCanvas = document.createElement('canvas');
         const thumbSize = 200;
-        const ratio = Math.min(thumbSize / canvas.width, thumbSize / canvas.height);
-        thumbCanvas.width = canvas.width * ratio;
-        thumbCanvas.height = canvas.height * ratio;
+        const ratio = Math.min(thumbSize / vw, thumbSize / vh);
+        thumbCanvas.width = vw * ratio;
+        thumbCanvas.height = vh * ratio;
         const thumbCtx = thumbCanvas.getContext('2d');
         thumbCtx?.drawImage(canvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
 

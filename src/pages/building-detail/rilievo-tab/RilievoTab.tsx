@@ -354,11 +354,11 @@ export const RilievoTab: FC = () => {
                     </span>
                 </div>
 
-                {/* 4 bottoni azione in una riga */}
-                <div className="flex gap-2">
+                {/* 4 bottoni azione */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                     <button
                         type="button"
-                        className="btn btn-outline flex items-center gap-1.5 text-xs min-h-[40px] flex-1"
+                        className="btn btn-outline flex items-center justify-center gap-1.5 text-xs min-h-[40px]"
                         onClick={() => setShowPhotoModal(true)}
                     >
                         <CameraIcon className="h-4 w-4"/>
@@ -366,7 +366,7 @@ export const RilievoTab: FC = () => {
                     </button>
                     <button
                         type="button"
-                        className="btn btn-outline flex items-center gap-1.5 text-xs min-h-[40px] flex-1"
+                        className="btn btn-outline flex items-center justify-center gap-1.5 text-xs min-h-[40px]"
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <ArrowUpTrayIcon className="h-4 w-4"/>
@@ -374,7 +374,7 @@ export const RilievoTab: FC = () => {
                     </button>
                     <button
                         type="button"
-                        className="btn btn-outline flex items-center gap-1.5 text-xs min-h-[40px] flex-1"
+                        className="btn btn-outline flex items-center justify-center gap-1.5 text-xs min-h-[40px]"
                         onClick={() => setShowAudioModal(true)}
                     >
                         <MicrophoneIcon className="h-4 w-4"/>
@@ -382,7 +382,7 @@ export const RilievoTab: FC = () => {
                     </button>
                     <button
                         type="button"
-                        className="btn btn-outline flex items-center gap-1.5 text-xs min-h-[40px] flex-1"
+                        className="btn btn-outline flex items-center justify-center gap-1.5 text-xs min-h-[40px]"
                         onClick={() => setShowMeasurementModal(true)}
                     >
                         <ArrowsPointingOutIcon className="h-4 w-4"/>
@@ -574,11 +574,11 @@ export const RilievoTab: FC = () => {
 
                 {/* Layout: Albero + Card */}
                 <div className="flex flex-col lg:flex-row gap-4">
-                    <div className="lg:w-1/2 border border-border-light rounded-xl overflow-hidden bg-surface-card max-h-[400px] lg:max-h-[600px] overflow-y-auto">
+                    <div className="lg:w-1/2 border border-border-light rounded-xl overflow-hidden bg-surface-card max-h-[400px] lg:h-[600px] overflow-y-auto">
                         {roots.map(root => renderItem(root))}
                     </div>
 
-                    <div className="lg:w-1/2">
+                    <div className="lg:w-1/2 lg:h-[600px] lg:overflow-y-auto">
                         {selectedItemData ? renderSelectedCard() : (
                             <div className="border border-dashed border-border-strong rounded-xl p-8 text-center">
                                 <ClipboardDocumentCheckIcon className="h-10 w-10 text-text-disabled mx-auto mb-2"/>

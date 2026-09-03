@@ -23,7 +23,7 @@ export const CreateBuildingModal: FC<CreateBuildingModalProps> = ({onClose, onCr
     const [status, setStatus] = useState<BuildingStatus>('active');
     const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
 
-    const isValid = name.trim() !== '' && address.trim() !== '' && city.trim() !== '';
+    const isValid = name.trim() !== '';
 
     useEffect(() => {
         const handleKeyDown = (e: globalThis.KeyboardEvent) => {
@@ -135,7 +135,7 @@ export const CreateBuildingModal: FC<CreateBuildingModalProps> = ({onClose, onCr
                     {/* Indirizzo */}
                     <div>
                         <label className="text-sm text-slate-600 mb-1 block">
-                            {t('buildings.field_address')} <span className="text-error">*</span>
+                            {t('buildings.field_address')}
                         </label>
                         <input
                             type="text"
@@ -148,7 +148,7 @@ export const CreateBuildingModal: FC<CreateBuildingModalProps> = ({onClose, onCr
                     {/* Città */}
                     <div>
                         <label className="text-sm text-slate-600 mb-1 block">
-                            {t('buildings.field_city')} <span className="text-error">*</span>
+                            {t('buildings.field_city')}
                         </label>
                         <input
                             type="text"

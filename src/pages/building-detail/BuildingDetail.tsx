@@ -61,7 +61,7 @@ export const BuildingDetail: FC = () => {
 
     return (
         <div className="w-full px-4 sm:px-6 lg:px-8 py-6 bg-gradient-to-br from-primary-50/50 via-primary-100/30 to-slate-50 min-h-screen">
-            <div className="mx-auto w-full max-w-6xl">
+            <div className="w-full">
 
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
@@ -165,7 +165,7 @@ export const BuildingDetail: FC = () => {
             </div>
 
                 {/* Tab bar sticky */}
-                <div className="sticky top-0 z-10 bg-surface-card border-b border-border-default rounded-xl mt-4 -mx-0">
+                <div className="sticky top-16 z-10 bg-surface-card border-b border-border-default rounded-xl mt-4 -mx-0">
                     {/* Desktop */}
                     <div className="hidden sm:flex overflow-x-auto">
                         <button

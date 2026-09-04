@@ -41,16 +41,33 @@ export const useVoiceRecorder = () => {
         recognition.lang = lang;
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-            let interimText = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                const result = event.results[i];
-                if (result.isFinal) {
-                    finalTranscriptRef.current += result[0].transcript;
-                } else {
-                    interimText += result[0].transcript;
+            if (isDesktop()) {
+                // Desktop: append only new final results (handles restarts)
+                let interimText = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        finalTranscriptRef.current += result[0].transcript;
+                    } else {
+                        interimText += result[0].transcript;
+                    }
                 }
+                _setTranscription(finalTranscriptRef.current + interimText);
+            } else {
+                // Mobile: rebuild full transcript each time (single session, no restarts)
+                let finalText = '';
+                let interimText = '';
+                for (let i = 0; i < event.results.length; i++) {
+                    const result = event.results[i];
+                    if (result.isFinal) {
+                        finalText += result[0].transcript;
+                    } else {
+                        interimText += result[0].transcript;
+                    }
+                }
+                finalTranscriptRef.current = finalText;
+                _setTranscription(finalText + interimText);
             }
-            _setTranscription(finalTranscriptRef.current + interimText);
         };
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -61,15 +78,10 @@ export const useVoiceRecorder = () => {
         };
 
         recognition.onend = () => {
-            const isActive = isDesktop()
-                ? mediaRecorderRef.current?.state === 'recording'
-                : !isStoppingRef.current;
-            if (!isStoppingRef.current && isActive) {
+            // Auto-restart only on desktop (on mobile it causes beep sounds)
+            if (isDesktop() && !isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
                 setTimeout(() => {
-                    const stillActive = isDesktop()
-                        ? mediaRecorderRef.current?.state === 'recording'
-                        : !isStoppingRef.current;
-                    if (!isStoppingRef.current && stillActive) {
+                    if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
                         try { recognition.start(); } catch (_) { /* ignore */ }
                     }
                 }, 300);

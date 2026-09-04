@@ -11,6 +11,7 @@ export const useVoiceRecorder = () => {
     const chunksRef = useRef<Blob[]>([]);
     const transcriptionRef = useRef('');
     const finalTranscriptRef = useRef('');
+    const previousSessionsRef = useRef('');
     const isStoppingRef = useRef(false);
     const [isRecording, setIsRecording] = useState(false);
     const [transcription, setTranscription] = useState('');
@@ -73,12 +74,15 @@ export const useVoiceRecorder = () => {
                 _setTranscription(finalTranscriptRef.current + interimText);
             } else {
                 // Mobile (Android Chrome): each result contains the full phrase so far,
-                // so just take the last result's transcript
+                // so just take the last result's transcript and prepend previous sessions
                 const lastResult = event.results[event.results.length - 1];
-                const text = lastResult[0].transcript;
-                finalTranscriptRef.current = text;
-                console.log('[VOICE] mobile result', {lastIndex: event.results.length - 1, text});
-                _setTranscription(text);
+                const currentText = lastResult[0].transcript;
+                const fullText = previousSessionsRef.current
+                    ? previousSessionsRef.current + ' ' + currentText
+                    : currentText;
+                finalTranscriptRef.current = fullText;
+                console.log('[VOICE] mobile result', {previous: previousSessionsRef.current, current: currentText, full: fullText});
+                _setTranscription(fullText);
             }
         };
 
@@ -92,10 +96,24 @@ export const useVoiceRecorder = () => {
 
         recognition.onend = () => {
             console.log('[VOICE] onend', {isStopping: isStoppingRef.current, desktop: isDesktop()});
-            // Auto-restart only on desktop (on mobile it causes beep sounds)
-            if (isDesktop() && !isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
+            if (isStoppingRef.current) return;
+
+            if (isDesktop()) {
+                // Desktop: restart only if MediaRecorder is still recording
+                if (mediaRecorderRef.current?.state === 'recording') {
+                    setTimeout(() => {
+                        if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
+                            try { recognition.start(); } catch (_) { /* ignore */ }
+                        }
+                    }, 300);
+                }
+            } else {
+                // Mobile: save current transcript and restart until user presses stop
+                previousSessionsRef.current = finalTranscriptRef.current;
+                console.log('[VOICE] mobile saving before restart', {saved: previousSessionsRef.current});
                 setTimeout(() => {
-                    if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
+                    if (!isStoppingRef.current) {
+                        console.log('[VOICE] mobile auto-restart');
                         try { recognition.start(); } catch (_) { /* ignore */ }
                     }
                 }, 300);
@@ -115,6 +133,7 @@ export const useVoiceRecorder = () => {
             setRecordingDone(false);
             isStoppingRef.current = false;
             finalTranscriptRef.current = '';
+            previousSessionsRef.current = '';
             _setTranscription('');
             setVoiceError(null);
             setAudioPath(null);
@@ -206,6 +225,7 @@ export const useVoiceRecorder = () => {
         _setTranscription('');
         setAudioPath(null);
         finalTranscriptRef.current = '';
+        previousSessionsRef.current = '';
     }, []);
 
     return {

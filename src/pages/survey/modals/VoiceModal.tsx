@@ -8,7 +8,7 @@ import type {VoiceModalProps} from "./voiceModal.type.ts";
 
 export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
     const {t} = useTranslation();
-    const {isRecording, transcription, audioPath, voiceError, startRecording, stopRecording} = useVoiceRecorder();
+    const {isRecording, transcription, audioPath, voiceError, recordingDone, startRecording, stopRecording} = useVoiceRecorder();
     const {currentSession, addVoiceObservation, updateVoiceObservation, deleteVoiceObservation, getNextObservationId} = useSurvey();
     const {elements} = useEdificio();
     const elementList = Object.values(elements);
@@ -31,15 +31,15 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
         }
     }, [transcription, isEditMode]);
 
-    // Quando l'audio è pronto, salva automaticamente e mostra il form di revisione
+    // Quando la registrazione è completata, salva automaticamente e mostra il form di revisione
     useEffect(() => {
-        if (!isEditMode && audioPath && currentSession) {
+        if (!isEditMode && recordingDone && !hasRecorded && currentSession) {
             const id = getNextObservationId();
             addVoiceObservation({
                 id,
                 sessionId: currentSession.id,
                 timestamp: new Date().toISOString(),
-                audioPath,
+                audioPath: audioPath || '',
                 transcription: localTranscription || undefined,
                 confidence: localTranscription ? 70 : 30,
                 dataStatus: 'RAW',
@@ -47,7 +47,7 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
             setPendingId(id);
             setHasRecorded(true);
         }
-    }, [audioPath, isEditMode]);
+    }, [recordingDone, isEditMode, hasRecorded]);
 
     // Detecta modifiche fake_ai campi
     useEffect(() => {
@@ -92,12 +92,12 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
                 transcription: localTranscription || undefined,
                 targetElementId: targetElementId || undefined,
             });
-        } else if (pendingId && hasRecorded && audioPath && currentSession) {
+        } else if (pendingId && hasRecorded && currentSession) {
             updateVoiceObservation({
                 id: pendingId,
                 sessionId: currentSession.id,
                 timestamp: new Date().toISOString(),
-                audioPath,
+                audioPath: audioPath || '',
                 transcription: localTranscription || undefined,
                 targetElementId: targetElementId || undefined,
                 confidence: localTranscription ? 70 : 30,

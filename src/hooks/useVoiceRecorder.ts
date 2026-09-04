@@ -16,6 +16,7 @@ export const useVoiceRecorder = () => {
     const [transcription, setTranscription] = useState('');
     const [audioPath, setAudioPath] = useState<string | null>(null);
     const [voiceError, setVoiceError] = useState<string | null>(null);
+    const [recordingDone, setRecordingDone] = useState(false);
 
     const _setTranscription = (text: string) => {
         transcriptionRef.current = text;
@@ -23,9 +24,6 @@ export const useVoiceRecorder = () => {
     };
 
     const startRecognition = useCallback((lang: string) => {
-        // Speech recognition doesn't work alongside MediaRecorder on mobile
-        if (!isDesktop()) return;
-
         const W = window as Window & {
             SpeechRecognition?: new () => SpeechRecognitionInstance;
             webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
@@ -86,52 +84,62 @@ export const useVoiceRecorder = () => {
 
     const startRecording = useCallback(async () => {
         try {
-            if (!navigator.mediaDevices?.getUserMedia) {
-                setVoiceError('Microfono non supportato. Assicurati di usare HTTPS.');
-                return;
-            }
-
-            const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-
-            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                ? 'audio/webm;codecs=opus'
-                : MediaRecorder.isTypeSupported('audio/webm')
-                    ? 'audio/webm'
-                    : MediaRecorder.isTypeSupported('audio/mp4')
-                        ? 'audio/mp4'
-                        : '';
-
-            const mediaRecorder = mimeType
-                ? new MediaRecorder(stream, {mimeType})
-                : new MediaRecorder(stream);
-
-            chunksRef.current = [];
+            setRecordingDone(false);
             isStoppingRef.current = false;
             finalTranscriptRef.current = '';
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) {
-                    chunksRef.current.push(e.data);
-                }
-            };
-
-            mediaRecorder.onstop = () => {
-                stream.getTracks().forEach(track => track.stop());
-                const type = mimeType || 'audio/webm';
-                const audioBlob = new Blob(chunksRef.current, {type});
-                setAudioPath(URL.createObjectURL(audioBlob));
-            };
-
-            mediaRecorder.start(1000);
-            mediaRecorderRef.current = mediaRecorder;
-            setIsRecording(true);
-            setAudioPath(null);
             _setTranscription('');
             setVoiceError(null);
+            setAudioPath(null);
 
-            // Start speech recognition (desktop only — on mobile it conflicts with MediaRecorder)
             const langMap: Record<string, string> = {it: 'it-IT', en: 'en-US', ar: 'ar-SA'};
-            startRecognition(langMap[i18n.language] || 'it-IT');
+            const lang = langMap[i18n.language] || 'it-IT';
+
+            if (isDesktop()) {
+                // Desktop: MediaRecorder + SpeechRecognition together
+                if (!navigator.mediaDevices?.getUserMedia) {
+                    setVoiceError('Microfono non supportato. Assicurati di usare HTTPS.');
+                    return;
+                }
+
+                const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+
+                const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                    ? 'audio/webm;codecs=opus'
+                    : MediaRecorder.isTypeSupported('audio/webm')
+                        ? 'audio/webm'
+                        : MediaRecorder.isTypeSupported('audio/mp4')
+                            ? 'audio/mp4'
+                            : '';
+
+                const mediaRecorder = mimeType
+                    ? new MediaRecorder(stream, {mimeType})
+                    : new MediaRecorder(stream);
+
+                chunksRef.current = [];
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) {
+                        chunksRef.current.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    stream.getTracks().forEach(track => track.stop());
+                    const type = mimeType || 'audio/webm';
+                    const audioBlob = new Blob(chunksRef.current, {type});
+                    setAudioPath(URL.createObjectURL(audioBlob));
+                    setRecordingDone(true);
+                };
+
+                mediaRecorder.start(1000);
+                mediaRecorderRef.current = mediaRecorder;
+                setIsRecording(true);
+                startRecognition(lang);
+            } else {
+                // Mobile: SpeechRecognition only (no MediaRecorder conflict)
+                setIsRecording(true);
+                startRecognition(lang);
+            }
         } catch (error) {
             const err = error instanceof Error ? error : new Error('Errore accesso microfono');
             if (err.name === 'NotAllowedError') {
@@ -155,6 +163,10 @@ export const useVoiceRecorder = () => {
             recognitionRef.current = null;
         }
         setIsRecording(false);
+        // On mobile there's no MediaRecorder.onstop to set recordingDone
+        if (!isDesktop()) {
+            setRecordingDone(true);
+        }
     }, []);
 
     const updateTranscription = useCallback((text: string) => {
@@ -166,6 +178,7 @@ export const useVoiceRecorder = () => {
         transcription,
         audioPath,
         voiceError,
+        recordingDone,
         startRecording,
         stopRecording,
         updateTranscription,

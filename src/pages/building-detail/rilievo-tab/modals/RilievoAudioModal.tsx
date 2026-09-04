@@ -7,12 +7,11 @@ import type {RilievoAudio} from "../../../../features/rilievo/rilievo.type.ts";
 
 export const RilievoAudioModal: FC<RilievoAudioModalProps> = ({itemId, onSave, onClose}) => {
     const {t} = useTranslation();
-    const {isRecording, transcription, audioPath, voiceError, startRecording, stopRecording} = useVoiceRecorder();
+    const {isRecording, transcription, audioPath, voiceError, recordingDone, startRecording, stopRecording} = useVoiceRecorder();
 
     const [hasRecorded, setHasRecorded] = useState(false);
     const [localTranscription, setLocalTranscription] = useState('');
     const [recordingStartTime, setRecordingStartTime] = useState(0);
-    const [lastAudioPath, setLastAudioPath] = useState<string | null>(null);
 
     useEffect(() => {
         if (!hasRecorded) {
@@ -21,11 +20,10 @@ export const RilievoAudioModal: FC<RilievoAudioModalProps> = ({itemId, onSave, o
     }, [transcription, hasRecorded]);
 
     useEffect(() => {
-        if (audioPath && audioPath !== lastAudioPath) {
-            setLastAudioPath(audioPath);
+        if (recordingDone && !hasRecorded) {
             setHasRecorded(true);
         }
-    }, [audioPath, lastAudioPath]);
+    }, [recordingDone, hasRecorded]);
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
@@ -48,7 +46,6 @@ export const RilievoAudioModal: FC<RilievoAudioModalProps> = ({itemId, onSave, o
         setHasRecorded(false);
         setLocalTranscription('');
         setRecordingStartTime(0);
-        setLastAudioPath(audioPath);
     };
 
     const handleSave = () => {

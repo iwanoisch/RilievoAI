@@ -42,17 +42,13 @@ export const useVoiceRecorder = () => {
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
             let interimText = '';
-            let finalText = '';
-            for (let i = 0; i < event.results.length; i++) {
+            for (let i = event.resultIndex; i < event.results.length; i++) {
                 const result = event.results[i];
                 if (result.isFinal) {
-                    finalText += result[0].transcript;
+                    finalTranscriptRef.current += result[0].transcript;
                 } else {
                     interimText += result[0].transcript;
                 }
-            }
-            if (finalText) {
-                finalTranscriptRef.current += finalText;
             }
             _setTranscription(finalTranscriptRef.current + interimText);
         };
@@ -65,9 +61,15 @@ export const useVoiceRecorder = () => {
         };
 
         recognition.onend = () => {
-            if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
+            const isActive = isDesktop()
+                ? mediaRecorderRef.current?.state === 'recording'
+                : !isStoppingRef.current;
+            if (!isStoppingRef.current && isActive) {
                 setTimeout(() => {
-                    if (!isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
+                    const stillActive = isDesktop()
+                        ? mediaRecorderRef.current?.state === 'recording'
+                        : !isStoppingRef.current;
+                    if (!isStoppingRef.current && stillActive) {
                         try { recognition.start(); } catch (_) { /* ignore */ }
                     }
                 }, 300);
@@ -173,6 +175,13 @@ export const useVoiceRecorder = () => {
         _setTranscription(text);
     }, []);
 
+    const resetRecording = useCallback(() => {
+        setRecordingDone(false);
+        _setTranscription('');
+        setAudioPath(null);
+        finalTranscriptRef.current = '';
+    }, []);
+
     return {
         isRecording,
         transcription,
@@ -182,5 +191,6 @@ export const useVoiceRecorder = () => {
         startRecording,
         stopRecording,
         updateTranscription,
+        resetRecording,
     };
 };

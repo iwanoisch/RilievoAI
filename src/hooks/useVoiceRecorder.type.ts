@@ -10,6 +10,7 @@ export interface SpeechRecognitionResultList {
 }
 
 export interface SpeechRecognitionEvent {
+    resultIndex: number;
     results: SpeechRecognitionResultList;
 }
 

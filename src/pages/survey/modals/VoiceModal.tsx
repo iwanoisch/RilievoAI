@@ -8,7 +8,7 @@ import type {VoiceModalProps} from "./voiceModal.type.ts";
 
 export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
     const {t} = useTranslation();
-    const {isRecording, transcription, audioPath, voiceError, recordingDone, startRecording, stopRecording} = useVoiceRecorder();
+    const {isRecording, transcription, audioPath, voiceError, recordingDone, startRecording, stopRecording, resetRecording} = useVoiceRecorder();
     const {currentSession, addVoiceObservation, updateVoiceObservation, deleteVoiceObservation, getNextObservationId} = useSurvey();
     const {elements} = useEdificio();
     const elementList = Object.values(elements);
@@ -71,11 +71,12 @@ export const VoiceModal: FC<VoiceModalProps> = ({editData, onClose}) => {
             deleteVoiceObservation(pendingId);
             setPendingId(null);
         }
+        resetRecording();
         setHasRecorded(false);
         setLocalTranscription('');
         setTargetElementId('');
         setHasChanges(false);
-    }, [pendingId, deleteVoiceObservation]);
+    }, [pendingId, deleteVoiceObservation, resetRecording]);
 
     const handleRecord = useCallback(() => {
         startRecording();

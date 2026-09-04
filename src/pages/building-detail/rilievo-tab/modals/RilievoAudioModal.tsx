@@ -7,7 +7,7 @@ import type {RilievoAudio} from "../../../../features/rilievo/rilievo.type.ts";
 
 export const RilievoAudioModal: FC<RilievoAudioModalProps> = ({itemId, onSave, onClose}) => {
     const {t} = useTranslation();
-    const {isRecording, transcription, audioPath, voiceError, recordingDone, startRecording, stopRecording} = useVoiceRecorder();
+    const {isRecording, transcription, audioPath, voiceError, recordingDone, startRecording, stopRecording, resetRecording} = useVoiceRecorder();
 
     const [hasRecorded, setHasRecorded] = useState(false);
     const [localTranscription, setLocalTranscription] = useState('');
@@ -43,6 +43,7 @@ export const RilievoAudioModal: FC<RilievoAudioModalProps> = ({itemId, onSave, o
     }, [stopRecording]);
 
     const handleRetake = () => {
+        resetRecording();
         setHasRecorded(false);
         setLocalTranscription('');
         setRecordingStartTime(0);

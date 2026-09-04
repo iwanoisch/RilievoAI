@@ -41,7 +41,25 @@ export const useVoiceRecorder = () => {
         recognition.lang = lang;
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-            if (isDesktop()) {
+            const desktop = isDesktop();
+            console.log('[VOICE] onresult', {
+                desktop,
+                resultIndex: event.resultIndex,
+                resultsLength: event.results.length,
+                finalTranscriptBefore: finalTranscriptRef.current,
+            });
+
+            // Log each result
+            for (let i = 0; i < event.results.length; i++) {
+                const r = event.results[i];
+                console.log(`[VOICE] result[${i}]`, {
+                    isFinal: r.isFinal,
+                    transcript: r[0].transcript,
+                    confidence: r[0].confidence,
+                });
+            }
+
+            if (desktop) {
                 // Desktop: append only new final results (handles restarts)
                 let interimText = '';
                 for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -66,18 +84,21 @@ export const useVoiceRecorder = () => {
                     }
                 }
                 finalTranscriptRef.current = finalText;
+                console.log('[VOICE] mobile result', {finalText, interimText, output: finalText + interimText});
                 _setTranscription(finalText + interimText);
             }
         };
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
             const errorType = event.error || '';
+            console.log('[VOICE] onerror', {error: errorType, message: event.message});
             if (errorType === 'no-speech' || errorType === 'aborted' || errorType === 'network') {
                 return;
             }
         };
 
         recognition.onend = () => {
+            console.log('[VOICE] onend', {isStopping: isStoppingRef.current, desktop: isDesktop()});
             // Auto-restart only on desktop (on mobile it causes beep sounds)
             if (isDesktop() && !isStoppingRef.current && mediaRecorderRef.current?.state === 'recording') {
                 setTimeout(() => {

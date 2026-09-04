@@ -66,7 +66,7 @@ const persistConfig = {
     key: 'root',
     version: 3,
     storage,
-    whitelist: ['auth', 'survey', 'buildings', 'anagrafica', 'ai', 'rilievo'],
+    whitelist: ['auth', 'buildings', 'anagrafica', 'ai', 'rilievo'],
     migrate: createMigrate(migrations, {debug: false}),
 };
 

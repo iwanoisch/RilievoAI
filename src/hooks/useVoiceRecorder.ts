@@ -72,20 +72,13 @@ export const useVoiceRecorder = () => {
                 }
                 _setTranscription(finalTranscriptRef.current + interimText);
             } else {
-                // Mobile: rebuild full transcript each time (single session, no restarts)
-                let finalText = '';
-                let interimText = '';
-                for (let i = 0; i < event.results.length; i++) {
-                    const result = event.results[i];
-                    if (result.isFinal) {
-                        finalText += result[0].transcript;
-                    } else {
-                        interimText += result[0].transcript;
-                    }
-                }
-                finalTranscriptRef.current = finalText;
-                console.log('[VOICE] mobile result', {finalText, interimText, output: finalText + interimText});
-                _setTranscription(finalText + interimText);
+                // Mobile (Android Chrome): each result contains the full phrase so far,
+                // so just take the last result's transcript
+                const lastResult = event.results[event.results.length - 1];
+                const text = lastResult[0].transcript;
+                finalTranscriptRef.current = text;
+                console.log('[VOICE] mobile result', {lastIndex: event.results.length - 1, text});
+                _setTranscription(text);
             }
         };
 

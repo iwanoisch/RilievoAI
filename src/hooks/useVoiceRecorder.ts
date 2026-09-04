@@ -42,25 +42,7 @@ export const useVoiceRecorder = () => {
         recognition.lang = lang;
 
         recognition.onresult = (event: SpeechRecognitionEvent) => {
-            const desktop = isDesktop();
-            console.log('[VOICE] onresult', {
-                desktop,
-                resultIndex: event.resultIndex,
-                resultsLength: event.results.length,
-                finalTranscriptBefore: finalTranscriptRef.current,
-            });
-
-            // Log each result
-            for (let i = 0; i < event.results.length; i++) {
-                const r = event.results[i];
-                console.log(`[VOICE] result[${i}]`, {
-                    isFinal: r.isFinal,
-                    transcript: r[0].transcript,
-                    confidence: r[0].confidence,
-                });
-            }
-
-            if (desktop) {
+            if (isDesktop()) {
                 // Desktop: append only new final results (handles restarts)
                 let interimText = '';
                 for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -81,21 +63,18 @@ export const useVoiceRecorder = () => {
                     ? previousSessionsRef.current + ' ' + currentText
                     : currentText;
                 finalTranscriptRef.current = fullText;
-                console.log('[VOICE] mobile result', {previous: previousSessionsRef.current, current: currentText, full: fullText});
                 _setTranscription(fullText);
             }
         };
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
             const errorType = event.error || '';
-            console.log('[VOICE] onerror', {error: errorType, message: event.message});
             if (errorType === 'no-speech' || errorType === 'aborted' || errorType === 'network') {
                 return;
             }
         };
 
         recognition.onend = () => {
-            console.log('[VOICE] onend', {isStopping: isStoppingRef.current, desktop: isDesktop()});
             if (isStoppingRef.current) return;
 
             if (isDesktop()) {
@@ -110,10 +89,8 @@ export const useVoiceRecorder = () => {
             } else {
                 // Mobile: save current transcript and restart until user presses stop
                 previousSessionsRef.current = finalTranscriptRef.current;
-                console.log('[VOICE] mobile saving before restart', {saved: previousSessionsRef.current});
                 setTimeout(() => {
                     if (!isStoppingRef.current) {
-                        console.log('[VOICE] mobile auto-restart');
                         try { recognition.start(); } catch (_) { /* ignore */ }
                     }
                 }, 300);

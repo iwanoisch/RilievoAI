@@ -848,6 +848,8 @@
     "retry_failed": "Riprova {{count}} batch falliti",
     "retry_failed_one": "Riprova 1 batch fallito",
     "stop_analysis": "Ferma analisi",
+    "refine_button": "Raffina con istruzioni",
+    "prompt_hint_refine": "Scrivi istruzioni per correggere o arricchire i dati gi\u00e0 estratti, senza dover ricaricare i file",
     "total_sessions": "{{count}} sessioni di analisi",
     "total_sessions_one": "{{count}} sessione di analisi",
     "total_sections": "{{count}} sezioni totali compilate",

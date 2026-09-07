@@ -845,6 +845,8 @@
     "retry_failed": "Retry {{count}} failed batches",
     "retry_failed_one": "Retry 1 failed batch",
     "stop_analysis": "Stop analysis",
+    "refine_button": "Refine with instructions",
+    "prompt_hint_refine": "Write instructions to correct or enrich previously extracted data, without re-uploading files",
     "total_sessions": "{{count}} analysis sessions",
     "total_sessions_one": "{{count}} analysis session",
     "total_sections": "{{count}} total sections filled",

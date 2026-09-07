@@ -11,6 +11,8 @@ import {
     AI_ANAGRAFICA_SYSTEM_PROMPT,
     AI_SECTION_PROMPT_TEMPLATE,
     AI_BULK_PROMPT_TEMPLATE,
+    AI_REFINE_PROMPT_TEMPLATE,
+    AI_REFINE_MAX_TOKENS,
     AI_MODEL,
     AI_MAX_TOKENS,
     AI_API_URL,
@@ -21,7 +23,7 @@ import {buildFieldSchema} from "../../utility/ai-schema-utils.ts";
 import {extractFilesFromList} from "../../utility/file-extract-utils.ts";
 import {useAnagrafica} from "../anagrafica/useAnagrafica.ts";
 import {useBuildings} from "../buildings/useBuildings.ts";
-import {setRilievoItems, setGenerated} from "../rilievo/rilievoSlice.ts";
+import {setRilievoItems, setGenerated, selectActiveRilievo} from "../rilievo/rilievoSlice.ts";
 import {convertAiStructureToItems} from "../../utility/rilievo-utils.ts";
 import type {BuildingCardData} from "../buildings/buildings.type.ts";
 import type {AiAnagraficaRequest, AiAnagraficaResponse, AiAnnotation, AiBulkResponse, AiExtractedFile, AiSession, AiUploadedFile} from "./ai.type.ts";
@@ -76,7 +78,7 @@ const buildContentBlocks = (files: AiExtractedFile[], finalText: string): Array<
 const MAX_RETRIES = 2;
 const RETRY_DELAYS = [3000, 6000];
 
-const callClaude = async (system: string, content: Array<Record<string, unknown>>, signal?: AbortSignal): Promise<Record<string, unknown>> => {
+const callClaude = async (system: string, content: Array<Record<string, unknown>>, signal?: AbortSignal, maxTokens?: number): Promise<Record<string, unknown>> => {
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
         const response = await fetch(AI_API_URL, {
             method: 'POST',
@@ -88,7 +90,7 @@ const callClaude = async (system: string, content: Array<Record<string, unknown>
             },
             body: JSON.stringify({
                 model: AI_MODEL,
-                max_tokens: AI_MAX_TOKENS,
+                max_tokens: maxTokens ?? AI_MAX_TOKENS,
                 system,
                 messages: [{role: 'user', content}],
             }),
@@ -111,15 +113,64 @@ const callClaude = async (system: string, content: Array<Record<string, unknown>
     throw new Error('Claude API error 529: Server sovraccarico dopo più tentativi');
 };
 
+const repairTruncatedJson = (text: string): string => {
+    let open = 0;
+    let openArr = 0;
+    let inString = false;
+    let escape = false;
+
+    for (const ch of text) {
+        if (escape) { escape = false; continue; }
+        if (ch === '\\') { escape = true; continue; }
+        if (ch === '"') { inString = !inString; continue; }
+        if (inString) continue;
+        if (ch === '{') open++;
+        if (ch === '}') open--;
+        if (ch === '[') openArr++;
+        if (ch === ']') openArr--;
+    }
+
+    // Tronca fino all'ultimo campo completo (ultima virgola o chiusura)
+    let repaired = text.trimEnd();
+    // Rimuovi trailing virgola o caratteri parziali
+    repaired = repaired.replace(/,\s*$/, '');
+    // Se siamo dentro una stringa non chiusa, chiudi
+    if (inString) repaired += '"';
+
+    // Chiudi array e oggetti aperti
+    for (let i = 0; i < openArr; i++) repaired += ']';
+    for (let i = 0; i < open; i++) repaired += '}';
+
+    return repaired;
+};
+
 const parseResponse = <T>(data: Record<string, unknown>): T => {
+    const stopReason = data.stop_reason as string | undefined;
     const textBlock = (data.content as Array<Record<string, unknown>>)?.find(b => b.type === 'text');
     if (!textBlock?.text) throw new Error('Risposta vuota da Claude');
 
     let text = textBlock.text as string;
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) text = jsonMatch[1];
 
-    return JSON.parse(text.trim()) as T;
+    // Rimuovi markdown code fences (anche se troncate senza chiusura)
+    const jsonMatchFull = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (jsonMatchFull) {
+        text = jsonMatchFull[1];
+    } else {
+        const jsonMatchOpen = text.match(/```(?:json)?\s*([\s\S]*)/);
+        if (jsonMatchOpen) text = jsonMatchOpen[1];
+    }
+
+    text = text.trim();
+
+    try {
+        return JSON.parse(text) as T;
+    } catch {
+        if (stopReason === 'max_tokens') {
+            const repaired = repairTruncatedJson(text);
+            return JSON.parse(repaired) as T;
+        }
+        throw new Error(`JSON non valido nella risposta AI`);
+    }
 };
 
 const AI_STATE_DEFAULTS = {
@@ -136,6 +187,7 @@ export const useAi = () => {
     const state = {...AI_STATE_DEFAULTS, ...rawState};
     const anagrafica = useAnagrafica();
     const buildings = useBuildings();
+    const rilievoState = useAppSelector(selectActiveRilievo);
     const abortControllerRef = useRef<AbortController | null>(null);
     const failedBatchesRef = useRef<Array<{
         batch: AiExtractedFile[];
@@ -445,6 +497,137 @@ export const useAi = () => {
         }
     };
 
+    const serializeCurrentData = (buildingId: string): {anagraficaJson: string; rilievoJson: string} => {
+        const sections = anagrafica.getSectionsForBuilding(buildingId);
+        const anagraficaData: Record<string, Record<string, string>> = {};
+        for (const section of sections) {
+            const values = section.values ?? {};
+            const nonEmpty: Record<string, string> = {};
+            for (const [k, v] of Object.entries(values)) {
+                if (v && v.trim() !== '') nonEmpty[k] = v;
+            }
+            if (Object.keys(nonEmpty).length > 0) {
+                anagraficaData[section.sectionId] = nonEmpty;
+            }
+        }
+
+        const items = rilievoState?.items ?? [];
+        const rilievoItems = items.map(item => ({
+            id: item.id,
+            parentId: item.parentId,
+            type: item.type,
+            label: item.label,
+            detail: item.detail,
+        }));
+
+        return {
+            anagraficaJson: JSON.stringify(anagraficaData, null, 2),
+            rilievoJson: JSON.stringify(rilievoItems, null, 2),
+        };
+    };
+
+    const hasPreviousAnalysis = (buildingId: string): boolean => {
+        const sections = anagrafica.getSectionsForBuilding(buildingId);
+        const hasAnagraficaData = sections.some(s => {
+            const values = s.values ?? {};
+            return Object.values(values).some(v => v && v.trim() !== '');
+        });
+        const hasRilievoData = (rilievoState?.items ?? []).length > 0;
+        return hasAnagraficaData || hasRilievoData || state.sessions.length > 0;
+    };
+
+    const refineWithPrompt = async (buildingId: string, userPrompt: string) => {
+        try {
+            abortControllerRef.current = new AbortController();
+            dispatch(setAiStatus('analyzing'));
+            dispatch(setAiError(null));
+            dispatch(setSectionsProcessed(0));
+
+            const sessionId = state.currentSessionId ?? generateSessionId();
+            dispatch(setCurrentSessionId(sessionId));
+
+            const {anagraficaJson, rilievoJson} = serializeCurrentData(buildingId);
+
+            const sections: Array<{sectionId: string; sectionLabel: string; fields: ReturnType<typeof buildFieldSchema>}> =
+                ANAGRAFICA_SECTIONS.map(config => ({
+                    sectionId: config.id,
+                    sectionLabel: config.label,
+                    fields: buildFieldSchema(config),
+                }));
+
+            const systemPrompt = AI_ANAGRAFICA_SYSTEM_PROMPT + `\nISTRUZIONI UTENTE:\n${userPrompt}\n`;
+            const refinePrompt = AI_REFINE_PROMPT_TEMPLATE
+                .replace('{{currentAnagrafica}}', anagraficaJson)
+                .replace('{{currentRilievo}}', rilievoJson)
+                .replace('{{userPrompt}}', userPrompt)
+                .replace('{{sectionsSchema}}', JSON.stringify(sections, null, 2));
+
+            dispatch(setBatchProgress({current: 1, total: 1, failed: 0}));
+
+            const content: Array<Record<string, unknown>> = [{type: 'text', text: refinePrompt}];
+            const data = await callClaude(systemPrompt, content, abortControllerRef.current.signal, AI_REFINE_MAX_TOKENS);
+            const response = parseResponse<AiBulkResponse>(data);
+
+            let batchProcessed = 0;
+            const allNotes: AiAnnotation[] = [];
+            const mergedSections: Record<string, AiAnagraficaResponse> = {};
+
+            const responseSections = response.sections ?? {};
+            for (const [sectionId, sectionResponse] of Object.entries(responseSections)) {
+                anagrafica.applyAiResponse(buildingId, sectionId, sectionResponse);
+                batchProcessed++;
+                mergedSections[sectionId] = sectionResponse;
+            }
+
+            if (response.buildingStructure?.floors?.length) {
+                const rilievoItems = convertAiStructureToItems(response.buildingStructure);
+                if (rilievoItems.length > 0) {
+                    dispatch(setRilievoItems(rilievoItems));
+                    dispatch(setGenerated(true));
+                }
+            }
+
+            if (response.globalNotes?.length) allNotes.push(...response.globalNotes);
+            for (const sectionResponse of Object.values(responseSections)) {
+                if (sectionResponse.notes?.length) allNotes.push(...sectionResponse.notes);
+            }
+
+            const currentBuilding = buildings.buildings.find(b => b.id === buildingId);
+            if (currentBuilding) {
+                const newestDocDate = response.documentDate ?? '';
+                const buildingUpdates = extractBuildingUpdates(mergedSections, newestDocDate, currentBuilding);
+                if (Object.keys(buildingUpdates).length > 0) {
+                    void buildings.updateBuilding({...currentBuilding, ...buildingUpdates});
+                }
+            }
+
+            dispatch(addAnnotations(allNotes));
+            dispatch(addSectionsProcessed(batchProcessed));
+            dispatch(setBatchProgress({current: 1, total: 1, failed: 0}));
+
+            dispatch(addSession({
+                id: sessionId,
+                timestamp: new Date().toISOString(),
+                fileCount: 0,
+                sectionsProcessed: batchProcessed,
+            }));
+
+            dispatch(setAiStatus('done'));
+            abortControllerRef.current = null;
+            return {success: true, failedBatches: 0};
+        } catch (error) {
+            if (error instanceof DOMException && error.name === 'AbortError') {
+                dispatch(setAiStatus('idle'));
+                return null;
+            }
+            const message = error instanceof Error ? error.message : 'Errore AI';
+            dispatch(setAiError(message));
+            dispatch(setAiStatus('error'));
+            abortControllerRef.current = null;
+            return null;
+        }
+    };
+
     const retryFailedBatches = async () => {
         const pending = failedBatchesRef.current;
         if (pending.length === 0) return null;
@@ -545,6 +728,8 @@ export const useAi = () => {
         extractFiles,
         analyzeSection,
         analyzeBulk,
+        refineWithPrompt,
+        hasPreviousAnalysis,
         stopAnalysis,
         retryFailedBatches,
         hasFailedBatches,

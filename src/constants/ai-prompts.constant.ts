@@ -178,6 +178,70 @@ FORMATO JSON:
   "externalElements": []
 }`;
 
+export const AI_REFINE_PROMPT_TEMPLATE = `
+Hai già analizzato i documenti di questo edificio in una sessione precedente.
+L'utente ha scritto nuove istruzioni per RAFFINARE o CORREGGERE i risultati.
+
+REGOLE IMPORTANTI:
+- Rispondi SOLO con JSON valido, SENZA markdown, SENZA backtick, SENZA spiegazioni
+- Restituisci SOLO le sezioni anagrafica che hai effettivamente modificato (non tutte)
+- Per buildingStructure: restituiscila SOLO se l'utente chiede modifiche all'alberatura
+- Mantieni label brevi e concise (max 30-40 caratteri per label)
+- Per aperture/elementi usa label sintetiche: "D01 - Porta ingresso", "F01 - Finestra", "R01 - Radiatore"
+- NON aggiungere "(da rilevare: ...)" nelle label — il sistema di checklist gestisce già cosa rilevare
+
+DATI ANAGRAFICA ATTUALI:
+{{currentAnagrafica}}
+
+ALBERATURA RILIEVO ATTUALE (formato: id, parentId, type, label):
+{{currentRilievo}}
+
+ISTRUZIONI UTENTE:
+{{userPrompt}}
+
+SEZIONI E CAMPI DISPONIBILI:
+{{sectionsSchema}}
+
+FORMATO RISPOSTA:
+{
+  "documentDate": "",
+  "sections": {
+    "sectionId": {
+      "values": { "chiave_campo": "valore_stringa" },
+      "groupValutazioni": {},
+      "repeatables": {},
+      "notes": []
+    }
+  },
+  "globalNotes": [],
+  "buildingStructure": {
+    "label": "Nome",
+    "address": "Indirizzo",
+    "floors": [
+      {
+        "label": "Piano Terra",
+        "level": 0,
+        "rooms": [
+          {
+            "label": "Soggiorno",
+            "area": "42.50",
+            "walls": [
+              {
+                "label": "W01",
+                "openings": [{"label": "D01", "type": "door"}],
+                "elements": [{"label": "R01", "category": "thermal"}]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+`;
+
+export const AI_REFINE_MAX_TOKENS = 32768;
+
 export const AI_MODEL = 'claude-sonnet-4-6';
 export const AI_MAX_TOKENS = 16384;
 export const AI_API_URL = import.meta.env.DEV

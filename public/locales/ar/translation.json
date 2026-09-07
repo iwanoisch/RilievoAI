@@ -835,6 +835,8 @@
     "retry_failed": "إعادة محاولة {{count}} دفعات فاشلة",
     "retry_failed_one": "إعادة محاولة دفعة فاشلة واحدة",
     "stop_analysis": "إيقاف التحليل",
+    "refine_button": "تحسين بالتعليمات",
+    "prompt_hint_refine": "اكتب تعليمات لتصحيح أو إثراء البيانات المستخرجة سابقًا، دون إعادة تحميل الملفات",
     "total_sessions": "{{count}} جلسات تحليل",
     "total_sessions_one": "{{count}} جلسة تحليل",
     "total_sections": "{{count}} أقسام إجمالية مملوءة",

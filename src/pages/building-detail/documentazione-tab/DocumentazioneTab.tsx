@@ -73,8 +73,11 @@ export const DocumentazioneTab: FC = () => {
         }
     };
 
+    const canRefine = ai.userPrompt.trim().length > 0 && ai.hasPreviousAnalysis(buildingId);
+    const canAnalyze = extractedFiles.length > 0 || canRefine;
+
     const handleAnalyze = async () => {
-        if (extractedFiles.length === 0) {
+        if (extractedFiles.length === 0 && !canRefine) {
             if (activeFiles.length > 0) {
                 showAlert({title: t('doc.reload_files'), type: 'warning', message: t('doc.reload_files_hint')});
             } else {
@@ -83,7 +86,13 @@ export const DocumentazioneTab: FC = () => {
             return;
         }
 
-        const result = await ai.analyzeBulk(buildingId, extractedFiles, ai.userPrompt);
+        let result;
+        if (extractedFiles.length > 0) {
+            result = await ai.analyzeBulk(buildingId, extractedFiles, ai.userPrompt);
+        } else {
+            result = await ai.refineWithPrompt(buildingId, ai.userPrompt);
+        }
+
         if (result) {
             showAlert({title: t('doc.analysis_complete'), type: 'success', message: ''});
         } else if (ai.error) {
@@ -300,7 +309,11 @@ export const DocumentazioneTab: FC = () => {
                         value={ai.userPrompt}
                         onChange={(e) => ai.updatePrompt(e.target.value)}
                     />
-                    <p className="text-xs text-text-muted mt-1">{t('doc.prompt_hint')}</p>
+                    <p className="text-xs text-text-muted mt-1">
+                        {ai.hasPreviousAnalysis(buildingId)
+                            ? t('doc.prompt_hint_refine')
+                            : t('doc.prompt_hint')}
+                    </p>
                 </div>
 
                 {/* Bottoni analisi */}
@@ -308,11 +321,11 @@ export const DocumentazioneTab: FC = () => {
                     <button
                         type="button"
                         onClick={() => void handleAnalyze()}
-                        disabled={isAnalyzing || isExtracting || extractedFiles.length === 0}
+                        disabled={isAnalyzing || isExtracting || !canAnalyze}
                         className="btn btn-primary flex items-center gap-2 min-h-[44px]"
                     >
                         <SparklesIcon className={`h-5 w-5${isAnalyzing ? ' animate-spin' : ''}`}/>
-                        {t('doc.analyze_button')}
+                        {extractedFiles.length === 0 && canRefine ? t('doc.refine_button') : t('doc.analyze_button')}
                     </button>
                     {isAnalyzing && (
                         <>

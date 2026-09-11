@@ -1,5 +1,6 @@
 import {FC, useState, useRef} from "react";
 import {useTranslation} from "react-i18next";
+import {useParams} from "react-router-dom";
 import {
     ClipboardDocumentCheckIcon,
     ChevronRightIcon,
@@ -22,17 +23,24 @@ import {RilievoMeasurementModal} from "./modals/RilievoMeasurementModal.tsx";
 import {RilievoEditPhotoModal} from "./modals/RilievoEditPhotoModal.tsx";
 import {RilievoEditAudioModal} from "./modals/RilievoEditAudioModal.tsx";
 import {RilievoEditMeasurementModal} from "./modals/RilievoEditMeasurementModal.tsx";
+import {FloorPlanCard} from "./floor-plan-card/FloorPlanCard.tsx";
+import {FloorPlanViewer} from "./floor-plan-viewer/FloorPlanViewer.tsx";
+import {FloorPlanElementModal} from "./floor-plan-modal/FloorPlanElementModal.tsx";
+import type {FloorPlanImage} from "../../../utility/floor-plan-db.ts";
 import type {RilievoItem, RilievoItemType, RilievoPhoto, RilievoAudio, RilievoMeasurement} from "../../../features/rilievo/rilievo.type.ts";
 
 export const RilievoTab: FC = () => {
     const {t} = useTranslation();
+    const {id: buildingId} = useParams<{id: string}>();
     const {
-        items, generated, generating, error, selectedItemId,
+        items, photos, audios, measurements,
+        generated, generating, error, selectedItemId,
         regenerateFromAnagrafica, selectItem, toggleCheck, reset, deleteItem, addItem, updateItem,
         getChildren, getRoots, getCompletionPercent, totalCompletion,
         addPhoto, updatePhoto, deletePhoto, getPhotosForItem,
         addAudio, updateAudio, deleteAudio, getAudiosForItem,
         addMeasurement, updateMeasurement, deleteMeasurement, getMeasurementsForItem,
+        addMarker, removeMarker, getMarkersForFile,
     } = useRilievo();
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -68,6 +76,13 @@ export const RilievoTab: FC = () => {
     const [editingPhoto, setEditingPhoto] = useState<RilievoPhoto | null>(null);
     const [editingAudio, setEditingAudio] = useState<RilievoAudio | null>(null);
     const [editingMeasurement, setEditingMeasurement] = useState<RilievoMeasurement | null>(null);
+
+    // Floor plan
+    const [activeFloorPlan, setActiveFloorPlan] = useState<FloorPlanImage | null>(null);
+    const [floorPlanModal, setFloorPlanModal] = useState<{tapPos: {x: number; y: number}; initialItemId?: string} | null>(null);
+    const [lastSelectedFloorId, setLastSelectedFloorId] = useState<string | null>(null);
+    // itemId selezionato nella modale planimetria (per le modali foto/audio/misura)
+    const [fpModalItemId, setFpModalItemId] = useState<string | null>(null);
 
     const toggleExpand = (id: string) => {
         setExpandedIds(prev => {
@@ -572,6 +587,26 @@ export const RilievoTab: FC = () => {
                     })}
                 </div>
 
+                {/* Planimetrie */}
+                {buildingId && (
+                    <div className="space-y-3">
+                        <FloorPlanCard
+                            buildingId={buildingId}
+                            activeFileId={activeFloorPlan?.fileId || null}
+                            onSelectImage={(img) => setActiveFloorPlan(prev => prev?.fileId === img.fileId ? null : img)}
+                        />
+                        {activeFloorPlan && (
+                            <FloorPlanViewer
+                                image={activeFloorPlan}
+                                markers={getMarkersForFile(activeFloorPlan.fileId)}
+                                items={items}
+                                onTapEmpty={(posX, posY) => setFloorPlanModal({tapPos: {x: posX, y: posY}})}
+                                onTapMarker={(marker) => setFloorPlanModal({tapPos: {x: marker.posX, y: marker.posY}, initialItemId: marker.itemId})}
+                            />
+                        )}
+                    </div>
+                )}
+
                 {/* Layout: Albero + Card */}
                 <div className="flex flex-col lg:flex-row gap-4">
                     <div className="lg:w-1/2 border border-border-light rounded-xl overflow-hidden bg-surface-card max-h-[400px] lg:h-[600px] overflow-y-auto">
@@ -634,6 +669,77 @@ export const RilievoTab: FC = () => {
                         onSave={(updates) => updateMeasurement(editingMeasurement.id, updates)}
                         onDelete={() => deleteMeasurement(editingMeasurement.id)}
                         onClose={() => setEditingMeasurement(null)}
+                    />
+                )}
+
+                {/* Floor Plan Element Modal */}
+                {floorPlanModal && activeFloorPlan && (
+                    <FloorPlanElementModal
+                        items={items}
+                        initialItemId={floorPlanModal.initialItemId}
+                        isExistingMarker={!!floorPlanModal.initialItemId}
+                        placedItemIds={new Set(getMarkersForFile(activeFloorPlan.fileId).map(m => m.itemId))}
+                        photos={photos}
+                        audios={audios}
+                        measurements={measurements}
+                        onSelectItem={(itemId) => {
+                            setFpModalItemId(itemId);
+                            selectItem(itemId);
+                            if (activeFloorPlan) {
+                                addMarker({
+                                    id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                                    fileId: activeFloorPlan.fileId,
+                                    itemId,
+                                    posX: floorPlanModal.tapPos.x,
+                                    posY: floorPlanModal.tapPos.y,
+                                });
+                            }
+                        }}
+                        onRemoveMarker={() => {
+                            if (floorPlanModal.initialItemId && activeFloorPlan) {
+                                const markers = getMarkersForFile(activeFloorPlan.fileId);
+                                const marker = markers.find(m => m.itemId === floorPlanModal.initialItemId);
+                                if (marker) removeMarker(marker.id);
+                            }
+                            setFloorPlanModal(null);
+                            setFpModalItemId(null);
+                        }}
+                        onClose={() => { setFloorPlanModal(null); setFpModalItemId(null); }}
+                        onToggleCheck={toggleCheck}
+                        onAddPhoto={addPhoto}
+                        onDeletePhoto={deletePhoto}
+                        onAddAudio={addAudio}
+                        onDeleteAudio={deleteAudio}
+                        onAddMeasurement={addMeasurement}
+                        onDeleteMeasurement={deleteMeasurement}
+                        onShowPhotoModal={() => setShowPhotoModal(true)}
+                        onShowAudioModal={() => setShowAudioModal(true)}
+                        onShowMeasurementModal={() => setShowMeasurementModal(true)}
+                        onFileUpload={(e) => {
+                            const files = e.target.files;
+                            const targetItemId = fpModalItemId || selectedItemId;
+                            if (!files || !targetItemId) return;
+                            for (let i = 0; i < files.length; i++) {
+                                const file = files[i];
+                                const reader = new FileReader();
+                                reader.onload = () => {
+                                    addPhoto({
+                                        id: `photo-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                                        itemId: targetItemId,
+                                        uri: reader.result as string,
+                                        timestamp: new Date().toISOString(),
+                                        note: file.name,
+                                    });
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                            e.target.value = '';
+                        }}
+                        onEditPhoto={setEditingPhoto}
+                        onEditAudio={setEditingAudio}
+                        onEditMeasurement={setEditingMeasurement}
+                        lastSelectedFloorId={lastSelectedFloorId}
+                        onFloorSelected={setLastSelectedFloorId}
                     />
                 )}
             </div>

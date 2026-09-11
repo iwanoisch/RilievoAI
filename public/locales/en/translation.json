@@ -685,7 +685,16 @@
     "instructions_title": "How to use the floor plan",
     "instructions_no_markers": "Select a photo from the section below and click on the floor plan to place it. You can add multiple photos.",
     "instructions_with_markers": "Click on a marker on the floor plan to view details, change the angle, reposition or remove the photo.",
-    "placed_photos": "Placed photos"
+    "placed_photos": "Placed photos",
+    "card_title": "Floor Plans",
+    "upload_file": "Upload",
+    "uploading": "Uploading...",
+    "empty_hint": "Upload floor plans (images or PDFs) to interact with elements",
+    "tap_hint": "Tap on the floor plan to associate an element",
+    "select_floor": "Select floor",
+    "select_room": "Select room",
+    "select_element": "Select element",
+    "remove_marker": "Remove point from floor plan"
   },
   "buildingDetail": {
     "documentation": "Documentation",

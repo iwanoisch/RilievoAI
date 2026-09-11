@@ -55,11 +55,20 @@ export interface RilievoItem {
     elementCategory?: 'thermal' | 'electrical' | 'degradation' | 'finish' | 'plumbing' | 'other';
 }
 
+export interface FloorPlanMarker {
+    id: string;
+    fileId: string;
+    itemId: string;
+    posX: number;
+    posY: number;
+}
+
 export interface RilievoState {
     items: RilievoItem[];
     photos: RilievoPhoto[];
     audios: RilievoAudio[];
     measurements: RilievoMeasurement[];
+    floorPlanMarkers: FloorPlanMarker[];
     selectedItemId: string | null;
     generated: boolean;
     error: string | null;

@@ -1,12 +1,13 @@
 import {createSlice} from "@reduxjs/toolkit";
 import type {PayloadAction} from "@reduxjs/toolkit";
-import type {RilievoItem, RilievoPhoto, RilievoAudio, RilievoMeasurement, RilievoState} from "./rilievo.type.ts";
+import type {RilievoItem, RilievoPhoto, RilievoAudio, RilievoMeasurement, FloorPlanMarker, RilievoState} from "./rilievo.type.ts";
 
 const emptyRilievoState: RilievoState = {
     items: [],
     photos: [],
     audios: [],
     measurements: [],
+    floorPlanMarkers: [],
     selectedItemId: null,
     generated: false,
     error: null,
@@ -55,6 +56,9 @@ const rilievoSlice = createSlice({
         setGenerated: (state, action: PayloadAction<boolean>) => {
             updateCurrent(state, s => { s.generated = action.payload; });
         },
+        setFloorPlanMarkers: (state, action: PayloadAction<FloorPlanMarker[]>) => {
+            updateCurrent(state, s => { s.floorPlanMarkers = action.payload; });
+        },
         setRilievoError: (state, action: PayloadAction<string | null>) => {
             updateCurrent(state, s => { s.error = action.payload; });
         },
@@ -64,7 +68,7 @@ const rilievoSlice = createSlice({
 export const {
     setRilievoActiveBuildingId,
     setRilievoItems, setRilievoPhotos, setRilievoAudios, setRilievoMeasurements,
-    setSelectedItemId, setGenerated, setRilievoError,
+    setFloorPlanMarkers, setSelectedItemId, setGenerated, setRilievoError,
 } = rilievoSlice.actions;
 
 export const selectActiveRilievo = (rootState: {rilievo: RilievoPerBuildingState}): RilievoState => {

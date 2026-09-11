@@ -54,7 +54,7 @@ const fileToArrayBuffer = (file: File): Promise<ArrayBuffer> =>
         reader.readAsArrayBuffer(file);
     });
 
-const pdfToPageImages = async (pdfData: ArrayBuffer, filename: string): Promise<AiExtractedFile[]> => {
+export const pdfToPageImages = async (pdfData: ArrayBuffer, filename: string): Promise<AiExtractedFile[]> => {
     const pdf = await pdfjsLib.getDocument({
         data: pdfData,
         wasmUrl: PDFJS_WASM_URL,

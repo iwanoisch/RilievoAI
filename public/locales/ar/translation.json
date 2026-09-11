@@ -675,7 +675,16 @@
     "instructions_title": "كيفية استخدام المخطط",
     "instructions_no_markers": "اختر صورة من القسم أدناه وانقر على المخطط لوضعها. يمكنك إضافة عدة صور.",
     "instructions_with_markers": "انقر على علامة على المخطط لعرض التفاصيل أو تغيير الزاوية أو إعادة التموضع أو إزالة الصورة.",
-    "placed_photos": "الصور الموضوعة"
+    "placed_photos": "الصور الموضوعة",
+    "card_title": "المخططات",
+    "upload_file": "تحميل",
+    "uploading": "جاري التحميل...",
+    "empty_hint": "حمّل مخططات (صور أو PDF) للتفاعل مع العناصر",
+    "tap_hint": "انقر على المخطط لربط عنصر",
+    "select_floor": "اختر الطابق",
+    "select_room": "اختر الغرفة",
+    "select_element": "اختر العنصر",
+    "remove_marker": "إزالة النقطة من المخطط"
   },
   "buildingDetail": {
     "documentation": "التوثيق",

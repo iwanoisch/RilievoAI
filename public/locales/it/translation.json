@@ -688,7 +688,16 @@
     "instructions_title": "Come usare la planimetria",
     "instructions_no_markers": "Seleziona una foto dalla sezione sottostante e clicca sulla planimetria per posizionarla. Puoi aggiungere più foto.",
     "instructions_with_markers": "Clicca su un marker sulla planimetria per visualizzare i dettagli, modificare l'angolo, riposizionare o rimuovere la foto.",
-    "placed_photos": "Foto posizionate"
+    "placed_photos": "Foto posizionate",
+    "card_title": "Planimetrie",
+    "upload_file": "Carica",
+    "uploading": "Caricamento...",
+    "empty_hint": "Carica planimetrie (immagini o PDF) per interagire con gli elementi",
+    "tap_hint": "Tocca la planimetria per associare un elemento",
+    "select_floor": "Seleziona il piano",
+    "select_room": "Seleziona l'ambiente",
+    "select_element": "Seleziona l'elemento",
+    "remove_marker": "Rimuovi punto dalla planimetria"
   },
   "buildingDetail": {
     "documentation": "Documentazione",

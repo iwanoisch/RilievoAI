@@ -39,6 +39,13 @@ export const RILIEVO_TYPE_LABELS: Record<string, string> = {
 
 export const RILIEVO_MEASUREMENT_QUICK_LABELS: string[] = ['Lunghezza', 'Larghezza', 'Altezza', 'Profondita', 'Distanza'];
 
+export const RILIEVO_MARKER_STATUS_COLORS: Record<RilievoItemStatus, string> = {
+    pending: '#94a3b8',
+    in_progress: '#f59e0b',
+    done: '#22c55e',
+    to_verify: '#3b82f6',
+};
+
 export const RILIEVO_ALLOWED_CHILDREN: Record<string, string[]> = {
     building: ['floor', 'element'],
     floor: ['room'],

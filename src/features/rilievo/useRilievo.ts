@@ -2,7 +2,7 @@ import {useState} from "react";
 import {useAppDispatch, useAppSelector} from "../../store/store.ts";
 import {
     setRilievoItems, setRilievoPhotos, setRilievoAudios, setRilievoMeasurements,
-    setSelectedItemId, setGenerated, setRilievoError,
+    setFloorPlanMarkers, setSelectedItemId, setGenerated, setRilievoError,
 } from "./rilievoSlice.ts";
 import {convertAiStructureToItems} from "../../utility/rilievo-utils.ts";
 import {
@@ -10,7 +10,7 @@ import {
 } from "../../constants/ai-prompts.constant.ts";
 import type {AiBuildingStructure} from "../ai/ai.type.ts";
 import {selectActiveRilievo} from "./rilievoSlice.ts";
-import type {RilievoItem, RilievoCheck, RilievoPhoto, RilievoAudio, RilievoMeasurement} from "./rilievo.type.ts";
+import type {RilievoItem, RilievoCheck, RilievoPhoto, RilievoAudio, RilievoMeasurement, FloorPlanMarker} from "./rilievo.type.ts";
 
 const API_KEY = import.meta.env.VITE_CLAUDE_KEY as string;
 
@@ -52,6 +52,7 @@ export const useRilievo = () => {
         photos: rawState.photos ?? [],
         audios: rawState.audios ?? [],
         measurements: rawState.measurements ?? [],
+        floorPlanMarkers: rawState.floorPlanMarkers ?? [],
     };
 
     const [generating, setGenerating] = useState(false);
@@ -363,11 +364,36 @@ export const useRilievo = () => {
         return Math.round(percents.reduce((a, b) => a + b, 0) / percents.length);
     };
 
+    // ===== Floor Plan Markers =====
+
+    const addMarker = (marker: FloorPlanMarker) => {
+        // Rimuovi marker esistente per lo stesso item sulla stessa planimetria (riposizionamento)
+        const filtered = state.floorPlanMarkers.filter(
+            m => !(m.itemId === marker.itemId && m.fileId === marker.fileId)
+        );
+        dispatch(setFloorPlanMarkers([...filtered, marker]));
+    };
+
+    const removeMarker = (markerId: string) => {
+        dispatch(setFloorPlanMarkers(state.floorPlanMarkers.filter(m => m.id !== markerId)));
+    };
+
+    const removeMarkersForFile = (fileId: string) => {
+        dispatch(setFloorPlanMarkers(state.floorPlanMarkers.filter(m => m.fileId !== fileId)));
+    };
+
+    const getMarkersForFile = (fileId: string): FloorPlanMarker[] =>
+        state.floorPlanMarkers.filter(m => m.fileId === fileId);
+
+    const getMarkerForItem = (itemId: string): FloorPlanMarker | undefined =>
+        state.floorPlanMarkers.find(m => m.itemId === itemId);
+
     const reset = () => {
         dispatch(setRilievoItems([]));
         dispatch(setRilievoPhotos([]));
         dispatch(setRilievoAudios([]));
         dispatch(setRilievoMeasurements([]));
+        dispatch(setFloorPlanMarkers([]));
         dispatch(setSelectedItemId(null));
         dispatch(setGenerated(false));
         dispatch(setRilievoError(null));
@@ -403,6 +429,12 @@ export const useRilievo = () => {
         updateMeasurement,
         deleteMeasurement,
         getMeasurementsForItem,
+        // Floor Plan Markers
+        addMarker,
+        removeMarker,
+        removeMarkersForFile,
+        getMarkersForFile,
+        getMarkerForItem,
         // Navigation
         getChildren,
         getRoots,

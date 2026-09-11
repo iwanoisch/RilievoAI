@@ -14,7 +14,7 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
     onToggleCheck, onDeletePhoto, onDeleteAudio, onDeleteMeasurement,
     onShowPhotoModal, onShowAudioModal, onShowMeasurementModal, onFileUpload,
     onEditPhoto, onEditAudio, onEditMeasurement,
-    lastSelectedFloorId, onFloorSelected, isExistingMarker, placedItemIds,
+    onFloorSelected, isExistingMarker, placedItemIds,
 }) => {
     const {t} = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);

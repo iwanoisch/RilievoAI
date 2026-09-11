@@ -27,7 +27,6 @@ export interface FloorPlanElementModalProps {
     onEditPhoto: (photo: RilievoPhoto) => void;
     onEditAudio: (audio: RilievoAudio) => void;
     onEditMeasurement: (measurement: RilievoMeasurement) => void;
-    lastSelectedFloorId: string | null;
     onFloorSelected: (floorId: string) => void;
     isExistingMarker: boolean;
     placedItemIds: Set<string>;

@@ -744,7 +744,6 @@ export const RilievoTab: FC = () => {
                         onEditPhoto={setEditingPhoto}
                         onEditAudio={setEditingAudio}
                         onEditMeasurement={setEditingMeasurement}
-                        lastSelectedFloorId={lastSelectedFloorId}
                         onFloorSelected={setLastSelectedFloorId}
                     />
                 )}

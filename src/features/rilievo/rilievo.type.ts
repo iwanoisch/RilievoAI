@@ -52,7 +52,7 @@ export interface RilievoItem {
     checks: RilievoCheck[];
     order: number;
     openingType?: 'door' | 'window' | 'french_door' | 'other';
-    elementCategory?: 'thermal' | 'electrical' | 'degradation' | 'finish' | 'other';
+    elementCategory?: 'thermal' | 'electrical' | 'degradation' | 'finish' | 'plumbing' | 'other';
 }
 
 export interface RilievoState {

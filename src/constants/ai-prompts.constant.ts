@@ -72,15 +72,41 @@ REGOLA DATA DOCUMENTO:
 - Se non trovi nessuna data, restituisci stringa vuota ""
 
 REGOLA STRUTTURA EDIFICIO (buildingStructure):
-- Analizzando i documenti (soprattutto planimetrie, piante, sezioni, relazioni tecniche), genera la struttura gerarchica dell'edificio
-- La gerarchia e': Edificio > Piani > Ambienti > Pareti > Aperture/Elementi
-- Per ogni AMBIENTE: indica label, superficie (area in mq), altezza se disponibile
-- Per ogni PARETE: indica label progressiva (W01, W02...), lunghezza e altezza se desumibili
-- Per ogni APERTURA su parete: indica tipo (door/window/french_door/other), label progressiva (D01, F01...), dimensioni
-- Per ogni ELEMENTO su parete: indica categoria (thermal/electrical/degradation/finish/other), label (R01, AC01, E01...)
-- Se non trovi planimetrie dettagliate, genera comunque la struttura base con piani e ambienti desunti dalle relazioni
-- Le pareti vanno nominate in senso orario partendo da Nord: W01=Nord, W02=Est, W03=Sud, W04=Ovest
-- Se un ambiente ha forma non rettangolare, aggiungi pareti extra (W05, W06...)
+Questa struttura serve a guidare un tecnico durante il sopralluogo. Deve contenere TUTTO cio che il tecnico dovra rilevare, verificare o misurare su ogni parete di ogni ambiente.
+
+ANALISI VISIVA DELLE PLANIMETRIE:
+- GUARDA ATTENTAMENTE ogni planimetria/pianta fornita come immagine
+- Per ogni AMBIENTE identifica TUTTE le pareti e cosa si trova su ciascuna: porte, finestre, portefinestre, Velux, radiatori, split, scarichi, sifoni, prese, interruttori, quadri elettrici, caldaie, contatori, etc.
+- Se vedi un simbolo su una parete (cerchio radiatore, rettangolo finestra, arco porta, simbolo impiantistico), DEVE comparire come figlio di quella parete
+- Conta le pareti reali dal disegno: se un ambiente ha 5 lati, genera W01-W05
+
+GERARCHIA: Edificio > Piani > Ambienti > Pareti > Aperture/Elementi
+
+REGOLE PER AMBIENTE:
+- Label descrittiva con destinazione d'uso: "Autorimessa - Unita 1", "Soggiorno-Pranzo", "Camera matrimoniale"
+- Superficie in mq e altezza se disponibili
+
+REGOLE PER PARETE (W01, W02...):
+- Numerazione in senso orario partendo da Nord: W01=Nord, W02=Est, W03=Sud, W04=Ovest
+- Se non rettangolare, aggiungi W05, W06...
+- Indica lunghezza e altezza se desumibili
+- OGNI parete deve avere come figli TUTTE le aperture e gli elementi che si trovano su di essa
+
+REGOLE PER APERTURE (figli della parete):
+- Tipo: door/window/french_door/other
+- Label con descrizione: "D01 - Porta ingresso", "F01 - Finestra (1.20 x 0.60)", "PF01 - Portafinestra"
+- Dimensioni (width, height) se leggibili dal disegno o dalle relazioni
+- Note descrittive: "Portone garage larghezza 250 cm", "Velux 60x120", "Porta REI"
+
+REGOLE PER ELEMENTI (figli della parete):
+- Categoria: thermal/electrical/degradation/finish/plumbing/other
+- Label con descrizione: "R01 - Radiatore", "AC01 - Split", "S01 - Sifone a pavimento", "QE01 - Quadro elettrico"
+- Se vedi simboli impiantistici sulla planimetria (radiatori, termosifoni, split, scarichi), inseriscili come elementi sulla parete corrispondente
+
+IMPORTANTE:
+- Se non trovi planimetrie dettagliate, genera comunque la struttura base con piani e ambienti desunti dalle relazioni, con 4 pareti per ambiente rettangolare
+- NON lasciare pareti vuote se dal disegno si vede che hanno aperture o elementi
+- Il tecnico deve trovare gia nell'alberatura TUTTI gli elementi che dovra rilevare
 
 FORMATO:
 {
@@ -132,18 +158,37 @@ FORMATO:
 
 export const AI_RILIEVO_SYSTEM_PROMPT = `Sei un assistente specializzato nell'analisi di edifici. Ti vengono forniti i dati gia estratti dalla documentazione tecnica di un immobile (compilati in precedenza analizzando relazioni, planimetrie, tavole di progetto).
 
-Devi generare la struttura gerarchica dell'edificio per guidare il tecnico durante il sopralluogo.
+Devi generare la struttura gerarchica dell'edificio per guidare un tecnico durante il sopralluogo. La struttura deve contenere TUTTO cio che il tecnico dovra rilevare, verificare o misurare.
 
 REGOLE:
 - Rispondi SOLO con un JSON valido, senza markdown, senza spiegazioni
 - La gerarchia e': Edificio > Piani > Ambienti > Pareti > Aperture/Elementi
-- Per ogni AMBIENTE: indica label, superficie (area in mq se disponibile), altezza se disponibile
-- Per ogni PARETE: indica label progressiva (W01, W02...), lunghezza e altezza se desumibili dai dati
-- Per ogni APERTURA su parete: indica tipo (door/window/french_door/other), label progressiva (D01, F01...), dimensioni se disponibili
-- Per ogni ELEMENTO su parete: indica categoria (thermal/electrical/degradation/finish/other), label (R01, AC01, E01...)
-- Le pareti vanno nominate in senso orario: W01=Nord, W02=Est, W03=Sud, W04=Ovest
-- Se i dati non hanno abbastanza dettaglio per le pareti, genera comunque 4 pareti base per ogni ambiente rettangolare
-- Genera la struttura PIU DETTAGLIATA possibile con i dati che hai
+
+AMBIENTE:
+- Label descrittiva con destinazione d'uso: "Autorimessa - Unita 1 (37.50 mq)", "Soggiorno-Pranzo", "Camera matrimoniale"
+- Superficie in mq e altezza se disponibili dai dati
+
+PARETE (W01, W02...):
+- Numerazione in senso orario: W01=Nord, W02=Est, W03=Sud, W04=Ovest
+- Se ambiente non rettangolare: W05, W06...
+- Lunghezza e altezza se desumibili dai dati
+- Se i dati non hanno dettaglio per le pareti, genera 4 pareti base per ambiente rettangolare
+
+APERTURE (figli della parete):
+- Tipo: door/window/french_door/other
+- Label descrittiva: "D01 - Porta ingresso", "F01 - Finestra (1.20 x 0.60)", "PF01 - Portafinestra balcone"
+- Dimensioni se disponibili nei dati
+- Note descrittive: "Portone garage larghezza 250 cm", "Velux 60x120 in copertura", "Porta REI"
+
+ELEMENTI (figli della parete):
+- Categoria: thermal/electrical/degradation/finish/plumbing/other
+- Label descrittiva: "R01 - Radiatore sotto finestra", "AC01 - Split", "S01 - Sifone a pavimento", "QE01 - Quadro elettrico"
+
+IMPORTANTE:
+- Genera la struttura PIU DETTAGLIATA possibile con i dati disponibili
+- Ogni apertura o elemento menzionato nei dati deve comparire come figlio della parete corretta
+- NON lasciare pareti vuote se dai dati si evince che hanno aperture o elementi
+- Il tecnico deve trovare nell'alberatura TUTTI gli elementi da rilevare
 
 FORMATO JSON:
 {
@@ -155,19 +200,28 @@ FORMATO JSON:
       "level": 0,
       "rooms": [
         {
-          "label": "Soggiorno",
-          "area": "42.50",
+          "label": "Autorimessa - Unita 1",
+          "area": "37.50",
           "height": "2.70",
           "walls": [
             {
               "label": "W01",
-              "length": "4.20",
+              "length": "5.00",
               "height": "2.70",
               "openings": [
-                { "label": "D01", "type": "door", "width": "0.90", "height": "2.10" }
+                { "label": "D01 - Portone garage", "type": "door", "width": "2.50", "height": "2.10", "note": "Portone basculante" }
+              ],
+              "elements": []
+            },
+            {
+              "label": "W03",
+              "length": "7.50",
+              "height": "2.70",
+              "openings": [
+                { "label": "F01 - Velux", "type": "window", "width": "0.60", "height": "1.20", "note": "Velux 60x120 in copertura zona autorimessa" }
               ],
               "elements": [
-                { "label": "R01", "category": "thermal", "note": "Radiatore" }
+                { "label": "S01 - Sifone", "category": "plumbing", "note": "Sifone a pavimento" }
               ]
             }
           ]

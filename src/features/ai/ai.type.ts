@@ -62,7 +62,7 @@ export interface AiStructureOpening {
 
 export interface AiStructureElement {
     label: string;
-    category: 'thermal' | 'electrical' | 'degradation' | 'finish' | 'other';
+    category: 'thermal' | 'electrical' | 'degradation' | 'finish' | 'plumbing' | 'other';
     note?: string;
 }
 

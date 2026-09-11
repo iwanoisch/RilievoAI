@@ -80,7 +80,6 @@ export const RilievoTab: FC = () => {
     // Floor plan
     const [activeFloorPlan, setActiveFloorPlan] = useState<FloorPlanImage | null>(null);
     const [floorPlanModal, setFloorPlanModal] = useState<{tapPos: {x: number; y: number}; initialItemId?: string} | null>(null);
-    const [lastSelectedFloorId, setLastSelectedFloorId] = useState<string | null>(null);
     // itemId selezionato nella modale planimetria (per le modali foto/audio/misura)
     const [fpModalItemId, setFpModalItemId] = useState<string | null>(null);
 
@@ -744,7 +743,7 @@ export const RilievoTab: FC = () => {
                         onEditPhoto={setEditingPhoto}
                         onEditAudio={setEditingAudio}
                         onEditMeasurement={setEditingMeasurement}
-                        onFloorSelected={setLastSelectedFloorId}
+                        onFloorSelected={() => {}}
                     />
                 )}
             </div>

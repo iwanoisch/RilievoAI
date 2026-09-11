@@ -697,7 +697,8 @@
     "select_floor": "Seleziona il piano",
     "select_room": "Seleziona l'ambiente",
     "select_element": "Seleziona l'elemento",
-    "remove_marker": "Rimuovi punto dalla planimetria"
+    "remove_marker": "Rimuovi punto dalla planimetria",
+    "no_elements": "Tutti gli elementi sono già posizionati"
   },
   "buildingDetail": {
     "documentation": "Documentazione",

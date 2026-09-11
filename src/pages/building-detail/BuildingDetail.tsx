@@ -76,10 +76,10 @@ export const BuildingDetail: FC = () => {
                             <ArrowLeftIcon className="h-5 w-5"/>
                         </button>
                         <div className="flex-1 min-w-0">
-                            <h1 className="text-xl sm:text-3xl uppercase font-bold text-slate-900 tracking-tight truncate">
+                            <h1 className="text-base sm:text-2xl uppercase font-bold text-slate-900 tracking-tight line-clamp-2" title={building.name}>
                                 {building.name}
                             </h1>
-                            <div className="flex items-center gap-1 mt-1 text-sm sm:text-base text-slate-500">
+                            <div className="flex items-center gap-1 mt-1 text-xs sm:text-sm text-slate-500">
                                 <MapPinIcon className="h-4 w-4 flex-shrink-0"/>
                                 <span>{building.address} - {building.city}</span>
                             </div>

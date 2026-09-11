@@ -1,4 +1,4 @@
-import {FC, useState, useRef} from "react";
+import {FC, useState, useRef, useMemo} from "react";
 import {useTranslation} from "react-i18next";
 import {useParams} from "react-router-dom";
 import {
@@ -83,6 +83,15 @@ export const RilievoTab: FC = () => {
     const [lastSelectedFloorId, setLastSelectedFloorId] = useState<string | null>(null);
     // itemId selezionato nella modale planimetria (per le modali foto/audio/misura)
     const [fpModalItemId, setFpModalItemId] = useState<string | null>(null);
+
+    const activeFloorPlanMarkers = useMemo(
+        () => activeFloorPlan ? getMarkersForFile(activeFloorPlan.fileId) : [],
+        [activeFloorPlan, getMarkersForFile]
+    );
+    const activeFloorPlanMarkerItemIds = useMemo(
+        () => new Set(activeFloorPlanMarkers.map(m => m.itemId)),
+        [activeFloorPlanMarkers]
+    );
 
     const toggleExpand = (id: string) => {
         setExpandedIds(prev => {
@@ -240,7 +249,10 @@ export const RilievoTab: FC = () => {
                             />
                         ) : (
                             <>
-                                <span className={`text-sm font-medium truncate block ${isSelected ? 'text-primary-700' : 'text-text-primary'}`}>
+                                <span
+                                    className={`text-sm font-medium truncate block ${isSelected ? 'text-primary-700' : 'text-text-primary'}`}
+                                    title={item.label}
+                                >
                                     {item.label}
                                 </span>
                                 {item.detail && (
@@ -256,46 +268,40 @@ export const RilievoTab: FC = () => {
                         {completion}%
                     </span>
 
-                    {/* Modifica nome */}
-                    <button
-                        type="button"
-                        className="p-1 rounded text-text-disabled hover:text-primary-600 hover:bg-primary-50 transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
-                        aria-label={t('rilievo.edit_node')}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            startEditNode(item);
-                        }}
-                    >
-                        <PencilSquareIcon className="h-3.5 w-3.5"/>
-                    </button>
-
-                    {allowedTypes.length > 0 && (
+                    {/* Azioni */}
+                    <div className="flex items-center shrink-0">
                         <button
                             type="button"
-                            className="p-1 rounded text-text-disabled hover:text-primary-600 hover:bg-primary-50 transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
-                            aria-label={t('rilievo.add_child')}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setAddingChildFor(addingChildFor === item.id ? null : item.id);
-                                setNewItemType(allowedTypes[0]);
-                                setNewItemLabel('');
-                            }}
+                            className="p-1 rounded text-text-disabled hover:text-primary-600 transition-colors"
+                            aria-label={t('rilievo.edit_node')}
+                            onClick={(e) => { e.stopPropagation(); startEditNode(item); }}
                         >
-                            <PlusIcon className="h-4 w-4"/>
+                            <PencilSquareIcon className="h-3 w-3"/>
                         </button>
-                    )}
-
-                    <button
-                        type="button"
-                        className="p-1 rounded text-text-disabled hover:text-error hover:bg-error-light transition-colors min-h-[32px] min-w-[32px] flex items-center justify-center"
-                        aria-label={t('rilievo.delete_item')}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            deleteItem(item.id);
-                        }}
-                    >
-                        <TrashIcon className="h-3.5 w-3.5"/>
-                    </button>
+                        {allowedTypes.length > 0 && (
+                            <button
+                                type="button"
+                                className="p-1 rounded text-text-disabled hover:text-primary-600 transition-colors"
+                                aria-label={t('rilievo.add_child')}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setAddingChildFor(addingChildFor === item.id ? null : item.id);
+                                    setNewItemType(allowedTypes[0]);
+                                    setNewItemLabel('');
+                                }}
+                            >
+                                <PlusIcon className="h-3 w-3"/>
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            className="p-1 rounded text-text-disabled hover:text-error transition-colors"
+                            aria-label={t('rilievo.delete_item')}
+                            onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }}
+                        >
+                            <TrashIcon className="h-3 w-3"/>
+                        </button>
+                    </div>
                 </div>
 
                 {addingChildFor === item.id && (
@@ -598,7 +604,7 @@ export const RilievoTab: FC = () => {
                         {activeFloorPlan && (
                             <FloorPlanViewer
                                 image={activeFloorPlan}
-                                markers={getMarkersForFile(activeFloorPlan.fileId)}
+                                markers={activeFloorPlanMarkers}
                                 items={items}
                                 onTapEmpty={(posX, posY) => setFloorPlanModal({tapPos: {x: posX, y: posY}})}
                                 onTapMarker={(marker) => setFloorPlanModal({tapPos: {x: marker.posX, y: marker.posY}, initialItemId: marker.itemId})}
@@ -678,14 +684,14 @@ export const RilievoTab: FC = () => {
                         items={items}
                         initialItemId={floorPlanModal.initialItemId}
                         isExistingMarker={!!floorPlanModal.initialItemId}
-                        placedItemIds={new Set(getMarkersForFile(activeFloorPlan.fileId).map(m => m.itemId))}
+                        placedItemIds={activeFloorPlanMarkerItemIds}
                         photos={photos}
                         audios={audios}
                         measurements={measurements}
-                        onSelectItem={(itemId) => {
+                        onConfirm={(itemId) => {
                             setFpModalItemId(itemId);
                             selectItem(itemId);
-                            if (activeFloorPlan) {
+                            if (activeFloorPlan && !activeFloorPlanMarkerItemIds.has(itemId)) {
                                 addMarker({
                                     id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
                                     fileId: activeFloorPlan.fileId,

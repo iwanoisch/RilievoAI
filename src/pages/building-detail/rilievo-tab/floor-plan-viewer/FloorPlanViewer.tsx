@@ -39,7 +39,7 @@ export const FloorPlanViewer: FC<FloorPlanViewerProps> = ({
             const hitMarker = markers.find(m => {
                 const mx = m.posX * rect.width + rect.left;
                 const my = m.posY * rect.height + rect.top;
-                return Math.sqrt((e.clientX - mx) ** 2 + (e.clientY - my) ** 2) < 18;
+                return Math.sqrt((e.clientX - mx) ** 2 + (e.clientY - my) ** 2) < 12;
             });
 
             if (hitMarker) {

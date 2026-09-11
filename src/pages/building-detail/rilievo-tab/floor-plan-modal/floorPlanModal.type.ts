@@ -1,11 +1,11 @@
 import type {RilievoItem, RilievoPhoto, RilievoAudio, RilievoMeasurement} from "../../../../features/rilievo/rilievo.type.ts";
 
-export type FloorPlanModalStep = 'floor' | 'room' | 'element' | 'detail';
+export type FloorPlanModalStep = 'floor' | 'detail';
 
 export interface FloorPlanElementModalProps {
     items: RilievoItem[];
     initialItemId?: string;
-    onSelectItem: (itemId: string) => void;
+    onConfirm: (itemId: string) => void;
     onRemoveMarker: () => void;
     onClose: () => void;
     // Card dettaglio callbacks

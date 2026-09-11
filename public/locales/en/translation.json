@@ -694,7 +694,8 @@
     "select_floor": "Select floor",
     "select_room": "Select room",
     "select_element": "Select element",
-    "remove_marker": "Remove point from floor plan"
+    "remove_marker": "Remove point from floor plan",
+    "no_elements": "All elements are already placed"
   },
   "buildingDetail": {
     "documentation": "Documentation",

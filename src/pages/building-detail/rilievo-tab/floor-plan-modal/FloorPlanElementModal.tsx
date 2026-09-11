@@ -2,15 +2,14 @@ import {FC, useEffect, useRef, useState} from "react";
 import {useTranslation} from "react-i18next";
 import {
     XMarkIcon, ChevronLeftIcon, CheckCircleIcon,
-    CameraIcon, MicrophoneIcon, ArrowsPointingOutIcon, ArrowUpTrayIcon, TrashIcon,
+    CameraIcon, MicrophoneIcon, ArrowsPointingOutIcon, ArrowUpTrayIcon, TrashIcon, PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 import {RILIEVO_CHECK_ICON, RILIEVO_STATUS_CONFIG} from "../../../../constants/rilievo.constant.ts";
-import {PencilSquareIcon} from "@heroicons/react/24/outline";
 import type {RilievoItem} from "../../../../features/rilievo/rilievo.type.ts";
 import type {FloorPlanElementModalProps, FloorPlanModalStep} from "./floorPlanModal.type.ts";
 
 export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
-    items, initialItemId, onSelectItem, onRemoveMarker, onClose,
+    items, initialItemId, onConfirm, onRemoveMarker, onClose,
     photos, audios, measurements,
     onToggleCheck, onDeletePhoto, onDeleteAudio, onDeleteMeasurement,
     onShowPhotoModal, onShowAudioModal, onShowMeasurementModal, onFileUpload,
@@ -20,107 +19,104 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
     const {t} = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Blocca scroll del body quando la modale è aperta
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => { document.body.style.overflow = ''; };
     }, []);
 
+    // Navigazione: stack di parentId attraversati. L'ultimo è il livello corrente.
+    // Vuoto = primo livello (figli del building root)
+    const [navStack, setNavStack] = useState<string[]>([]);
     const [step, setStep] = useState<FloorPlanModalStep>(initialItemId ? 'detail' : 'floor');
-    const [selectedFloorId, setSelectedFloorId] = useState<string | null>(lastSelectedFloorId);
-    const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
     const [selectedItemId, setSelectedItemId] = useState<string | null>(initialItemId || null);
 
-    const getChildren = (parentId: string) =>
+    // Ricorda l'ultimo piano selezionato per comodità
+    const hasSetFloor = useRef(false);
+
+    // --- Helpers ---
+
+    const getChildrenOf = (parentId: string): RilievoItem[] =>
         items.filter(i => i.parentId === parentId).sort((a, b) => a.order - b.order);
 
-    // Raccoglie tutti i discendenti di un nodo
-    const getAllDescendants = (parentId: string): RilievoItem[] => {
-        const result: RilievoItem[] = [];
-        const collect = (pid: string) => {
-            for (const child of items.filter(i => i.parentId === pid)) {
-                result.push(child);
-                collect(child.id);
-            }
-        };
-        collect(parentId);
-        return result;
-    };
+    const getAvailableChildrenOf = (parentId: string): RilievoItem[] =>
+        getChildrenOf(parentId).filter(i => !placedItemIds.has(i.id));
 
-    const floors = items.filter(i => i.type === 'floor').sort((a, b) => a.order - b.order);
-    const children = selectedFloorId ? getChildren(selectedFloorId) : [];
-    const elements = selectedParentId
-        ? [items.find(i => i.id === selectedParentId)!, ...getAllDescendants(selectedParentId)]
-            .filter(i => i && !placedItemIds.has(i.id))
-            .sort((a, b) => a.order - b.order)
-        : [];
+    const getRootBuilding = (): RilievoItem | undefined =>
+        items.find(i => i.parentId === null);
+
+    // --- Dati correnti per lo step 'floor' (lista navigazione) ---
+
+    const currentParentId = navStack.length > 0 ? navStack[navStack.length - 1] : getRootBuilding()?.id;
+    const currentList = currentParentId ? getAvailableChildrenOf(currentParentId) : [];
+    const currentParent = currentParentId ? items.find(i => i.id === currentParentId) : null;
+
+    // --- Dati per lo step 'detail' ---
 
     const selectedItem = selectedItemId ? items.find(i => i.id === selectedItemId) : null;
     const itemPhotos = selectedItemId ? photos.filter(p => p.itemId === selectedItemId) : [];
     const itemAudios = selectedItemId ? audios.filter(a => a.itemId === selectedItemId) : [];
     const itemMeasurements = selectedItemId ? measurements.filter(m => m.itemId === selectedItemId) : [];
 
-    const handleSelectFloor = (floorId: string) => {
-        setSelectedFloorId(floorId);
-        onFloorSelected(floorId);
-        // Se il piano ha figli, mostra la lista. Altrimenti seleziona direttamente il piano.
-        const floorChildren = getChildren(floorId);
-        if (floorChildren.length > 0) {
-            setStep('room');
+    // --- Azioni ---
+
+    const navigateInto = (itemId: string) => {
+        // Salva il piano selezionato (primo livello di navigazione)
+        if (!hasSetFloor.current) {
+            onFloorSelected(itemId);
+            hasSetFloor.current = true;
+        }
+
+        const availableChildren = getAvailableChildrenOf(itemId);
+        if (availableChildren.length > 0) {
+            // Ha figli disponibili → naviga dentro
+            setNavStack(prev => [...prev, itemId]);
         } else {
-            handleSelectElement(floorId);
+            // Nodo foglia o tutti i figli piazzati → seleziona direttamente
+            selectElement(itemId);
         }
     };
 
-    const handleSelectChild = (childId: string) => {
-        const childItem = items.find(i => i.id === childId);
-        if (!childItem) return;
-        // Se ha sotto-figli, mostra la lista dei discendenti
-        const grandChildren = getChildren(childId);
-        if (grandChildren.length > 0) {
-            setSelectedParentId(childId);
-            setStep('element');
-        } else {
-            // Nessun figlio: seleziona direttamente
-            handleSelectElement(childId);
-        }
-    };
-
-    const handleSelectElement = (itemId: string) => {
+    const selectElement = (itemId: string) => {
         setSelectedItemId(itemId);
-        onSelectItem(itemId);
         setStep('detail');
     };
 
     const handleBack = () => {
-        if (step === 'detail') { setStep(selectedParentId ? 'element' : 'room'); setSelectedItemId(null); }
-        else if (step === 'element') { setStep('room'); setSelectedParentId(null); }
-        else if (step === 'room') { setStep('floor'); setSelectedFloorId(null); }
-        else onClose();
+        if (step === 'detail') {
+            setSelectedItemId(null);
+            setStep('floor');
+        } else if (navStack.length > 0) {
+            setNavStack(prev => prev.slice(0, -1));
+        } else {
+            onClose();
+        }
     };
 
-    const stepTitle = () => {
-        if (step === 'floor') return t('floorPlan.select_floor');
-        if (step === 'room') {
-            const floor = items.find(i => i.id === selectedFloorId);
-            return floor?.label || t('floorPlan.select_room');
-        }
-        if (step === 'element') {
-            const parent = items.find(i => i.id === selectedParentId);
-            return parent?.label || t('floorPlan.select_element');
-        }
-        return selectedItem?.label || '';
+    // --- Titolo header ---
+
+    const headerTitle = (): string => {
+        if (step === 'detail') return selectedItem?.label || '';
+        if (navStack.length > 0) return currentParent?.label || '';
+        return t('floorPlan.select_floor');
     };
 
-    const renderList = (listItems: RilievoItem[], onSelect: (id: string) => void) => (
+    const showBackButton = (): boolean => {
+        if (step === 'detail' && isExistingMarker) return false;
+        if (step === 'detail') return true;
+        return navStack.length > 0;
+    };
+
+    // --- Render lista navigazione ---
+
+    const renderList = () => (
         <div className="space-y-1">
-            {listItems.map(item => {
+            {currentList.map(item => {
                 const statusCfg = RILIEVO_STATUS_CONFIG[item.status];
                 return (
                     <button
                         key={item.id}
                         type="button"
-                        onClick={() => onSelect(item.id)}
+                        onClick={() => navigateInto(item.id)}
                         className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg hover:bg-surface-hover transition-colors min-h-[48px]"
                     >
                         <span className={`h-2.5 w-2.5 rounded-full shrink-0 ${statusCfg.bg}`}/>
@@ -134,8 +130,13 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
                     </button>
                 );
             })}
+            {currentList.length === 0 && (
+                <p className="text-sm text-text-muted text-center py-6">{t('floorPlan.no_elements')}</p>
+            )}
         </div>
     );
+
+    // --- Render card dettaglio ---
 
     const renderDetailCard = () => {
         if (!selectedItem) return null;
@@ -143,7 +144,6 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
 
         return (
             <div className="space-y-4">
-                {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                         <h4 className="text-sm font-bold text-text-primary">{selectedItem.label}</h4>
@@ -169,7 +169,6 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
                     </div>
                 </div>
 
-                {/* 4 bottoni azione */}
                 <div className="grid grid-cols-2 gap-2">
                     <button type="button" className="btn btn-outline flex items-center justify-center gap-1.5 text-xs min-h-[44px]" onClick={onShowPhotoModal}>
                         <CameraIcon className="h-4 w-4"/>{t('rilievo.btn_capture')}
@@ -187,7 +186,6 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
 
                 <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={onFileUpload}/>
 
-                {/* Checklist */}
                 {selectedItem.checks.length > 0 && (
                     <div className="space-y-1.5">
                         <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">{t('rilievo.checklist')}</h5>
@@ -197,27 +195,23 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
                                 <div
                                     key={check.id}
                                     className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm cursor-pointer transition-colors ${
-                                        check.done
-                                            ? 'bg-success-light/30 text-success-dark'
-                                            : 'bg-surface-page text-text-secondary hover:bg-surface-hover'
+                                        check.done ? 'bg-success-light/30 text-success-dark' : 'bg-surface-page text-text-secondary hover:bg-surface-hover'
                                     }`}
                                     onClick={() => onToggleCheck(selectedItem.id, check.id)}
                                 >
                                     <Icon className="h-4 w-4 shrink-0"/>
                                     <span className="flex-1">{check.label}</span>
                                     {check.value && <span className="text-xs font-semibold">{check.value}</span>}
-                                    {check.done ? (
-                                        <CheckCircleIcon className="h-4 w-4 text-success shrink-0"/>
-                                    ) : (
-                                        <span className="h-4 w-4 rounded-full border-2 border-border-strong shrink-0"/>
-                                    )}
+                                    {check.done
+                                        ? <CheckCircleIcon className="h-4 w-4 text-success shrink-0"/>
+                                        : <span className="h-4 w-4 rounded-full border-2 border-border-strong shrink-0"/>
+                                    }
                                 </div>
                             );
                         })}
                     </div>
                 )}
 
-                {/* Foto */}
                 {itemPhotos.length > 0 && (
                     <div className="space-y-1.5">
                         <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">{t('rilievo.photos')} ({itemPhotos.length})</h5>
@@ -234,7 +228,6 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
                     </div>
                 )}
 
-                {/* Audio */}
                 {itemAudios.length > 0 && (
                     <div className="space-y-1.5">
                         <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">{t('rilievo.audios')} ({itemAudios.length})</h5>
@@ -251,7 +244,6 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
                     </div>
                 )}
 
-                {/* Misurazioni */}
                 {itemMeasurements.length > 0 && (
                     <div className="space-y-1.5">
                         <h5 className="text-xs font-semibold text-text-muted uppercase tracking-wider">{t('rilievo.measurements')} ({itemMeasurements.length})</h5>
@@ -274,16 +266,17 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
     return (
         <div className="fixed inset-0 z-40 flex items-stretch sm:items-center justify-center bg-black/50">
             <div className="bg-surface-card sm:rounded-2xl shadow-xl w-full sm:max-w-lg h-full sm:h-auto sm:max-h-[85vh] flex flex-col">
-                {/* Header */}
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-border-light safe-area-top">
-                    <button
-                        type="button"
-                        onClick={handleBack}
-                        className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover min-h-[44px] min-w-[44px] flex items-center justify-center"
-                    >
-                        {step === 'floor' ? <XMarkIcon className="h-5 w-5"/> : <ChevronLeftIcon className="h-5 w-5"/>}
-                    </button>
-                    <h3 className="text-sm font-bold text-text-primary flex-1 truncate">{stepTitle()}</h3>
+                    {showBackButton() && (
+                        <button
+                            type="button"
+                            onClick={handleBack}
+                            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-hover min-h-[44px] min-w-[44px] flex items-center justify-center"
+                        >
+                            <ChevronLeftIcon className="h-5 w-5"/>
+                        </button>
+                    )}
+                    <h3 className="text-sm font-bold text-text-primary flex-1 truncate">{headerTitle()}</h3>
                     <button
                         type="button"
                         onClick={onClose}
@@ -293,13 +286,26 @@ export const FloorPlanElementModal: FC<FloorPlanElementModalProps> = ({
                     </button>
                 </div>
 
-                {/* Body */}
                 <div className="flex-1 overflow-y-auto overscroll-contain p-4">
-                    {step === 'floor' && renderList(floors, handleSelectFloor)}
-                    {step === 'room' && renderList(children.filter(c => !placedItemIds.has(c.id)), handleSelectChild)}
-                    {step === 'element' && renderList(elements, handleSelectElement)}
+                    {step === 'floor' && renderList()}
                     {step === 'detail' && renderDetailCard()}
                 </div>
+
+                {/* Footer: Salva/Annulla solo per nuovi marker (non per edit di marker esistenti) */}
+                {step === 'detail' && !isExistingMarker && selectedItemId && (
+                    <div className="grid grid-cols-2 gap-3 px-4 py-3 border-t border-border-light">
+                        <button type="button" onClick={onClose} className="btn btn-ghost min-h-[44px]">
+                            {t('common.cancel')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { onConfirm(selectedItemId); onClose(); }}
+                            className="btn btn-primary min-h-[44px]"
+                        >
+                            {t('common.save')}
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
